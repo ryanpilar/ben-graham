@@ -1,5 +1,7 @@
 import React, { ReactNode } from 'react'
 // Project Imports
+import { cn } from '@/lib/utils';
+
 // 3rd Party Imports
 // Styles
 
@@ -7,8 +9,8 @@ import React, { ReactNode } from 'react'
 
 const MaxWidthWrapper = ({ className, children }: { className?: string, children: ReactNode }) => {
     return (
-        <div className=''>
-            Cheow BELLA
+        <div className={cn('mx-auto w-full mx-w-screen-xl px-2.5 md:mx-20', className)}>
+            {children}
         </div>
     );
 };
