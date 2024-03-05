@@ -9,6 +9,40 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button';
 
+const features: FeatureItemProps[] = [
+  {
+    step: 'Step 1',
+    title: 'Sign up for an account',
+    description: (
+      <span>
+        Either starting out with a free plan or choose our{' '}
+        <Link href='/pricing' className='text-blue-700 underline underline-offset-2'>
+          pro plan
+        </Link>.
+      </span>
+    ),
+  },
+  {
+    step: 'Step 2',
+    title: 'Upload your PDF file',
+    description: (
+      <span>
+        We'll process your file and make it ready for you to chat with.
+      </span>
+    ),
+  },
+  {
+    step: 'Step 3',
+    title: 'Start asking questions',
+    description: (
+      <span>
+        It's that simple. Try out Ben-G.ai today - it really takes less than a minute.
+      </span>
+    ),
+  },
+]
+
+
 /** ================================|| Home ||=================================== **/
 
 export default function Home() {
@@ -46,17 +80,17 @@ export default function Home() {
             className: 'mt-5',
           })}
           href='/dashboard'
-          target='_blank'>
+          target='_blank'
+        >
           Get started{' '}
           <ArrowRight className='h-5 w-5 ml-2' />
         </Link>
-
       </MaxWidthWrapper>
 
-      {/* TRANSLUCENT BG WAVY THING */}
       <TranslucentGlowBGLayer />
+
       {/* LARGE IMAGE */}
-      <div>
+      <section>
         <div className='mx-auto max-w-6xl px-6 lg:px-8'>
           <div className='mt-16 flow-root sm:mt-24'>
             <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
@@ -71,8 +105,88 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
+
+      <TranslucentGlowBGLayer leftOffset={{ base: '-13rem', sm: '-36rem' }} />
+
+      {/* FEATURE SECTION */}
+      <div className='mx-auto mb-32 mt-32 max-w-5xl sm:mt-56'>
+        <div className='mb-12 px-6 lg:px-8'>
+          <div className='mx-auto max-w-2xl sm:text-center'>
+            <h2 className='mt-2 font-bold text-4xl text-gray-900 sm:text-5xl'>
+              Start chatting in minutes
+            </h2>
+            <p className='mt-4 text-lg text-gray-600'>
+              Chatting to your PDF files has never been
+              easier than with Quill.
+            </p>
+          </div>
+        </div>
+
+        {/* FEATURE LIST */}
+        <FeatureList features={features} />
+
+        {/* LARGE IMAGE #2 */}
+        <div className='mx-auto max-w-6xl px-6 lg:px-8'>
+          <div className='mt-16 flow-root sm:mt-24'>
+            <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
+              <Image
+                src='/file-upload-preview.jpg'
+                alt='uploading preview'
+                width={1419}
+                height={732}
+                quality={100}
+                className='rounded-md bg-white p-2 sm:p-8 md:p-20 shadow-2xl ring-1 ring-gray-900/10'
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+
 
     </>
   );
 }
+
+/** ================================|| Feature Item ||=================================== **/
+
+export interface FeatureItemProps {
+  step: string;
+  title: string;
+  description: JSX.Element; // Allows embedding React components, such as Link.
+}
+
+export const FeatureItem: React.FC<FeatureItemProps> = ({ step, title, description }) => {
+  return (
+    <li className='md:flex-1'>
+      <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4'>
+        <span className='text-sm font-medium text-blue-600'>
+          {step}
+        </span>
+        <span className='text-xl font-semibold'>
+          {title}
+        </span>
+        <span className='mt-2 text-zinc-700'>
+          {description}
+        </span>
+      </div>
+    </li>
+  );
+}
+
+/** ================================|| Feature List ||=================================== **/
+
+export interface FeatureListProps {
+  features: FeatureItemProps[];
+}
+export const FeatureList: React.FC<FeatureListProps> = ({ features }) => {
+  return (
+    <ol className='my-8 space-y-4 pt-8 md:flex md:space-x-12 md:space-y-0'>
+      {features.map((feature, index) => (
+        <FeatureItem key={index} {...feature} />
+      ))}
+    </ol>
+  );
+};
+
