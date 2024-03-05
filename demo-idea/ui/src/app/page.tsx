@@ -87,27 +87,29 @@ export default function Home() {
         </Link>
       </MaxWidthWrapper>
 
-      <TranslucentGlowBGLayer />
+      <div className='relative isolate'>
+        <TranslucentGlowBGLayer />
 
-      {/* LARGE IMAGE */}
-      <section>
-        <div className='mx-auto max-w-6xl px-6 lg:px-8'>
-          <div className='mt-16 flow-root sm:mt-24'>
-            <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
-              <Image
-                src='/dashboard-preview.jpg'
-                alt='product preview'
-                width={1364}
-                height={866}
-                quality={100}
-                className='rounded-md bg-white p-2 sm:p-8 md:p-20 shadow-2xl ring-1 ring-gray-900/10'
-              />
+        {/* LARGE IMAGE */}
+        <section>
+          <div className='mx-auto max-w-6xl px-6 lg:px-8'>
+            <div className='mt-16 flow-root sm:mt-24'>
+              <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
+                <Image
+                  src='/dashboard-preview.jpg'
+                  alt='product preview'
+                  width={1364}
+                  height={866}
+                  quality={100}
+                  className='rounded-md bg-white p-2 sm:p-8 md:p-20 shadow-2xl ring-1 ring-gray-900/10'
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <TranslucentGlowBGLayer leftOffset={{ base: '-13rem', sm: '-36rem' }} />
+        <TranslucentGlowBGLayer leftOffset={{ base: '-13rem', sm: '-36rem' }} />
+      </div>
 
       {/* FEATURE SECTION */}
       <div className='mx-auto mb-32 mt-32 max-w-5xl sm:mt-56'>
@@ -142,7 +144,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
 
 
     </>
@@ -182,7 +183,7 @@ export interface FeatureListProps {
 }
 export const FeatureList: React.FC<FeatureListProps> = ({ features }) => {
   return (
-    <ol className='my-8 space-y-4 pt-8 md:flex md:space-x-12 md:space-y-0'>
+    <ol className='m-8 space-y-4 pt-8 md:flex md:space-x-12 md:space-y-0'>
       {features.map((feature, index) => (
         <FeatureItem key={index} {...feature} />
       ))}
