@@ -1,0 +1,49 @@
+ BREEBS - https://chat.openai.com/g/g-lObyD60FY-breebs-chat-with-knowledge
+        - https://www.breebs.com/
+
+https://pdf.ai/
+ChatPDF: https://chat.openai.com/g/g-lijo49FhM-chatpdf
+https://www.chatpdf.com/
+https://www.popai.pro/
+https://askyourpdf.com/
+https://askpdf.xyz/
+https://customgpt.ai/ 
+
+
+Tokenizer to see how big your documents are: https://platform.openai.com/tokenizer
+
+privateGPT, localGPT, docalysis, langchain, Vectara, Pinecone.io, Nuclia 
+
+What you are describing here is RAG (Retrieval-Augmented Generation) which incorporates a vector database. 
+This would contain your documents but split into "chunks." Then when it is queried while in us it would
+return the top number of results you set. So if you ask a question it would then search the vector database 
+for relevant chunks and return those, not entire pages.
+
+Let me put it this way. I've uploaded a D&D rulebook and campaign as source documents for a custom GPT. With prompts telling it how I want the game played. I can now play D&D by the rules with the AI.
+
+Give it a go and see what happens. If you tell it how to use your docs, it will do that.
+
+
+Most scalable solution would be to use the API.
+- Extract the text from each pdf (there are some nice libraries for this like pdfplumber)
+- send the extracted text to the GPT API (you probably want to use the gpt 3.5 16k context one) and prompt it to summarise it.
+store the result as a txt file
+
+ChatGPT 4's Code Analyzer mode can be used to scan and analyze the PDF files. It can extract the text from each PDF file, send 
+the extracted text to the GPT API, prompt it to summarize the text, and store the result as a txt file
+
+If you have ChatGPT Plus, there exists a Plugin called AskYourPDF. Never used myself, though. There are also GitHub repositories that implemented something similar. This guy 
+implement what you need: https://youtu.be/9AXP7tCI9PI. He also linked his GitHub Repository in the Description.
+
+Before you start - what kind of analysis do you need it to do? Do you need it to go through each page and look for keywords, or do you want to perform the kind of analysis that requires it to 
+remember what was said on page 5 of file #132 to understand what’s being said on page 7 of file #1735?
+
+Summarizing is something GPT is really good at. The second option is a lot more difficult because GPT has fairly limited memory (depending on the engine you’re using, somewhere around 3, 6 to 12,000 words). 
+You’d need a more creative solution for that, like setting up a vector database or something like that.
+
+1800 PDF files, Each PDF file is about 10 pages. Depending on the size of your docs it might cost you $10-15 if gpt-3.5-turbo is enough, 
+maybe twice that if you need to use the 16k model. Don’t use gpt-4 for this.
+
+Create a simple HTML doc with a <div> for your large amount of text. Upload 
+that bad boy onto a free hosting site. Then, with ChatGPT-4's plugins, drop in that URL. 
+Boom, ChatGPT can dive into your data.
