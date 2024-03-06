@@ -9,39 +9,6 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button';
 
-const features: FeatureItemProps[] = [
-  {
-    step: 'Step 1',
-    title: 'Sign up for an account',
-    description: (
-      <span>
-        Either starting out with a free plan or choose our{' '}
-        <Link href='/pricing' className='text-blue-700 underline underline-offset-2'>
-          pro plan
-        </Link>.
-      </span>
-    ),
-  },
-  {
-    step: 'Step 2',
-    title: 'Upload your PDF file',
-    description: (
-      <span>
-        We'll process your file and make it ready for you to chat with.
-      </span>
-    ),
-  },
-  {
-    step: 'Step 3',
-    title: 'Start asking questions',
-    description: (
-      <span>
-        It's that simple. Try out Ben-G.ai today - it really takes less than a minute.
-      </span>
-    ),
-  },
-]
-
 
 /** ================================|| Home ||=================================== **/
 
@@ -144,8 +111,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-
     </>
   );
 }
@@ -178,6 +143,38 @@ export const FeatureItem: React.FC<FeatureItemProps> = ({ step, title, descripti
 
 /** ================================|| Feature List ||=================================== **/
 
+const features: FeatureItemProps[] = [
+  {
+    step: 'Step 1',
+    title: 'Sign up for an account',
+    description: (
+      <span>
+        Either starting out with a free plan or choose our{' '}
+        <Link href='/pricing' className='text-blue-700 underline underline-offset-2'>
+          pro plan
+        </Link>.
+      </span>
+    ),
+  },
+  {
+    step: 'Step 2',
+    title: 'Upload your PDF file',
+    description: (
+      <span>
+        We'll process your file and make it ready for you to chat with.
+      </span>
+    ),
+  },
+  {
+    step: 'Step 3',
+    title: 'Start asking questions',
+    description: (
+      <span>
+        It's that simple. Try out Ben-G.ai today - it really takes less than a minute.
+      </span>
+    ),
+  },
+]
 export interface FeatureListProps {
   features: FeatureItemProps[];
 }

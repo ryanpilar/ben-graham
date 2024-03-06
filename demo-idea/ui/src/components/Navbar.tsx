@@ -1,11 +1,12 @@
 import React from 'react'
 // Project Imports
-import MaxWidthWrapper from './MaxWidthWrapper';
 import Link from 'next/link';
 import { buttonVariants } from './ui/button';
+import MaxWidthWrapper from './MaxWidthWrapper';
 // 3rd Party Imports
-import { LoginLink, RegisterLink } from '@kinde-oss/kinde-auth-nextjs/server'
 import { ArrowRight } from 'lucide-react';
+import {RegisterLink, LoginLink} from "@kinde-oss/kinde-auth-nextjs/components";
+
 // Styles
 
 /** ================================|| Navbar ||=================================== **/
