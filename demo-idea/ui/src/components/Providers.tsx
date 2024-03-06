@@ -7,7 +7,11 @@ import {
 } from '@tanstack/react-query'
 // Styles
 
-/** ================================|| Providers ||=================================== **/
+/** ================================|| Providers ||=================================== 
+ *
+        -   trcp is a thin wrapper around react-query 
+        -   first we make a trpc instance, _trpc (in the app folder) tells next that 
+            its not navigable  **/
 
 const Providers = () => {
     const [queryClient] = React.useState(() => new QueryClient())
