@@ -4,11 +4,13 @@ import React from 'react'
 import UploadButton from './UploadButton';
 import { trpc } from '@/app/_trpc/client';
 // Project Imports
+import { Button } from './ui/button';
 // 3rd Party Imports
-import { Ghost, Loader2, MessageSquare, Plus } from 'lucide-react';
+import {format} from 'date-fns'
+import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
 import Skeleton from "react-loading-skeleton"
 import Link from 'next/link';
-import { Button } from './ui/button';
+
 // Styles
 
 /** ================================|| User Dashboard ||=================================== **/
@@ -59,12 +61,12 @@ const UserDashboard = () => {
                         </div>
                       </Link>
       
-                      {/* <div className='px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500'>
+                      <div className='px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500'>
                         <div className='flex items-center gap-2'>
                           <Plus className='h-4 w-4' />
                           {format(
                             new Date(file.createdAt),
-                            'MMM yyyy'
+                            'MMM dd yyyy'
                           )}
                         </div>
       
@@ -74,19 +76,20 @@ const UserDashboard = () => {
                         </div>
       
                         <Button
-                          onClick={() =>
-                            deleteFile({ id: file.id })
-                          }
+                        //   onClick={() =>
+                        //     deleteFile({ id: file.id })
+                        //   }
                           size='sm'
                           className='w-full'
                           variant='destructive'>
-                          {currentlyDeletingFile === file.id ? (
+                          {/* {currentlyDeletingFile === file.id ? (
                             <Loader2 className='h-4 w-4 animate-spin' />
                           ) : (
                             <Trash className='h-4 w-4' />
-                          )}
+                          )} */}
+                          <Trash className='h-4 w-4' />
                         </Button>
-                      </div> */}
+                      </div>
 
                     </li>
                   ))}

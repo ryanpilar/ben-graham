@@ -19,7 +19,7 @@ const isAuth = middleware( async (options)=> {
     // with the following context, we can get access to it in any api route that now uses this middleware
     return options.next({ 
         ctx: {
-            kindeUserId: user.id,
+            kindeId: user.id,
             user
         }
     })

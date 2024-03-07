@@ -2,6 +2,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { privateProcedure, publicProcedure, router } from './trpc'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/db'
+import { z } from 'zod'
 
 export const appRouter = router({
     authCallback: publicProcedure.query( async () => {
@@ -52,7 +53,30 @@ export const appRouter = router({
                 kindeId: kindeUserId
             }
         })
-    })
+    }),
+    deleteFile: privateProcedure
+    .input( z.object({ id: z.string() }))        // 1st, validate with zod
+    .mutation( async ({ ctx, input }) => {       // 2nd, carry out api logic
+      const { kindeId } = ctx
+
+      const file = await db.file.findFirst({
+        where: {
+          id: input.id,                          // Automatically has the type we declare with zod above
+          kindeId,                               // We are only searching for files that are currently logged in with kindeId
+        },
+      })
+
+      if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+
+      await db.file.delete({
+        where: {
+          id: input.id,
+        },
+      })
+
+      return file
+    }),
+
 })
 
 export type AppRouter = typeof appRouter

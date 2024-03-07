@@ -3,7 +3,6 @@ import React from 'react'
 import { db } from '@/db';
 // 3rd Party Imports
 import { redirect } from 'next/navigation'
-import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import UserDashboard from '@/components/UserDashboard';
 
