@@ -1,10 +1,7 @@
 {
-    "git.ignoreLimitWarning": true,
     "cSpell.words": [
         "kinde",
-        "lucide",
         "nextjs",
-        "tanstack",
         "trpc"
     ]
 }

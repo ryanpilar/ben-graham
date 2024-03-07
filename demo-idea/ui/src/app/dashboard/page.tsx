@@ -1,30 +1,33 @@
 import React from 'react'
 // Project Imports
+import { db } from '@/db';
 // 3rd Party Imports
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
 import { redirect } from 'next/navigation'
-// Styles
+import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import UserDashboard from '@/components/UserDashboard';
 
 /** ================================|| Dashboard ||=================================== **/
 
 const Dashboard = async () => {
 
     const { getUser } = getKindeServerSession()
-    const user: KindeUser | null = await getUser()
-    console.log('user', user)
+    const user = await getUser()
 
-    // Redirect signers that are not logged in
+    // Redirect users that are not logged in
     if (!user || !user.id) redirect('/auth-callback?origin=dashboard') // origin=dashboard so user can be redirected back to dashboard after auth
-
-    // Is the user synced to the database
-    // We need a user in the db to assign files and chats
     
+    const dbUser = await db.user.findFirst({
+        where: {
+            id: user.id
+        }
+    })
 
-
+    if (!dbUser) redirect('/auth-callback?origin=dashboard')
+    
     return (
         <div className=''>
-            {user.email}
+            <UserDashboard />
         </div>
     );
 };
