@@ -36,8 +36,8 @@ enum UploadStatus {
 }
 
 model File {
-  id     String @id @map("_id") @db.ObjectId
-  fileId String @default(cuid())
+  id     String @id @default(auto()) @map("_id") @db.ObjectId 
+  fileId String? @default(cuid())
   name   String
 
   uploadStatus UploadStatus @default(PENDING)

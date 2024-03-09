@@ -52,7 +52,7 @@ export const appRouter = router({
                 kindeId: kindeId
             }
         })
-    }),
+    }),    
     deleteFile: privateProcedure
         .input(z.object({ id: z.string() }))        // 1st, validate with zod
         .mutation(async ({ ctx, input }) => {       // 2nd, carry out api logic
@@ -77,15 +77,15 @@ export const appRouter = router({
         }),
     getFile: privateProcedure
         .input(z.object({ key: z.string() }))
-        .mutation( async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx
             const file = await db.file.findFirst({
                 where: {
-                    id: input.key,
+                    key: input.key,
                     kindeId,
                 }
             })
-            if (!file) throw new TRPCError({ code: 'NOT_FOUND'})
+            if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
             return file
         }),
 
