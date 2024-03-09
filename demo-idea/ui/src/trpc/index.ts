@@ -44,13 +44,12 @@ export const appRouter = router({
         return { success: true }
 
     }),
-    // Note: the destructuring of the context
     getUserFiles: privateProcedure.query( async ({ctx}) => {
-        const {user, kindeUserId} = ctx
+        const {user, kindeId} = ctx
 
         return await db.file.findMany({
             where: {
-                kindeId: kindeUserId
+                kindeId: kindeId
             }
         })
     }),

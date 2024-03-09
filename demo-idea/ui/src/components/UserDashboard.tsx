@@ -39,7 +39,7 @@ const UserDashboard = () => {
             setCurrentlyDeletingFile(id)
         },
         onSettled() {
-            setCurrentlyDeletingFile(null)
+            // setCurrentlyDeletingFile(null) // I removed this because there was this moment between onSettled and the actual refresh that exposed the btn to another click
         }
     })
 
@@ -68,7 +68,7 @@ const UserDashboard = () => {
                                 key={file.id}
                                 className='col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg'>
                                 <Link
-                                    href={`/dashboard/${file.fileId}`}
+                                    href={`/dashboard/${file.id}`}
                                     className='flex flex-col gap-2'>
                                     <div className='pt-6 px-6 flex w-full items-center justify-between space-x-6'>
                                         <div className='h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500' />
