@@ -5,7 +5,7 @@ import { db } from '@/db'
 import { z } from 'zod'
 
 export const appRouter = router({
-    authCallback: publicProcedure.query( async () => {
+    authCallback: publicProcedure.query(async () => {
         // 1st find the user ID with kinde
         const { getUser } = getKindeServerSession()
         const user = await getUser()
@@ -13,7 +13,7 @@ export const appRouter = router({
         // const {getUser} = getKindeServerSession()
         // const user:any = getUser()
 
-        if (!user.id || !user.email) { 
+        if (!user.id || !user.email) {
             throw new TRPCError({ code: 'UNAUTHORIZED' }) // TRPCError is a utility that handles predefined errors for us
         }
         console.log('About to hit db')
@@ -44,8 +44,8 @@ export const appRouter = router({
         return { success: true }
 
     }),
-    getUserFiles: privateProcedure.query( async ({ctx}) => {
-        const {user, kindeId} = ctx
+    getUserFiles: privateProcedure.query(async ({ ctx }) => {
+        const { user, kindeId } = ctx
 
         return await db.file.findMany({
             where: {
@@ -54,27 +54,40 @@ export const appRouter = router({
         })
     }),
     deleteFile: privateProcedure
-    .input( z.object({ id: z.string() }))        // 1st, validate with zod
-    .mutation( async ({ ctx, input }) => {       // 2nd, carry out api logic
-      const { kindeId } = ctx
+        .input(z.object({ id: z.string() }))        // 1st, validate with zod
+        .mutation(async ({ ctx, input }) => {       // 2nd, carry out api logic
+            const { kindeId } = ctx
 
-      const file = await db.file.findFirst({
-        where: {
-          id: input.id,                          // Automatically has the type we declare with zod above
-          kindeId,                               // We are only searching for files that are currently logged in with kindeId
-        },
-      })
+            const file = await db.file.findFirst({
+                where: {
+                    id: input.id,                          // Automatically has the type we declare with zod above
+                    kindeId,                               // We are only searching for files that are currently logged in with kindeId
+                },
+            })
 
-      if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+            if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
 
-      await db.file.delete({
-        where: {
-          id: input.id,
-        },
-      })
+            await db.file.delete({
+                where: {
+                    id: input.id,
+                },
+            })
 
-      return file
-    }),
+            return file
+        }),
+    getFile: privateProcedure
+        .input(z.object({ key: z.string() }))
+        .mutation( async ({ ctx, input }) => {
+            const { kindeId } = ctx
+            const file = await db.file.findFirst({
+                where: {
+                    id: input.key,
+                    kindeId,
+                }
+            })
+            if (!file) throw new TRPCError({ code: 'NOT_FOUND'})
+            return file
+        }),
 
 })
 
