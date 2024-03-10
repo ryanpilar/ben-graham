@@ -32,7 +32,8 @@ export const ourFileRouter = {
                     kindeId: metadata.kindeId,
                     // Sometimes uploadthing file.url timesout. So there is a workaround via S3
                     // This is just as good as the upload thing url because its a wrapper over amazon
-                    url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+                    // url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+                    url: `https://utfs.io/f/${file.key}`,
                     uploadStatus: 'PROCESSING',
                 }
             })

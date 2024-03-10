@@ -5,7 +5,11 @@ import React from 'react'
 
 /** ================================|| Chat Wrapper ||=================================== **/
 
-const ChatWrapper = () => {
+interface ChatWrapperProps {
+  fileId: string
+}
+
+const ChatWrapper = ({fileId}: ChatWrapperProps) => {
   return (
     <div className=''>Chat wrapper
     </div>
