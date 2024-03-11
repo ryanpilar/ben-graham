@@ -72,8 +72,9 @@ const PDFFullscreen = ({ fileUrl }: PdfFullscreenProps) => {
                                 setNumPages(numPages)
                             }
                             file={fileUrl}
-                            className='max-h-full'>
-                            {new Array(numPages).fill(0).map((_, i) => (
+                            className='max-h-full'
+                        >
+                            {new Array(numPages).fill(0).map((_, i) => (    // We don't care about the first value, or '_'
                                 <Page
                                     key={i}
                                     width={width ? width : 1}

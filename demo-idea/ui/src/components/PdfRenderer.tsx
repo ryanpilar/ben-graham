@@ -2,6 +2,7 @@
 import { ChevronDown, ChevronUp, Loader2, RotateCcw, RotateCw, Search } from 'lucide-react';
 import React, { useState } from 'react'
 // Project Imports
+import PDFFullscreen from './PDFFullscreen';
 import { useToast } from './ui/use-toast';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -9,11 +10,11 @@ import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 // 3rd Party Imports
+import SimpleBar from 'simplebar-react'
+import { useForm } from 'react-hook-form'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { useResizeDetector } from 'react-resize-detector'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import SimpleBar from 'simplebar-react'
 // Styles
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -78,7 +79,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
         <div className='w-full bg-white rounded-md shadow flex flex-col items-center'>
             <div className='h-14 w-full border-b border-zinc-200 flex items-center justify-between px-2'>
                 <div className='flex items-center gap-1.5'>
-                    Top Bar
+                    
                     <Button
                         disabled={currPage <= 1}
                         onClick={() => {
@@ -171,12 +172,12 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button
+                    {/* <Button
                         onClick={() => setRotation((prev) => prev - 90)}
                         variant='ghost'
                         aria-label='rotate 90 degrees counter clockwise'>
                         <RotateCcw className='h-4 w-4' />
-                    </Button>
+                    </Button> */}
 
                     <Button
                         onClick={() => setRotation((prev) => prev + 90)}
@@ -185,7 +186,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
                         <RotateCw className='h-4 w-4' />
                     </Button>
 
-                    {/* <PdfFullscreen fileUrl={url} /> */}
+                    <PDFFullscreen fileUrl={url} />
                 </div>
             </div>
 
@@ -215,6 +216,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
                             file={url}
                             className='max-h-full'
                         >
+                            {/*  */}
                             {isLoading && renderedScale ? (
                                 <Page
                                     width={width ? width : 1}
