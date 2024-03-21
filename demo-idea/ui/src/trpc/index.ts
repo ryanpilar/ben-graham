@@ -52,7 +52,7 @@ export const appRouter = router({
                 kindeId: kindeId
             }
         })
-    }),    
+    }),
     deleteFile: privateProcedure
         .input(z.object({ id: z.string() }))        // 1st, validate with zod
         .mutation(async ({ ctx, input }) => {       // 2nd, carry out api logic
@@ -88,6 +88,21 @@ export const appRouter = router({
             if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
             return file
         }),
+    getFileUploadStatus: privateProcedure
+        .input(z.object({ fileId: z.string() }))
+        .query(async ({ input, ctx }) => {
+            const file = await db.file.findFirst({
+                where: {
+                    id: input.fileId,
+                    kindeId: ctx.kindeId,
+                },
+            })
+            if (!file) return { status: 'PENDING' as const } // Return as a constant, telling typescript that PENDING is fine and a valid state to be in
+
+            return { status: file.uploadStatus }
+        }),
+
+    
 
 })
 

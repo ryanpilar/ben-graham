@@ -37,8 +37,7 @@ const PDFFullscreen = ({ fileUrl }: PdfFullscreenProps) => {
                 }
             }}>
 
-            <DialogTrigger
-                onClick={() => setIsOpen(true)}
+            <DialogTrigger onClick={ () => setIsOpen(true)}
                 asChild>
                 <Button
                     variant='ghost'

@@ -4,7 +4,7 @@ import { createTRPCReact } from "@trpc/react-query"
 
 // You need to pass the type of the main router in trpc as a generic into this function
 // And it is what gives us type safety across our application
-// So the below function expects the 'type' of our our router
+// So the below function expects the 'type' of our router
 // Without this type trpc will not know what type to send from the backend to the frontend
 // That is why we need to pass this 'type' to createTRPCReact
 

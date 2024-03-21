@@ -20,7 +20,8 @@ model User {
   // kindeId String @unique
   email String @unique
 
-  File File[]
+  File    File[]
+  Message Message[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -36,7 +37,7 @@ enum UploadStatus {
 }
 
 model File {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId 
+  id     String  @id @map("_id") 
   fileId String? @default(cuid())
   name   String
 
@@ -45,8 +46,23 @@ model File {
   url String
   key String
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  User      User?     @relation(fields: [kindeId], references: [id])
+  kindeId   String?
+  messages  Message[]
+}
+
+model Message {
+  id   String @id @map("_id")
+  text String
+
+  isUserMessage Boolean // so we can differenciate between user messages and ai messages
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   User      User?    @relation(fields: [kindeId], references: [id])
-  kindeId   String?  
+  kindeId   String?
+  File      File?    @relation(fields: [fileId], references: [id])
+  fileId    String? 
 }

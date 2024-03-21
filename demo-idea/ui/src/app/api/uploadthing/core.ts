@@ -1,7 +1,18 @@
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+// import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
+import { OpenAIEmbeddings } from "@langchain/openai";
 
+
+import { pinecone } from '@/lib/pinecone'
+// import { PineconeStore } from 'langchain/vectorstores/pinecone'
+import { PineconeStore } from "@langchain/pinecone";
+
+import { HumanMessage } from 'langchain/schema';
+
+
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
 const f = createUploadthing();
 
 /** ================================|| Core ||=================================== 
@@ -24,9 +35,10 @@ export const ourFileRouter = {
             // return { subscriptionPlan, userId: user.id }
             return { kindeId: user.id } // whatever we return here, will end up below in metadata
         })
-        .onUploadComplete( async ({ metadata, file }) => {
+        .onUploadComplete(async ({ metadata, file }) => {
             const createdFile = await db.file.create({
                 data: {
+                    id: file.key, // Note: this is the uploadthing key/id
                     key: file.key,
                     name: file.name,
                     kindeId: metadata.kindeId,
@@ -37,6 +49,76 @@ export const ourFileRouter = {
                     uploadStatus: 'PROCESSING',
                 }
             })
+            // The basis to be able to answer a questions here, is before hand, indexing the entire pdf file, 
+            // so now we can search for just the parts of the pdf file, so now we can just search for the parts
+            // of the pdf file that are closest to the question or the message that the user has sent.
+            // When we upload a file, right away we are going to index it, so when we ask a question later, it
+            // is already indexed and we can then search for the parts that are most similar.
+            // We are going to index using a vector database, Pinecone.
+
+            // Pinecone - we create an index, where we are going to store our pdf vectors
+
+            try {
+                // Now we have the url in memory, and we can generate some pages that we want to
+                // index in our vector store from them
+                // first we need them as a blob object
+                const response = await fetch(`https://utfs.io/f/${file.key}`)
+                // langchain makes working with api apps easier.
+                const blob = await response.blob()
+                // load the pdf into memory
+                const loader = new PDFLoader(blob)
+                // extract page level text
+                const pageLevelDocs = await loader.load()
+                // later we can check if you are on the pro or the free plan
+                const pagesAmt = pageLevelDocs.length
+
+                // vectorize and index entire document
+                const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
+
+                // take the text and turn it into a vectors
+                const embeddings = new OpenAIEmbeddings({
+                    openAIApiKey: process.env.OPENAI_API_KEY,
+                })
+
+                //  In the latest versions of LangChain, the chat history should be passed as an array of 
+                //  HumanMessage objects, not as an array of strings. The HumanMessage object is a class 
+                //  in LangChain that represents a human message in a conversation.
+
+                console.log('CHECK 1');
+                
+                await PineconeStore.fromDocuments(
+                    pageLevelDocs,
+                    embeddings,                         //   OpenAi embedding tell langchain how to generate the vectors from the text
+                    {
+                        pineconeIndex,
+                        namespace: createdFile.id,      //  We can save a vector to certain namespaces, in this case fileId, so when 
+                        //  we query by file id we can get all the vectors for that certain file
+                    }
+                )
+                console.log('CHECK 2');
+
+                // Update the database file to indicated a 'successful' upload state
+                await db.file.update({
+                    data: {
+                        uploadStatus: 'SUCCESS'
+                    },
+                    where: {
+                        id: createdFile.id,
+                    }
+                })
+                console.log('CHECK 3', createdFile);
+            } catch (error) {
+            console.log('FAILED TO SOMETHING!');
+            
+                await db.file.update({
+                    data: {
+                        uploadStatus: 'FAILED'
+                    },
+                    where: {
+                        id: createdFile.id,
+                    }
+                })
+            }
         }),
 
 } satisfies FileRouter;
