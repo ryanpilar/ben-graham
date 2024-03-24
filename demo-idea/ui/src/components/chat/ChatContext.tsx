@@ -36,7 +36,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     // so we use react-query:
 
     const { mutate: sendMessage } = useMutation({
-        mutationFn: async ( {message}: {message: string} ) => {
+        mutationFn: async ({ message }: { message: string }) => {
             const response = await fetch('/api/message', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -51,9 +51,9 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
             return response.body
         }
     })
-
+    // This is what we use to send a message to the messages route.ts
     const addMessage = () => sendMessage({ message })
-    const handleInputChange= (e:React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setMessage(e.target.value)
     }
 

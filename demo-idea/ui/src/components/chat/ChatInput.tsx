@@ -1,23 +1,22 @@
 import { Send } from 'lucide-react'
 import { Button } from '../ui/button'
-// import { Textarea } from '../ui/textarea'
 import { useContext, useRef } from 'react'
 import { Textarea } from '../ui/textarea'
-// import { ChatContext } from './ChatContext'
+import { ChatContext } from './ChatContext'
 
 interface ChatInputProps {
     isDisabled?: boolean
 }
 
 const ChatInput = ({ isDisabled }: ChatInputProps) => {
-    //   const {
-    //     addMessage,
-    //     handleInputChange,
-    // isLoading,
-    //     message,
-    //   } = useContext(ChatContext)
+    const {
+        addMessage,
+        handleInputChange,
+        isLoading,
+        message,
+    } = useContext(ChatContext)
 
-    //   const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const textareaRef = useRef<HTMLTextAreaElement>(null) // Used ti mae the keydown work
 
     return (
         <div className='absolute bottom-0 left-0 w-full'>
@@ -28,20 +27,20 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                         <div className='relative'>
                             <Textarea
                                 rows={1}
-                                // ref={textareaRef}
+                                ref={textareaRef}
                                 maxRows={4}
-                                autoFocus // when you load the page, the cursor will be inside the input by default
-                                // onChange={handleInputChange}
-                                // value={message}
-                                // onKeyDown={(e) => {
-                                //   if (e.key === 'Enter' && !e.shiftKey) {
-                                //     e.preventDefault()
-
-                                //     addMessage()
-
-                                //     textareaRef.current?.focus()
-                                //   }
-                                // }}
+                                autoFocus                                       // When you load the page, the cursor will be inside the input by default
+                                onChange={handleInputChange}
+                                value={message}
+                                // When we press enter inside our chat input, we want our message to send
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {     // b/c shift enter is an important shortkey! 
+                                        e.preventDefault()
+                                        addMessage()
+                                        // Shift the focus back into the text area
+                                        textareaRef.current?.focus()            // Current needs a question mark, b/c textareaRef could be null
+                                    }
+                                }}
                                 placeholder='Enter your question...'
                                 className='
                                     resize-none pr-12 text-base py-3 
@@ -49,16 +48,15 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                                     scrollbar-track-blue-lighter scrollbar-w-2 
                                     scrolling-touch'
                             />
-
+                            {/* Block if the message is being sent to the api, or if the api is currently answering the question */}
                             <Button
-                                // disabled={isLoading || isDisabled}
+                                disabled={isLoading || isDisabled}
                                 className='absolute bottom-1.5 right-[8px]'
                                 aria-label='send message'
-                            // onClick={() => {
-                            //   addMessage()
-
-                            //   textareaRef.current?.focus()
-                            // }}
+                                onClick={() => {
+                                    addMessage()
+                                    textareaRef.current?.focus() // Set where the cursor is positioned
+                                }}
                             >
                                 <Send className='h-4 w-4' />
                             </Button>

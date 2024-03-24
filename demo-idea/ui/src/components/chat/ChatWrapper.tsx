@@ -11,6 +11,7 @@ import { ChevronLeft, Loader2, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import ChatInput from './ChatInput'
 import Messages from './Messages'
+import { ChatContextProvider } from './ChatContext'
 
 /** ================================|| Chat Wrapper ||=================================== 
     Its really import for this chat wrapper to handle loading states.
@@ -31,12 +32,12 @@ const ChatWrapper = ({
   fileId,
   // isSubscribed,
 }: ChatWrapperProps) => {
-                                        // Anything we return back from the api will be available here in data
+  // Anything we return back from the api will be available here in data
   const { data, isLoading } =           // isLoading is super important for our ChatWrapper loading states
     trpc.getFileUploadStatus.useQuery({ fileId, }, {
 
-                                        // POLLING - This refetch interval passes in the data, so whatever we 
-                                        // return from the api route will be accessible in the data, status in our case.
+      // POLLING - This refetch interval passes in the data, so whatever we 
+      // return from the api route will be accessible in the data, status in our case.
       refetchInterval: (data) =>
         data?.status === 'SUCCESS' ||
           data?.status === 'FAILED'
@@ -45,6 +46,7 @@ const ChatWrapper = ({
     })
 
   if (isLoading)
+  
     return (
       <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
         <div className='flex-1 flex justify-center items-center flex-col mb-28'>
@@ -116,20 +118,20 @@ const ChatWrapper = ({
           </div>
         </div>
 
-  <ChatInput isDisabled />
-    </div>
-  )
+        <ChatInput isDisabled />
+      </div>
+    )
 
   return (
-    // <ChatContextProvider fileId={fileId}>
-    <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
-      <div className='flex-1 justify-between flex flex-col mb-28'>
-        <Messages fileId={fileId} />
-      </div>
+    <ChatContextProvider fileId={fileId}>
+      <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
+        <div className='flex-1 justify-between flex flex-col mb-28'>
+          <Messages fileId={fileId} />
+        </div>
 
-      <ChatInput />
-    </div>
-    // </ChatContextProvider>
+        <ChatInput />
+      </div>
+    </ChatContextProvider>
   )
 }
 

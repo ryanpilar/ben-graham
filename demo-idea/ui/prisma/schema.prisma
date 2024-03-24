@@ -54,7 +54,7 @@ model File {
 }
 
 model Message {
-  id   String @id @map("_id")
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
   text String
 
   isUserMessage Boolean // so we can differenciate between user messages and ai messages

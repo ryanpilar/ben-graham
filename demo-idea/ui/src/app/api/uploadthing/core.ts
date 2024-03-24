@@ -63,10 +63,14 @@ export const ourFileRouter = {
                 // index in our vector store from them
                 // first we need them as a blob object
                 const response = await fetch(`https://utfs.io/f/${file.key}`)
-                // langchain makes working with api apps easier.
+                console.log('CHECK 1');
+
                 const blob = await response.blob()
+                console.log('Create blog from uloadthingLink');
+
                 // load the pdf into memory
                 const loader = new PDFLoader(blob)
+
                 // extract page level text
                 const pageLevelDocs = await loader.load()
                 // later we can check if you are on the pro or the free plan
@@ -74,17 +78,19 @@ export const ourFileRouter = {
 
                 // vectorize and index entire document
                 const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
+                console.log('Pinecone done indexing');
+                console.log('the index', pineconeIndex);
+
 
                 // take the text and turn it into a vectors
-                const embeddings = new OpenAIEmbeddings({
-                    openAIApiKey: process.env.OPENAI_API_KEY,
-                })
+                const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
+                console.log('OpenAi embeddings Done');
+                console.log('embeddings', embeddings);
 
                 //  In the latest versions of LangChain, the chat history should be passed as an array of 
                 //  HumanMessage objects, not as an array of strings. The HumanMessage object is a class 
                 //  in LangChain that represents a human message in a conversation.
 
-                console.log('CHECK 1');
                 
                 await PineconeStore.fromDocuments(
                     pageLevelDocs,
@@ -92,10 +98,11 @@ export const ourFileRouter = {
                     {
                         pineconeIndex,
                         namespace: createdFile.id,      //  We can save a vector to certain namespaces, in this case fileId, so when 
+                        // maxConcurrency: 5,              // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
                         //  we query by file id we can get all the vectors for that certain file
                     }
                 )
-                console.log('CHECK 2');
+                console.log('Langchain Done vectorizing');
 
                 // Update the database file to indicated a 'successful' upload state
                 await db.file.update({
@@ -106,9 +113,10 @@ export const ourFileRouter = {
                         id: createdFile.id,
                     }
                 })
-                console.log('CHECK 3', createdFile);
+                console.log('MONGO FILE updatated', createdFile);
             } catch (error) {
-            console.log('FAILED TO SOMETHING!');
+            
+                console.log('FAILED TO SOMETHING!', error);
             
                 await db.file.update({
                     data: {
