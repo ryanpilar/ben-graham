@@ -63,10 +63,9 @@ export const ourFileRouter = {
                 // index in our vector store from them
                 // first we need them as a blob object
                 const response = await fetch(`https://utfs.io/f/${file.key}`)
-                console.log('CHECK 1');
 
                 const blob = await response.blob()
-                console.log('Create blog from uloadthingLink');
+                console.log('Create blob from uloadthingLink');
 
                 // load the pdf into memory
                 const loader = new PDFLoader(blob)
@@ -79,13 +78,11 @@ export const ourFileRouter = {
                 // vectorize and index entire document
                 const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
                 console.log('Pinecone done indexing');
-                console.log('the index', pineconeIndex);
 
 
                 // take the text and turn it into a vectors
                 const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
                 console.log('OpenAi embeddings Done');
-                console.log('embeddings', embeddings);
 
                 //  In the latest versions of LangChain, the chat history should be passed as an array of 
                 //  HumanMessage objects, not as an array of strings. The HumanMessage object is a class 

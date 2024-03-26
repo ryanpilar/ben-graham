@@ -47,3 +47,10 @@ maybe twice that if you need to use the 16k model. Don’t use gpt-4 for this.
 Create a simple HTML doc with a <div> for your large amount of text. Upload 
 that bad boy onto a free hosting site. Then, with ChatGPT-4's plugins, drop in that URL. 
 Boom, ChatGPT can dive into your data.
+
+
+
+
+
+instead add metadata to each document you send to db and for getting similaritySearches just pass the metadata you included as third argument
+this way you dont need to use namespaces in pinecone vectorStore

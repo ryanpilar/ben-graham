@@ -48,7 +48,7 @@ export const POST = async (req: NextRequest) => {
   })
 
   if (!file) {
-    console.log('FILE DOESN"T EXIST IN MONGO!')
+    console.log('FILE DOESNT EXIST IN MONGO!')
     return new Response('Not found', { status: 404 })
   }
   // Which page of the pdf is most relevent to the question that the user is asking, retrieve that page for context and send it to the large language model together
@@ -136,6 +136,10 @@ export const POST = async (req: NextRequest) => {
 
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
+    // model: 'gpt-4',
+    // model: 'gpt-4-0613',
+    // model: 'gpt-4-32k',
+
     temperature: 0,
     stream: true,               // We plan to stream the responses back to the front end in real time
     // These msgs serve one purpose: we want the previous messages that were exchanged
@@ -181,7 +185,9 @@ export const POST = async (req: NextRequest) => {
   // Its essentially one long message string that we will want to put into our database 
   const stream = OpenAIStream(response, {
     async onCompletion(completion) {
-      await db.message.create({
+      console.log('OPENAI STREAM COMPLETE');
+      
+      const createdDoc = await db.message.create({
         data: {
           text: completion,
           isUserMessage: false,
@@ -189,6 +195,8 @@ export const POST = async (req: NextRequest) => {
           kindeId: userId,
         },
       })
+      console.log('createdMessage', createdDoc);
+
     },
   })
 

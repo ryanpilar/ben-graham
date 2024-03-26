@@ -16,23 +16,23 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
         message,
     } = useContext(ChatContext)
 
-    const textareaRef = useRef<HTMLTextAreaElement>(null) // Used ti mae the keydown work
+    const textareaRef = useRef<HTMLTextAreaElement>(null) // Used to make the keydown work
 
     return (
         <div className='absolute bottom-0 left-0 w-full'>
 
-            <form className='mx-2 flex flex-row gap-3 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl'>
+            <div className='mx-2 flex flex-row gap-3 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl'>
                 <div className='relative flex h-full flex-1 items-stretch md:flex-col'>
                     <div className='relative flex flex-col w-full flex-grow p-4'>
                         <div className='relative'>
                             <Textarea
                                 rows={1}
-                                ref={textareaRef}
+                                ref={textareaRef}                               // We use ref in conjunction with the onKeyDown
                                 maxRows={4}
                                 autoFocus                                       // When you load the page, the cursor will be inside the input by default
-                                onChange={handleInputChange}
+                                onChange={handleInputChange}                    
                                 value={message}
-                                // When we press enter inside our chat input, we want our message to send
+
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {     // b/c shift enter is an important shortkey! 
                                         e.preventDefault()
@@ -53,9 +53,10 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                                 disabled={isLoading || isDisabled}
                                 className='absolute bottom-1.5 right-[8px]'
                                 aria-label='send message'
+                                type='submit'
                                 onClick={() => {
                                     addMessage()
-                                    textareaRef.current?.focus() // Set where the cursor is positioned
+                                    textareaRef.current?.focus()                // Set where the cursor is positioned
                                 }}
                             >
                                 <Send className='h-4 w-4' />
@@ -63,7 +64,7 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     )
 }
