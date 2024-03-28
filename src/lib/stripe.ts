@@ -20,7 +20,7 @@ export async function getUserSubscriptionPlan() {
     const user = await getUser()
 
     // If not a user yet, return null and false to indicate that this user is not subscribed
-    if (!user?.id) {
+    if (!user.id) {
         return {
             ...PLANS[0],
             isSubscribed: false,
@@ -31,7 +31,7 @@ export async function getUserSubscriptionPlan() {
 
     const dbUser = await db.user.findFirst({
         where: {
-            id: user?.id,
+            id: user.id,
         },
     })
     // Go into the db to see if we have entries for this user, or if theres no records, return with false and null
