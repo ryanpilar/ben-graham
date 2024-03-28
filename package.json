@@ -25,12 +25,15 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@tailwindcss/typography": "^0.5.10",
-    "@tanstack/react-query": "^5.25.0",
-    "@trpc/client": "^11.0.0-next-beta.308",
-    "@trpc/next": "^11.0.0-next-beta.308",
-    "@trpc/react": "^9.27.4",
-    "@trpc/react-query": "^11.0.0-next-beta.308",
-    "@trpc/server": "^11.0.0-next-beta.308",
+    
+      "@tanstack/react-query": "4.18.0",
+      "@trpc/client": "9.27.4",
+      "@trpc/next": "9.27.4",
+      "@trpc/react": "9.27.4",
+      "@trpc/react-query": "9.27.4",
+      "@trpc/server": "9.27.4",
+    
+    
     "@uploadthing/react": "^6.3.4",
     "ai": "^3.0.13",
     "class-variance-authority": "^0.7.0",

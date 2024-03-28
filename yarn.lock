@@ -1632,44 +1632,50 @@
     lodash.merge "^4.6.2"
     postcss-selector-parser "6.0.10"
 
-"@tanstack/query-core@5.28.9":
-  version "5.28.9"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.28.9.tgz#170a7a8794ab73aeffbaf711ac62126479a5d026"
-  integrity sha512-hNlfCiqZevr3GRVPXS3MhaGW5hjcxvCsIQ4q6ff7EPlvFwYZaS+0d9EIIgofnegDaU2BbCDlyURoYfRl5rmzow==
+"@tanstack/query-core@4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.18.0.tgz#3e166ce319fd869c668536384ae94d174ea46a59"
+  integrity sha512-PP4mG8MD08sq64RZCqMfXMYfaj7+Oulwg7xZ/fJoEOdTZNcPIgaOkHajZvUBsNLbi/0ViMvJB4cFkL2Jg2WPbw==
 
-"@tanstack/react-query@^5.25.0":
-  version "5.28.9"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.28.9.tgz#13c2049daa5db6c3137473e279b209f76d39708e"
-  integrity sha512-vwifBkGXsydsLxFOBMe3+f8kvtDoqDRDwUNjPHVDDt+FoBetCbOWAUHgZn4k+CVeZgLmy7bx6aKeDbe3e8koOQ==
+"@tanstack/react-query@4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.18.0.tgz#d9c661364b383fca79f5384cb97b445354068faa"
+  integrity sha512-s1kdbGMdVcfUIllzsHUqVUdktBT5uuIRgnvrqFNLjl9TSOXEoBSDrhjsGjao0INQZv8cMpQlgOh3YH9YtN6cKw==
   dependencies:
-    "@tanstack/query-core" "5.28.9"
+    "@tanstack/query-core" "4.18.0"
+    use-sync-external-store "^1.2.0"
 
-"@trpc/client@^11.0.0-next-beta.308":
-  version "11.0.0-next-beta.318"
-  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-11.0.0-next-beta.318.tgz#181ed3c445a851a68abf761d31a2d3984a65f5a0"
-  integrity sha512-R3IlUZqN3WKNNWsayMiVP6JqWVdyNSuwQmBQY7VqVepUBV210uo4GoFLv2vmmegOlHzgx9IUZG7u1grN1v1nAg==
+"@trpc/client@9.27.4":
+  version "9.27.4"
+  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-9.27.4.tgz#01942784af5628e615bd6dd6094a16c5f7a7d457"
+  integrity sha512-NyS3J333xy8PJWGTSKO0egvj3x/s4SaSPx7XDWHf/i51W/i5Fla+sNxYpv+4z+SwE2xyJKszN2EZbvKIW2X/wA==
+  dependencies:
+    "@babel/runtime" "^7.9.0"
 
-"@trpc/next@^11.0.0-next-beta.308":
-  version "11.0.0-next-beta.318"
-  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-11.0.0-next-beta.318.tgz#b04f25f2589574a8bf52bca30f7c63b6a46052a2"
-  integrity sha512-qeWfJ1vPm7GchLmMZz5Gj+mBka0CRci0bCKEhGoG8RSvI/+9GbbhZHKRRDnlsN81CgexJ2e2nULET9ESO6rt+Q==
+"@trpc/next@9.27.4":
+  version "9.27.4"
+  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-9.27.4.tgz#55c0b5997421855a42333c5f4e93463e9c5bf522"
+  integrity sha512-QY7eT37hIjHmtqOSEfx4IvZXOGHozIQ6B0MQ3+olmpMpTrygcYi4mFiurPV8Txh1iLa5mgBoJ1ZepLaSc0qzkg==
+  dependencies:
+    "@babel/runtime" "^7.9.0"
+    react-ssr-prepass "^1.5.0"
 
-"@trpc/react-query@^11.0.0-next-beta.308":
+"@trpc/react-query@9.27.4":
   version "11.0.0-next-beta.318"
   resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-11.0.0-next-beta.318.tgz#c7edf9695c5a68b4fa046c0ae3442bbf09a9dfda"
   integrity sha512-T6l4+OuOkE4yylUqtT5EiLXo0M5+XW6YaKqnTCMkELQrrPmq3Ok0eKfhWy1Xk+ayx02POO9fTzNhITz3BID21Q==
 
-"@trpc/react@^9.27.4":
+"@trpc/react@9.27.4":
   version "9.27.4"
   resolved "https://registry.yarnpkg.com/@trpc/react/-/react-9.27.4.tgz#0320e0cbd416506959ddc65a10758fc41d70fb65"
   integrity sha512-bP74Tf6vWcMoWYiTAvbWrieV9cFQiKUDKRoRj0+VeGJbxdbhdJyUzv4zos0T4SiSKuhgoEm9bP4jWU2NhNhpIA==
   dependencies:
     "@babel/runtime" "^7.9.0"
 
-"@trpc/server@^11.0.0-next-beta.308":
-  version "11.0.0-next-beta.318"
-  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-11.0.0-next-beta.318.tgz#0ca3930870368734f2fb7eec9b9ff7dd769709e8"
-  integrity sha512-lxwWfqgv3LvIfhagCElDtNEY6C2sQU3o43OH0vn9hQ+7o9j+JHwEZjZz1ixvm3wUZvwZ68LheXuKL9RdVn1d4w==
+"@trpc/server@9.27.4":
+  version "9.27.4"
+  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-9.27.4.tgz#6a3d8df1168a46a2b3e6566ba2c48b2aa2f532c1"
+  integrity sha512-yw0omUrxGp8+gEAuieZFeXB4bCqFvmyCDL3GOBv+Q6+cK0m5824ViHZKPgK5DYG1ijN/lbi1hP3UVKywPN7rbQ==
 
 "@types/debug@^4.0.0":
   version "4.1.12"
@@ -5149,6 +5155,11 @@ react-resize-detector@^10.0.1:
   integrity sha512-CR2EdP83ycGlWkhhrd6+hhZVhPJO4xnzClFCTBXlODVTHOgiDJQu77sBt67J7P3gfU4ec/kOuf2c5EcyTUNLXQ==
   dependencies:
     lodash "^4.17.21"
+
+react-ssr-prepass@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/react-ssr-prepass/-/react-ssr-prepass-1.5.0.tgz#bc4ca7fcb52365e6aea11cc254a3d1bdcbd030c5"
+  integrity sha512-yFNHrlVEReVYKsLI5lF05tZoHveA5pGzjFbFJY/3pOqqjGOmMmqx83N4hIjN2n6E1AOa+eQEUxs3CgRnPmT0RQ==
 
 react-style-singleton@^2.2.1:
   version "2.2.1"

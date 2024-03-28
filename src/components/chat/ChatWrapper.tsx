@@ -38,7 +38,7 @@ const ChatWrapper = ({
 
       // POLLING - This refetch interval passes in the data, so whatever we 
       // return from the api route will be accessible in the data, status in our case.
-      refetchInterval: (data) =>
+      refetchInterval: (data:any) =>
         data?.status === 'SUCCESS' ||
           data?.status === 'FAILED'
           ? false
