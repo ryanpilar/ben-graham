@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import React, { useEffect } from 'react'
 // Project Imports
 import { trpc } from '../_trpc/client';
