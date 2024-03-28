@@ -20,7 +20,7 @@ export async function getUserSubscriptionPlan() {
 
     // Get the current user, whoever is logged int
     const { getUser } = getKindeServerSession()
-    const user = getUser()
+    const user = await getUser()
 
     // If not a user yet, return null and false to indicate that this user is not subscribed
     if (!user.id) {
