@@ -6,18 +6,14 @@ import { NextRequest } from "next/server"
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { PineconeStore } from "@langchain/pinecone";
 import { openai } from "@/lib/openai"
-
-
 import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { log } from "console"
 
 
 export const POST = async (req: NextRequest) => {
   // Endpoint for asking a question about the pdf file
-  console.log('ENTERING THE MESSAGE API')
 
   // 1st we need access to the body
-  const body = await req.json() // this is how we get access to the data invnext13
+  const body = await req.json() 
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
@@ -27,8 +23,6 @@ export const POST = async (req: NextRequest) => {
 
   const { id: userId } = user
 
-  console.log('USER EXITS')
-
   // To make sure we always have the expected data coming to this api route, we use zot
   // We want to parse the body
   // And because we are running this through zod, when it is successfull we know the data types to be true!
@@ -36,8 +30,6 @@ export const POST = async (req: NextRequest) => {
   // the body can technically be anything, typescript knows that. So typescript says anyone can make a request 
   // with any data to this endpoint
   const { fileId, message } = SendMessageValidator.parse(body)
-
-  console.log('MESSAGE VALIDATED', fileId, message)
 
   // Now we use the fileId to find the pdf we are looking for
   const file = await db.file.findFirst({
