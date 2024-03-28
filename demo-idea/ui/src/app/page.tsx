@@ -161,7 +161,7 @@ const features: FeatureItemProps[] = [
     title: 'Upload your PDF file',
     description: (
       <span>
-        We'll process your file and make it ready for you to chat with.
+        We&apos;ll process your file and make it ready for you to chat with.
       </span>
     ),
   },
@@ -170,7 +170,7 @@ const features: FeatureItemProps[] = [
     title: 'Start asking questions',
     description: (
       <span>
-        It's that simple. Try out Ben-G.ai today - it really takes less than a minute.
+        It&apos;s that simple. Try out Ben-G.ai today - it really takes less than a minute.
       </span>
     ),
   },

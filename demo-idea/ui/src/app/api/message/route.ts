@@ -135,10 +135,11 @@ export const POST = async (req: NextRequest) => {
 
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    // model: 'gpt-3.5-turbo',
     // model: 'gpt-4',
     // model: 'gpt-4-0613',
     // model: 'gpt-4-32k',
+    model: 'gpt-4-0125-preview',
 
     temperature: 0,
     stream: true,               // We plan to stream the responses back to the front end in real time

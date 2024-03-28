@@ -1,4 +1,6 @@
 import { LucideProps, User } from 'lucide-react'
+import clsx from 'clsx';
+
 
 export const Icons = {
   user: User,

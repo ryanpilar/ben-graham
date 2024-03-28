@@ -4,7 +4,6 @@ import React from 'react'
 // Styles
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-// import UpgradeButton from '@/components/UpgradeButton'
 import { buttonVariants } from '@/components/ui/button'
 import {
   Tooltip,
@@ -94,7 +93,9 @@ const PricingPage = async () => {
   return (
     <>
       <MaxWidthWrapper className='mb-8 mt-24 text-center max-w-5xl'>
-        <div className='mx-auto mb-10 sm:max-w-lg'>
+
+        {/* -- HEADING & INTRO -- */}
+        <section className='mx-auto mb-10 sm:max-w-lg'>
           <h1 className='text-6xl font-bold sm:text-7xl'>
             Pricing
           </h1>
@@ -102,7 +103,7 @@ const PricingPage = async () => {
             Whether you&apos;re just trying out our service
             or need more, we&apos;ve got you covered.
           </p>
-        </div>
+        </section>
 
         <div className='pt-12 grid grid-cols-1 gap-10 lg:grid-cols-2'>
           <TooltipProvider>
@@ -114,8 +115,8 @@ const PricingPage = async () => {
                 )?.price.amount || 0
 
               return (
-                <div
-                  key={plan}
+
+                <div key={plan}
                   className={cn('relative rounded-2xl bg-white shadow-lg',
                     {
                       'border-2 border-blue-600 shadow-blue-200':
@@ -149,7 +150,7 @@ const PricingPage = async () => {
                     <div className='flex items-center space-x-1'>
                       <p>
                         {quota.toLocaleString()} PDFs/mo
-                          included
+                        included
                       </p>
 
                       <Tooltip delayDuration={300}>
@@ -208,33 +209,36 @@ const PricingPage = async () => {
                       )
                     )}
                   </ul>
+
                   <div className='border-t border-gray-200' />
+                  
                   <div className='p-5'>
                     {plan === 'Free' ? (
-                        <Link
-                          href={
-                            user ? '/dashboard' : '/sign-in'
-                          }
-                          className={buttonVariants({
-                            className: 'w-full',
-                            variant: 'secondary',
-                          })}>
-                          {user ? 'Upgrade now' : 'Sign up'}
-                          <ArrowRight className='h-5 w-5 ml-1.5' />
-                        </Link>
-                      ) : user ? (
-                        <UpgradeButton />
-                      ) : (
-                        <Link
-                          href='/sign-in'
-                          className={buttonVariants({
-                            className: 'w-full',
-                          })}>
-                          {user ? 'Upgrade now' : 'Sign up'}
-                          <ArrowRight className='h-5 w-5 ml-1.5' />
-                        </Link>
-                      )}
+                      <Link
+                        href={
+                          user ? '/dashboard' : '/sign-in'
+                        }
+                        className={buttonVariants({
+                          className: 'w-full',
+                          variant: 'secondary',
+                        })}>
+                        {user ? 'Upgrade now' : 'Sign up'}
+                        <ArrowRight className='h-5 w-5 ml-1.5' />
+                      </Link>
+                    ) : user ? (
+                      <UpgradeButton />
+                    ) : (
+                      <Link
+                        href='/sign-in'
+                        className={buttonVariants({
+                          className: 'w-full',
+                        })}>
+                        {user ? 'Upgrade now' : 'Sign up'}
+                        <ArrowRight className='h-5 w-5 ml-1.5' />
+                      </Link>
+                    )}
                   </div>
+                  
                 </div>
               )
             }

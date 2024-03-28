@@ -8,14 +8,9 @@ import { TRPCError } from '@trpc/server'
 import { db } from '@/db'
 import { z } from 'zod'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
-
-// import { absoluteUrl } from '@/lib/utils'
-// import {
-//   getUserSubscriptionPlan,
-//   stripe,
-// } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
 import { absoluteUrl } from '@/lib/utils'
+import { getUserSubscriptionPlan, stripe } from '@/lib/stripe'
 
 export const appRouter = router({
     authCallback: publicProcedure.query(async () => {
@@ -23,30 +18,27 @@ export const appRouter = router({
         const { getUser } = getKindeServerSession()
         const user = await getUser()
 
-        // const {getUser} = getKindeServerSession()
-        // const user:any = getUser()
-
         if (!user.id || !user.email) {
-            throw new TRPCError({ code: 'UNAUTHORIZED' }) // TRPCError is a utility that handles predefined errors for us
+            throw new TRPCError({ code: 'UNAUTHORIZED' })   // TRPCError is a utility that handles predefined errors for us
         }
         console.log('About to hit db')
 
         // Check if the user is in the db
-        const dbUser = await db.user.findFirst({
+        const mongoUser = await db.user.findFirst({
             where: {
                 id: user.id
             }
         })
 
-        console.log('dbUser', dbUser)
+        console.log('mongoUser', mongoUser)
 
-        if (!dbUser) {
+        if (!mongoUser) {
             // create user in db
             console.log('making document!')
 
             await db.user.create({
                 data: {
-                    id: user.id, // Note: this is the kinde id
+                    id: user.id,                            // Note: this is the kinde id
                     email: user.email
                 }
             })
@@ -67,8 +59,8 @@ export const appRouter = router({
         })
     }),
     deleteFile: privateProcedure
-        .input(z.object({ id: z.string() }))        // 1st, validate with zod
-        .mutation(async ({ ctx, input }) => {       // 2nd, carry out api logic
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx
 
             const file = await db.file.findFirst({
@@ -169,56 +161,59 @@ export const appRouter = router({
     createStripeSession: privateProcedure.mutation(
         async ({ ctx }) => {
             const { kindeId } = ctx
-            
+
             const billingUrl = absoluteUrl('/dashboard/billing')  // B/c we are server side right now, we are not able to use relative urls, and this is a helper function for that
 
             if (!kindeId)
                 throw new TRPCError({ code: 'UNAUTHORIZED' })
 
-            const dbUser = await db.user.findFirst({
+            const mongoUser = await db.user.findFirst({
                 where: {
                     id: kindeId,
                 },
             })
 
-            if (!dbUser)
+
+            if (!mongoUser)
                 throw new TRPCError({ code: 'UNAUTHORIZED' })
 
-            // const subscriptionPlan = await getUserSubscriptionPlan()
+            // If the user clicked the btn and they are already a user, it should take them to a manage your subscription page
+            // To retrieve the current subscription status
+            const subscriptionPlan = await getUserSubscriptionPlan()
 
-            // if (
-            //     subscriptionPlan.isSubscribed && dbUser.stripeCustomerId
-            // ) {
-                // const stripeSession =
-                //     await stripe.billingPortal.sessions.create({
-                //         customer: dbUser.stripeCustomerId,
-                //         return_url: billingUrl,
-                //     })
+            // Is the user on a Plus plan or not?
+            // If this fails, that means the user is not subscribed
+            if (subscriptionPlan.isSubscribed && mongoUser.stripeCustomerId) {
+                const stripeSession =                            // Insert Stripe config obj:
+                    await stripe.billingPortal.sessions.create({
+                        customer: mongoUser.stripeCustomerId,
+                        return_url: billingUrl,
+                    })
 
-                // return { url: stripeSession.url }
-            // }
+                return { url: stripeSession.url }                // Hosted page the stripe provides to us
+            }
 
-            // const stripeSession =
-            //     await stripe.checkout.sessions.create({
-            //         success_url: billingUrl,
-            //         cancel_url: billingUrl,
-            //         payment_method_types: ['card', 'paypal'],
-            //         mode: 'subscription',
-            //         billing_address_collection: 'auto',
-            //         line_items: [
-            //             {
-            //                 price: PLANS.find(
-            //                     (plan) => plan.name === 'Pro'
-            //                 )?.price.priceIds.test,
-            //                 quantity: 1,
-            //             },
-            //         ],
-            //         metadata: {
-            //             kindeId: kindeId,
-            //         },
-            //     })
+            const stripeSession =                                // Insert Stripe config obj:
+                await stripe.checkout.sessions.create({
+                    success_url: billingUrl,
+                    cancel_url: billingUrl,
+                    payment_method_types: ['card'],
+                    mode: 'subscription',
+                    billing_address_collection: 'auto',
+                    line_items: [                                // What the user is about to pay for
+                        {
+                            price: PLANS.find(                   // THe price that stripe expects comes from our plans that we have defined in our stripe config
+                                (plan) => plan.name === 'Plus'
+                            )?.price.priceIds.test,              // Change to 'production when you are ready to go'
+                            quantity: 1,
+                        },
+                    ],
+                    metadata: {
+                        kindeId: kindeId,                        // This is sent over to our webhook so we can make sure that we update this data for the correct user and enable their plan
+                    },
+                })
 
-            // return { url: stripeSession.url }
+            return { url: stripeSession.url }                    // We always redirect to the appropriate stripe session whether the user is or is not a stripe customer yet
         }
     ),
 
