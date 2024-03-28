@@ -167,7 +167,7 @@ interface PricingPlansProps {
     price: number;
     user: any; // You might want to define a more specific type based on the user object structure
 }
-export const PricingPlans: React.FC<PricingPlansProps> = ({ plan, tagline, quota, features, price, user }) => (
+const PricingPlans: React.FC<PricingPlansProps> = ({ plan, tagline, quota, features, price, user }) => (
     <div className={cn('relative rounded-2xl bg-white shadow-lg', {
         'border-2 border-blue-600 shadow-blue-200': plan === 'Plus',
         'border border-gray-200': plan !== 'Plus',
@@ -200,7 +200,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ plan, tagline, quota
 interface QuotaSectionProps {
     quota: number;
 }
-export const QuotaSection: React.FC<QuotaSectionProps> = ({ quota }) => (
+const QuotaSection: React.FC<QuotaSectionProps> = ({ quota }) => (
     <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
         <div className='flex items-center space-x-1'>
             <p>
@@ -219,7 +219,7 @@ interface FeatureItemProps {
     footnote?: string;
     negative?: boolean;
 }
-export const FeatureItem: React.FC<FeatureItemProps> = ({ text, footnote, negative }) => (
+const FeatureItem: React.FC<FeatureItemProps> = ({ text, footnote, negative }) => (
     <li className='flex text-left space-x-5'>
         <div className='flex-shrink-0'>
             {negative ? (
@@ -252,7 +252,7 @@ interface ActionSectionProps {
     user: any; // Again, consider defining a more specific type
 }
 
-export const ActionSection: React.FC<ActionSectionProps> = ({ plan, user }) => (
+const ActionSection: React.FC<ActionSectionProps> = ({ plan, user }) => (
     <div className='p-5'>
         {plan === 'Free' ? (
             <Link
@@ -285,7 +285,7 @@ interface TooltipWithTriggerProps {
     text: string;
     children: React.ReactNode;
 }
-export const TooltipWithTrigger: React.FC<TooltipWithTriggerProps> = ({ children, text }) => (
+const TooltipWithTrigger: React.FC<TooltipWithTriggerProps> = ({ children, text }) => (
     <Tooltip delayDuration={300}>
         <TooltipTrigger className='cursor-default ml-1.5'>
             {children}
