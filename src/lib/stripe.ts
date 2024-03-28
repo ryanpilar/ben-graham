@@ -8,9 +8,6 @@ import Stripe from 'stripe'
     See if the user is subscribed or not, and return communicating data
 **/
 
-
-
-
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
     apiVersion: '2023-10-16',
     typescript: true,

@@ -18,7 +18,7 @@ export const appRouter = router({
         const { getUser } = getKindeServerSession()
         const user = await getUser()
 
-        if (!user.id || !user.email) {
+        if (!user?.id || !user?.email) {
             throw new TRPCError({ code: 'UNAUTHORIZED' })   // TRPCError is a utility that handles predefined errors for us
         }
         console.log('About to hit db')
