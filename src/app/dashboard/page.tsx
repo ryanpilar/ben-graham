@@ -28,11 +28,13 @@ const Dashboard = async () => {
     if (!dbUser) redirect('/auth-callback?origin=dashboard')
 
     const subscriptionPlan = await getUserSubscriptionPlan()
+
+    console.log('subscriptionPlan', subscriptionPlan);    
     
     return (
-        <div className=''>
+        <>
             <UserDashboard subscriptionPlan={subscriptionPlan} />
-        </div>
+        </>
     );
 };
 

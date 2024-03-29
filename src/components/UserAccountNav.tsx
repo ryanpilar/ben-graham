@@ -32,6 +32,8 @@ const UserAccountNav = async ({
 }: UserAccountNavProps) => {
     
   const subscriptionPlan = await getUserSubscriptionPlan()
+  console.log('USER ACOUNT NAV', subscriptionPlan);
+  
 
   return (
     <DropdownMenu>

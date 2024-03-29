@@ -109,10 +109,7 @@ const PricingPage = async () => {
           <TooltipProvider>
 
             {pricingItems.map(({ plan, tagline, quota, features }) => {
-              const price =
-                PLANS.find(
-                  (p) => p.slug === plan.toLowerCase()
-                )?.price.amount || 0
+              const price = PLANS.find((p) => p.slug === plan.toLowerCase())?.price.amount || 0
 
               return (
 
@@ -211,7 +208,7 @@ const PricingPage = async () => {
                   </ul>
 
                   <div className='border-t border-gray-200' />
-                  
+
                   <div className='p-5'>
                     {plan === 'Free' ? (
                       <Link
@@ -238,7 +235,7 @@ const PricingPage = async () => {
                       </Link>
                     )}
                   </div>
-                  
+
                 </div>
               )
             }
