@@ -13,6 +13,8 @@ import { HumanMessage } from 'langchain/schema';
 
 
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
+import { getUserSubscriptionPlan } from "@/lib/stripe";
+import { PLANS } from "@/config/stripe";
 const f = createUploadthing();
 
 /** ================================|| Core ||=================================== 
@@ -24,16 +26,24 @@ const f = createUploadthing();
 export const ourFileRouter = {
 
     pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
+
+    // Here we have two different uploaders.
+
+
         .middleware(async () => {
             const { getUser } = getKindeServerSession()
             const user = await getUser()
 
             if (!user || !user.id) throw new Error('Unauthorized')
 
-            // const subscriptionPlan = await getUserSubscriptionPlan()
 
-            // return { subscriptionPlan, userId: user.id }
-            return { kindeId: user.id } // whatever we return here, will end up below in metadata
+            // We cannot check the subscription plan from the incoming request, because in this part of the app
+            // will not be called from any client. However the middle ware does, and can pass it along as metadata
+            // to other functions like onUploadComplete
+            // and now we can see if the user has paid or not
+            const subscriptionPlan = await getUserSubscriptionPlan()
+
+            return { subscriptionPlan, kindeId: user.id } // whatever we return here, will end up below as metadata
         })
         .onUploadComplete(async ({ metadata, file }) => {
             const createdFile = await db.file.create({
@@ -65,7 +75,6 @@ export const ourFileRouter = {
                 const response = await fetch(`https://utfs.io/f/${file.key}`)
 
                 const blob = await response.blob()
-                console.log('Create blob from uloadthingLink');
 
                 // load the pdf into memory
                 const loader = new PDFLoader(blob)
@@ -74,6 +83,26 @@ export const ourFileRouter = {
                 const pageLevelDocs = await loader.load()
                 // later we can check if you are on the pro or the free plan
                 const pagesAmt = pageLevelDocs.length
+
+                // Now we need to know the plan of the user:
+                const { subscriptionPlan } = metadata
+                const { isSubscribed } = subscriptionPlan
+
+                // Find out if the user is trying to upload more pages than they should
+                const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Plus')!.pagesPerPdf
+                const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Free')!.pagesPerPdf
+
+                // Is the user subscribed or not?
+                if ( (isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded) ) {
+                    await db.file.update({
+                        data: {
+                            uploadStatus: 'FAILED', // as to inform the user that something went wrong
+                        },
+                        where: {
+                            id: createdFile.id,
+                        },
+                    })
+                }
 
                 // vectorize and index entire document
                 const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
@@ -88,7 +117,7 @@ export const ourFileRouter = {
                 //  HumanMessage objects, not as an array of strings. The HumanMessage object is a class 
                 //  in LangChain that represents a human message in a conversation.
 
-                
+
                 await PineconeStore.fromDocuments(
                     pageLevelDocs,
                     embeddings,                         //   OpenAi embedding tell langchain how to generate the vectors from the text
@@ -112,9 +141,9 @@ export const ourFileRouter = {
                 })
                 console.log('MONGO FILE updatated', createdFile);
             } catch (error) {
-            
+
                 console.log('FAILED TO SOMETHING!', error);
-            
+
                 await db.file.update({
                     data: {
                         uploadStatus: 'FAILED'
