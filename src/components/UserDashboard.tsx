@@ -1,23 +1,27 @@
 "use client"
 
 import React, { useState } from 'react'
-import UploadButton from './UploadButton';
-import { trpc } from '@/app/_trpc/client';
+
 // Project Imports
 import { Button } from './ui/button';
-// 3rd Party Imports
-import { format } from 'date-fns'
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
-import Skeleton from "react-loading-skeleton"
-import Link from 'next/link';
-import { setUncaughtExceptionCaptureCallback } from 'process';
+import UploadButton from './UploadButton';
+import { trpc } from '@/app/_trpc/client';
+import { getUserSubscriptionPlan } from '@/lib/stripe'
 
-// Styles
+// 3rd Party Imports
+import Link from 'next/link';
+import { format } from 'date-fns'
+import Skeleton from "react-loading-skeleton"
+import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
+import { setUncaughtExceptionCaptureCallback } from 'process';
 
 /** ================================|| User Dashboard ||=================================== **/
 
-const UserDashboard = () => {
-
+interface PageProps {
+    subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
+  }
+  
+const UserDashboard = ({subscriptionPlan}: PageProps) => {
 
     // We need to know exactly what file is currently being deleted
     const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
@@ -39,7 +43,8 @@ const UserDashboard = () => {
             setCurrentlyDeletingFile(id)
         },
         onSettled() {
-            // setCurrentlyDeletingFile(null) // I removed this because there was this moment between onSettled and the actual refresh that exposed the btn to another click
+            // Whether there is an error or not, the loading state should stop
+            setCurrentlyDeletingFile(null) // I removed this because there was this moment between onSettled and the actual refresh that exposed the btn to another click
         }
     })
 
@@ -50,8 +55,8 @@ const UserDashboard = () => {
                     My Files
                 </h1>
 
-                {/* <UploadButton isSubscribed={subscriptionPlan.isSubscribed} /> */}
-                <UploadButton />
+                <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
+                {/* <UploadButton /> */}
             </div>
 
             {/* display all user files */}

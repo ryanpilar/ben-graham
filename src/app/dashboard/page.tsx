@@ -1,10 +1,13 @@
 import React from 'react'
+
 // Project Imports
 import { db } from '@/db';
+import { getUserSubscriptionPlan } from '@/lib/stripe'
+import UserDashboard from '@/components/UserDashboard';
+
 // 3rd Party Imports
 import { redirect } from 'next/navigation'
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import UserDashboard from '@/components/UserDashboard';
 
 /** ================================|| Dashboard ||=================================== **/
 
@@ -23,10 +26,12 @@ const Dashboard = async () => {
     })
 
     if (!dbUser) redirect('/auth-callback?origin=dashboard')
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
     
     return (
         <div className=''>
-            <UserDashboard />
+            <UserDashboard subscriptionPlan={subscriptionPlan} />
         </div>
     );
 };

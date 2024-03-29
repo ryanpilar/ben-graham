@@ -1,21 +1,21 @@
 "use client"
 import React, { useState } from 'react'
 // Project Imports
-import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
-// 3rd Party Imports
-import Dropzone from 'react-dropzone'
-import { Cloud, File, Loader2 } from 'lucide-react'
 import { Progress } from './ui/progress';
-import { useUploadThing } from '@/lib/uploadthing';
 import { useToast } from './ui/use-toast';
 import { trpc } from '@/app/_trpc/client';
+import { useUploadThing } from '@/lib/uploadthing';
+import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
+
+// 3rd Party Imports
+import Dropzone from 'react-dropzone'
 import { useRouter } from 'next/navigation';
-// Styles
+import { Cloud, File, Loader2 } from 'lucide-react'
 
-/** ================================|| Upload Button ||=================================== **/
+/** ================================|| Upload Dropzone ||=================================== **/
 
-const UploadDropzone = () => {
+const UploadDropzone = ({ isSubscribed, }: { isSubscribed: boolean }) => {
 
     const router = useRouter()
 
@@ -23,13 +23,15 @@ const UploadDropzone = () => {
     const [uploadProgress, setUploadProgress] = useState<number>(0)     // For the determinate progress bar
 
     const { toast } = useToast()
-    const { startUpload } = useUploadThing("pdfUploader")
+
+    // Depending on if the user is on the free plan or the plus plan, choose the appropriate uploader
+    const { startUpload } = useUploadThing(isSubscribed ? 'plusPlanUploader' : 'freePlanUploader')
 
     const { mutate: startPolling } = trpc.getFile.useMutation({
         onSuccess: (file) => {
             router.push(`/dashboard/${file.id}`)
         },
-        retry: true, // retry indefinitely until we get our file
+        retry: true,                                                    // Retry indefinitely until we get our file
         retryDelay: 500
     })
 
@@ -108,7 +110,7 @@ const UploadDropzone = () => {
                                     or drag and drop
                                 </p>
                                 <p className='text-xs text-zinc-500'>
-                                    {/* PDF (up to {isSubscribed ? "16" : "4"}MB) */}
+                                    PDF (up to {isSubscribed ? "16" : "4"}MB)
                                     PDF up to 4mb
                                 </p>
                             </div>
@@ -159,8 +161,9 @@ const UploadDropzone = () => {
         </Dropzone>
     )
 }
+/** =================================|| Upload Button ||==================================== **/
 
-const UploadButton = () => {
+const UploadButton = ({ isSubscribed, }: { isSubscribed: boolean }) => {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
@@ -184,8 +187,8 @@ const UploadButton = () => {
             </DialogTrigger>
 
             <DialogContent>
-                {/* <UploadDropzone isSubscribed={isSubscribed} /> */}
-                <UploadDropzone />
+                <UploadDropzone isSubscribed={isSubscribed} />
+                {/* <UploadDropzone /> */}
             </DialogContent>
 
 

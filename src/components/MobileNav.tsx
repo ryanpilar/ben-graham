@@ -13,11 +13,11 @@ import React from 'react'
 
 
 const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
-    
+
     const [isOpen, setOpen] = useState<boolean>(false)
 
     const toggleOpen = () => setOpen((prev) => !prev)
-    
+
     const pathname = usePathname()
 
     useEffect(() => {
@@ -88,7 +88,9 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                                         Dashboard
                                     </Link>
                                 </li>
+                                
                                 <li className='my-3 h-px w-full bg-gray-300' />
+                                
                                 <li>
                                     <Link
                                         className='flex items-center w-full font-semibold'
