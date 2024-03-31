@@ -188,11 +188,8 @@ const UploadButton = ({ isSubscribed, }: { isSubscribed: boolean }) => {
 
             <DialogContent>
                 <UploadDropzone isSubscribed={isSubscribed} />
-                {/* <UploadDropzone /> */}
             </DialogContent>
-
-
-
+            
         </Dialog>
     );
 };

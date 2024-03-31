@@ -56,7 +56,7 @@ const UserDashboard = ({subscriptionPlan}: PageProps) => {
                 </h1>
 
                 <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
-                {/* <UploadButton /> */}
+
             </div>
 
             {/* display all user files */}

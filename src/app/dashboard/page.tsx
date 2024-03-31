@@ -29,7 +29,7 @@ const Dashboard = async () => {
 
     const subscriptionPlan = await getUserSubscriptionPlan()
 
-    console.log('subscriptionPlan', subscriptionPlan);    
+    console.log('From DASHBOARD, subscriptionPlan', subscriptionPlan);    
     
     return (
         <>

@@ -15,9 +15,15 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
 
 export async function getUserSubscriptionPlan() {
 
+    console.log('ENTERED getUSERSubPlan');
+    
+
     // Get the current user, whoever is logged int
     const { getUser } = getKindeServerSession()
     const user = await getUser()
+
+    console.log('kinde user from getUSERSubPlan', user);
+    
 
     // If not a user yet, return null and false to indicate that this user is not subscribed
     if (!user?.id) {
@@ -34,9 +40,14 @@ export async function getUserSubscriptionPlan() {
             id: user?.id,
         },
     })
+    
+    console.log('dibUser retrieve fro getUSERSubPlan', dbUser);
+    
     // Go into the db to see if we have entries for this user, or if theres no records, return with false and null
 
     if (!dbUser) {
+        console.log('no dbUser FOUND!');
+        
         return {
             ...PLANS[0],
             isSubscribed: false,
@@ -55,6 +66,7 @@ export async function getUserSubscriptionPlan() {
     const plan = isSubscribed
         ? PLANS.find((plan) => plan.price.priceIds.test === dbUser.stripePriceId)
         : null
+        
     // Has the user cancelled their plan?
     let isCanceled = false
     if (isSubscribed && dbUser.stripeSubscriptionId) {

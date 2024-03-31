@@ -11,6 +11,7 @@ import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 import { PLANS } from '@/config/stripe'
 import { absoluteUrl } from '@/lib/utils'
 import { getUserSubscriptionPlan, stripe } from '@/lib/stripe'
+import { log } from 'console'
 
 export const appRouter = router({
     authCallback: publicProcedure.query(async () => {
@@ -77,6 +78,10 @@ export const appRouter = router({
                     id: input.id,
                 },
             })
+
+            // WE SHOULD BE ALSO DELETING THE UPLOADTHING FILE
+            // WE SHOULD BE ALSO DELETING THE PINECONE NAMESPACE FILES
+            // WE SHOULD BE DELETING THE MESSAGES ASSOCIATED WITH THE FILE ? ? MAYBE ? ? OR SHOULD WE DO THAT WHEN WE DELETE A PROJECT?? NOT SHURE YET  
 
             return file
         }),
@@ -160,12 +165,18 @@ export const appRouter = router({
         }),
     createStripeSession: privateProcedure.mutation(
         async ({ ctx }) => {
+            console.log('ENTERING createStripSession');
+
             const { kindeId } = ctx
 
             const billingUrl = absoluteUrl('/dashboard/billing')  // B/c we are server side right now, we are not able to use relative urls, and this is a helper function for that
+            console.log('Billing URL', billingUrl);
 
-            if (!kindeId)
+            if (!kindeId) {
+                console.log('NO KINDE ID FOUND');
+
                 throw new TRPCError({ code: 'UNAUTHORIZED' })
+            }
 
             const mongoUser = await db.user.findFirst({
                 where: {
@@ -174,8 +185,13 @@ export const appRouter = router({
             })
 
 
-            if (!mongoUser)
+            if (!mongoUser) {
+                console.log('NO mongo USER found in create stripe session')
                 throw new TRPCError({ code: 'UNAUTHORIZED' })
+            }
+
+            console.log('MONGO USER retrieved from stripsession');
+
 
             // If the user clicked the btn and they are already a user, it should take them to a manage your subscription page
             // To retrieve the current subscription status
