@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { pinecone } from "@/lib/pinecone"
+import { pinecone } from "@/lib/pinecone/core"
 import { SendMessageValidator } from "@/lib/validators/SendMessageValidator"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { NextRequest } from "next/server"

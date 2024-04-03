@@ -6,21 +6,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
-/** ================================|| Absolute Url ||=================================== 
+/** ==================================|| Absolute Url ||===================================== 
     
     Receives the path string and conditionally checks if we are on the client side or not.
-    Client is totally fine with relative path. 
     Also checks for production server and local server and builds url accordingly.
     
 **/
 
 export function absoluteUrl(path: string) {
+
   if (typeof window !== 'undefined') return path
+
   if (process.env.VERCEL_URL)
     return `https://${process.env.VERCEL_URL}${path}` // Root URL that the app is deployed to
-  return `http://localhost:${process.env.PORT ?? 3000}${path}`
+  
+    return `http://localhost:${process.env.PORT ?? 3000}${path}`
 }
+
+/** ================================|| Construct Metadata ||=================================== **/
 
 export function constructMetadata({
   title = "Ben-g - the SaaS for value investors",

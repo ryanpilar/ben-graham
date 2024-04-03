@@ -5,6 +5,7 @@ import Stripe from 'stripe'
 
 
 /** ================================|| Stripe ||=================================== 
+
     See if the user is subscribed or not, and return communicating data
 **/
 
@@ -15,18 +16,12 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
 
 export async function getUserSubscriptionPlan() {
 
-    console.log('ENTERED getUSERSubPlan');
-    
-
-    // Get the current user, whoever is logged int
+    // Get the current user, whoever is logged in
     const { getUser } = getKindeServerSession()
-    const user = await getUser()
-
-    console.log('kinde user from getUSERSubPlan', user);
-    
+    const kindeUser = await getUser()
 
     // If not a user yet, return null and false to indicate that this user is not subscribed
-    if (!user?.id) {
+    if (!kindeUser?.id) {
         return {
             ...PLANS[0],
             isSubscribed: false,
@@ -34,20 +29,16 @@ export async function getUserSubscriptionPlan() {
             stripeCurrentPeriodEnd: null,
         }
     }
-
     const dbUser = await db.user.findFirst({
         where: {
-            id: user?.id,
+            id: kindeUser?.id,
         },
     })
-    
-    console.log('dibUser retrieve fro getUSERSubPlan', dbUser);
-    
-    // Go into the db to see if we have entries for this user, or if theres no records, return with false and null
 
+    // Go into the db to see if we have entries for this user, or if theres no records, return with false and null
     if (!dbUser) {
         console.log('no dbUser FOUND!');
-        
+
         return {
             ...PLANS[0],
             isSubscribed: false,
@@ -66,7 +57,7 @@ export async function getUserSubscriptionPlan() {
     const plan = isSubscribed
         ? PLANS.find((plan) => plan.price.priceIds.test === dbUser.stripePriceId)
         : null
-        
+
     // Has the user cancelled their plan?
     let isCanceled = false
     if (isSubscribed && dbUser.stripeSubscriptionId) {

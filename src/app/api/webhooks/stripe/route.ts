@@ -5,10 +5,11 @@ import type Stripe from 'stripe'
 
 export async function POST(request: Request) {
 
-console.log('In stripe webhook - BODY DEETS:', request.text());
+// console.log('In stripe webhook - BODY DEETS:', await request.text());
 
 
   const body = await request.text()
+
   const signature = headers().get('Stripe-Signature') ?? ''     // First we check for the stripe signature                        
 
   let event: Stripe.Event

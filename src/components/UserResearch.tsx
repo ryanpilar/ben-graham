@@ -13,37 +13,35 @@ import Link from 'next/link';
 import { format } from 'date-fns'
 import Skeleton from "react-loading-skeleton"
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
+import AddProjectButton from './AddProjectButton';
 
-/** ================================|| User Dashboard ||=================================== **/
+/** ================================|| User Research ||=================================== **/
 
 interface PageProps {
     subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
   }
   
-const UserDashboard = ({subscriptionPlan}: PageProps) => {
+const UserResearch = ({subscriptionPlan}: PageProps) => {
 
     // We need to know exactly what file is currently being deleted
-    const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
+    const [currentlyDeletingProject, setCurrentlyDeletingProject] = useState<string | null>(null)
 
     // If we invalidate the data, we force an automatic refresh
-    const utils = trpc.useUtils()          // formerly useContext()
+    const utils = trpc.useUtils()          
 
-    // we get automatic type safety on the data
-    // trpc knows the type of data we are returning from the api endpoint
-    // it doesn't support every use case, it only supports JSON values for instance
-    // you can always go back to regular api routes if trpc doesn't support what you are doing
-    const { data: files, isLoading } = trpc.getUserFiles.useQuery()     // automatically gets queried on page load
+    // automatically gets queried on page load
+    const { data: projects, isLoading } = trpc.getUserProjects.useQuery()     
 
-    const { mutate: deleteFile } = trpc.deleteFile.useMutation({       
+    const { mutate: deleteProject } = trpc.deleteProject.useMutation({       
         onSuccess() {
-            utils.getUserFiles.invalidate()
+            utils.getUserProjects.invalidate()
         },
-        onMutate({ id }) {    // Callback right away when the button is clicked
-            setCurrentlyDeletingFile(id)
+        onMutate({ projectId }) {    
+            setCurrentlyDeletingProject(projectId)
         },
         onSettled() {
             // Whether there is an error or not, the loading state should stop
-            setCurrentlyDeletingFile(null) 
+            setCurrentlyDeletingProject(null) 
         }
     })
 
@@ -51,35 +49,33 @@ const UserDashboard = ({subscriptionPlan}: PageProps) => {
         <main className='mx-auto max-w-7xl md:p-10'>
             <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
                 <h1 className='mb-3 font-bold text-5xl text-gray-900'>
-                    My Files
+                    Research Projects
                 </h1>
-
-                <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
-
+                <AddProjectButton isSubscribed={subscriptionPlan.isSubscribed} />
             </div>
 
-            {/* display all user files */}
-            {files && files?.length !== 0 ? (
+            {/* Display all research projects */}
+            {projects && projects?.length !== 0 ? (
                 <ul className='mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3'>
-                    {files
+                    {projects
                         .sort(
                             (a, b) =>
                                 new Date(b.createdAt).getTime() -
                                 new Date(a.createdAt).getTime()
                         )
-                        .map((file) => (
+                        .map((project) => (
                             <li
-                                key={file.id}
+                                key={project.id}
                                 className='col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg'>
                                 <Link
-                                    href={`/dashboard/${file.id}`}
+                                    href={`/research/${project.id}`}
                                     className='flex flex-col gap-2'>
                                     <div className='pt-6 px-6 flex w-full items-center justify-between space-x-6'>
                                         <div className='h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500' />
                                         <div className='flex-1 truncate'>
                                             <div className='flex items-center space-x-3'>
                                                 <h3 className='truncate text-lg font-medium text-zinc-900'>
-                                                    {file.name}
+                                                    {project.name}
                                                 </h3>
                                             </div>
                                         </div>
@@ -90,7 +86,7 @@ const UserDashboard = ({subscriptionPlan}: PageProps) => {
                                     <div className='flex items-center gap-2'>
                                         <Plus className='h-4 w-4' />
                                         {format(
-                                            new Date(file.createdAt),
+                                            new Date(project.createdAt),
                                             'MMM dd yyyy'
                                         )}
                                     </div>
@@ -101,12 +97,12 @@ const UserDashboard = ({subscriptionPlan}: PageProps) => {
 
                                     <Button
                                         onClick={() =>
-                                            deleteFile({ id: file.id })
+                                            deleteProject({ projectId: project.id })
                                         }
                                         size='sm'
                                         className='w-full'
                                         variant='destructive'>
-                                        {currentlyDeletingFile === file.id ? (
+                                        {currentlyDeletingProject === project.id ? (
                                             <Loader2 className='h-4 w-4 animate-spin' />
                                         ) : (
                                             <Trash className='h-4 w-4' />
@@ -127,7 +123,7 @@ const UserDashboard = ({subscriptionPlan}: PageProps) => {
                     <h3 className='font-semibold text-xl'>
                         Pretty empty around here...
                     </h3>
-                    <p>Let&apos;s upload your first PDF.</p>
+                    <p>Let&apos;s create your first research project.</p>
                 </div>
             )}
 
@@ -135,4 +131,4 @@ const UserDashboard = ({subscriptionPlan}: PageProps) => {
     );
 };
 
-export default UserDashboard;
+export default UserResearch;

@@ -11,17 +11,16 @@ generator client {
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
-  // relationMode = "prisma"
 }
 
 model User {
-  // id                      String    @id @map("_id")    // matches kinde user id
   id    String @id @map("_id")
-  // kindeId String @unique
   email String @unique
 
-  File    File[]
-  Message Message[]
+  files     File[]
+  messages  Message[]
+  projects  Project[]
+  questions Question[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -37,7 +36,7 @@ enum UploadStatus {
 }
 
 model File {
-  id     String  @id @map("_id") 
+  id     String  @id @map("_id")
   fileId String? @default(cuid())
   name   String
 
@@ -46,11 +45,13 @@ model File {
   url String
   key String
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  User      User?     @relation(fields: [kindeId], references: [id])
-  kindeId   String?
-  messages  Message[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  User       User?     @relation(fields: [kindeId], references: [id])
+  kindeId    String?
+  messages   Message[]
+  projects   Project[] @relation(fields: [projectIds], references: [id])
+  projectIds String[]  @db.ObjectId
 }
 
 model Message {
@@ -59,10 +60,50 @@ model Message {
 
   isUserMessage Boolean // so we can differenciate between user messages and ai messages
 
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  User       User?     @relation(fields: [kindeId], references: [id])
+  kindeId    String?
+  File       File?     @relation(fields: [fileId], references: [id])
+  fileId     String?
+  Project    Project?  @relation(fields: [projectId], references: [id])
+  projectId  String?   @db.ObjectId
+  Question   Question? @relation(fields: [questionId], references: [id])
+  questionId String?   @db.ObjectId
+}
+
+model Project {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  kindeId String
+  User    User?  @relation(fields: [kindeId], references: [id])
+
+  fileIds String[]
+  Files   File[]   @relation(fields: [fileIds], references: [id])
+
+  messages  Message[]
+  questions Question[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  User      User?    @relation(fields: [kindeId], references: [id])
-  kindeId   String?
-  File      File?    @relation(fields: [fileId], references: [id])
-  fileId    String? 
+}
+
+model Question {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  text String
+
+  kindeId String
+  User    User?  @relation(fields: [kindeId], references: [id])
+
+  projectId String?  @db.ObjectId
+  Project   Project? @relation(fields: [projectId], references: [id])
+
+  messages Message[]
+
+  parentQuestionId String?    @db.ObjectId
+  parentQuestion   Question?  @relation("ParentChild", fields: [parentQuestionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subQuestions     Question[] @relation("ParentChild")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

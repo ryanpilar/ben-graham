@@ -49,9 +49,7 @@ const Messages = ({ fileId }: MessagesProps) => {
     }
   )
   // We could use a regular 'map' for this, our returned type would be array array, or [][]. So we flatten the map to get one array
-  const messages = data?.pages.flatMap(
-    (page) => page.messages
-  )
+  const messages = data?.pages.flatMap((page) => page.messages)
 
   // Regarding format, this needs to match our other messages too
   // We want the loading state to be true for the AI, but not for the user
@@ -89,7 +87,7 @@ const Messages = ({ fileId }: MessagesProps) => {
     if (entry?.isIntersecting) {
       fetchNextPage()
     }
-  }, [entry, fetchNextPage]) 
+  }, [entry, fetchNextPage])
 
   return (
     <div className='

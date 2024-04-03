@@ -7,17 +7,12 @@ import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 
 /** ================================|| Chat Context ||===================================
 
-
     This is where we process or messages, where we handle loading and error states
 
     onMutate: 
         Gets sent as soon as we send the message, and is where the optimistic update 
         happens.
-
 **/
-
-
-
 
 type StreamResponse = {
     addMessage: () => void
@@ -262,13 +257,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
             await utils.getFileMessages.invalidate({ fileId })
         },
-
-
-
     })
-
-
-
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setMessage(e.target.value)

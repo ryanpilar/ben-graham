@@ -1,13 +1,12 @@
 
 import React from 'react'
 // Project Imports
-// 3rd Party Imports
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { notFound, redirect } from 'next/navigation';
 import { db } from '@/db';
 import PdfRenderer from '@/components/PdfRenderer';
 import ChatWrapper from '@/components/chat/ChatWrapper';
-// Styles
+// 3rd Party Imports
+import { notFound, redirect } from 'next/navigation';
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 
 /** ================================|| File ||=================================== **/
 
@@ -19,16 +18,13 @@ interface PageProps {
 
 const File = async ({ params }: PageProps) => {
 
-  // retrieve the file id
   const { fileid } = params
-  // Check kinde auth
-
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
   if (!user || !user.id) redirect(`/auth-callback?origin=dashboard/${fileid}`)
 
-  // Make db call
+  // Make DB call
   const file = await db.file.findFirst({
     where: {
       id: fileid,
@@ -41,9 +37,11 @@ const File = async ({ params }: PageProps) => {
   return (
     <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
       <div className='mx-auto w-full max-w-8xl grow lg:flex xl:px-2'>
+
         {/* Left sidebar & main wrapper */}
         <div className='flex-1 xl:flex'>
           <div className='px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6'>
+
             {/* Main area */}
             <PdfRenderer url={file.url} />
           </div>

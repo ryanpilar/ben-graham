@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { useToast } from './ui/use-toast';
 import { trpc } from '@/app/_trpc/client';
-import { useUploadThing } from '@/lib/uploadthing';
+import { useUploadThing } from '@/lib/uploadthing/clientHelpers';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 
 // 3rd Party Imports
@@ -39,6 +39,7 @@ const UploadDropzone = ({ isSubscribed, }: { isSubscribed: boolean }) => {
         setUploadProgress(0)
 
         const interval = setInterval(() => {
+
             setUploadProgress((prevValue) => {
                 if (prevValue >= 95) {
                     clearInterval(interval)
@@ -46,7 +47,7 @@ const UploadDropzone = ({ isSubscribed, }: { isSubscribed: boolean }) => {
                 }
                 return prevValue + 5
             })
-        }, 750)
+        }, 950)
 
         return interval
     }
@@ -189,7 +190,7 @@ const UploadButton = ({ isSubscribed, }: { isSubscribed: boolean }) => {
             <DialogContent>
                 <UploadDropzone isSubscribed={isSubscribed} />
             </DialogContent>
-            
+
         </Dialog>
     );
 };

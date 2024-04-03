@@ -24,15 +24,13 @@ interface UserAccountNavProps {
   name: string
   imageUrl: string
 }
-
 const UserAccountNav = async ({
   email,
   imageUrl,
   name,
 }: UserAccountNavProps) => {
-    
+
   const subscriptionPlan = await getUserSubscriptionPlan()
-  
 
   return (
     <DropdownMenu>
@@ -98,8 +96,9 @@ const UserAccountNav = async ({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem className='cursor-pointer'>
-            <LogoutLink>Log out</LogoutLink>
+          <LogoutLink>Log out</LogoutLink>
         </DropdownMenuItem>
+
       </DropdownMenuContent>
     </DropdownMenu>
   )

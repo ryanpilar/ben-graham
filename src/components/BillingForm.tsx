@@ -1,21 +1,19 @@
 'use client'
 
 // Project Imports
-// 3rd Party Imports
-// Styles
-
-import { getUserSubscriptionPlan } from '@/lib/stripe'
-import { useToast } from './ui/use-toast'
-import { trpc } from '@/app/_trpc/client'
-import MaxWidthWrapper from './MaxWidthWrapper'
 import {
     Card,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
+    CardDescription,
 } from './ui/card'
 import { Button } from './ui/button'
+import { useToast } from './ui/use-toast'
+import { trpc } from '@/app/_trpc/client'
+import MaxWidthWrapper from './MaxWidthWrapper'
+import { getUserSubscriptionPlan } from '@/lib/stripe'
+// 3rd Party Imports
 import { Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -31,17 +29,17 @@ const BillingForm = ({ subscriptionPlan, }: BillingFormProps) => {
 
     // This is the alternative page to the pricing page that will allow us to do a similar thing, which is buy subscriptions
     const { mutate: createStripeSession, isLoading } = trpc.createStripeSession.useMutation({
-            onSuccess: ({ url }) => {
-                if (url) window.location.href = url
-                if (!url) {
-                    toast({
-                        title: 'There was a problem...',
-                        description: 'Please try again in a moment',
-                        variant: 'destructive',
-                    })
-                }
-            },
-        })
+        onSuccess: ({ url }) => {
+            if (url) window.location.href = url
+            if (!url) {
+                toast({
+                    title: 'There was a problem...',
+                    description: 'Please try again in a moment',
+                    variant: 'destructive',
+                })
+            }
+        },
+    })
 
     return (
         <MaxWidthWrapper className='max-w-5xl'>
@@ -61,7 +59,7 @@ const BillingForm = ({ subscriptionPlan, }: BillingFormProps) => {
                     </CardHeader>
 
                     <CardFooter className='flex flex-col items-start space-y-2 md:flex-row md:justify-between md:space-x-0'>
-                        
+
                         <Button type='submit'>
                             {isLoading ? (
                                 <Loader2 className='mr-4 h-4 w-4 animate-spin' />
@@ -75,7 +73,7 @@ const BillingForm = ({ subscriptionPlan, }: BillingFormProps) => {
                             <p className='rounded-full text-xs font-medium'>
                                 {subscriptionPlan.isCanceled
                                     ? 'Your plan will be canceled on '
-                                    : 'Your plan renews on'}
+                                    : 'Your plan renews on '}
                                 {format(
                                     subscriptionPlan.stripeCurrentPeriodEnd!,
                                     'dd.MM.yyyy'

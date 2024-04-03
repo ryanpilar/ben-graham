@@ -1,56 +1,42 @@
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-// import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
 import { OpenAIEmbeddings } from "@langchain/openai";
-
-
-import { pinecone } from '@/lib/pinecone'
-// import { PineconeStore } from 'langchain/vectorstores/pinecone'
+import { pinecone } from '@/lib/pinecone/core'
 import { PineconeStore } from "@langchain/pinecone";
-
-import { HumanMessage } from 'langchain/schema';
-
-
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
 import { getUserSubscriptionPlan } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
-const f = createUploadthing();
 
-/** ================================|| Core ||=================================== 
+/** ======================================|| Core ||========================================= 
+ 
     -   the middleware will run when someone has requested to upload a file from the client
     -   onUploadComplete will run when the upload is successful 
     -   only authenticated user can upload files
+
+    We can pass Kinde and Stripe data along as metadata to other functions like onUploadComplete 
+    and now we, inside those functions, we can see if the user has paid or not     
+
 **/
+
+// Initialize upload handler
+const f = createUploadthing();
+
+// Middleware to ensure only authenticated users can upload files
 const middleware = async () => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
     if (!user || !user.id) throw new Error('Unauthorized')
 
-
-    // We cannot check the subscription plan from the incoming request, because in this part of the app
-    // will not be called from any client. However the middle ware does, and can pass it along as metadata
-    // to other functions like onUploadComplete
-    // and now we can see if the user has paid or not
+    // Fetch user's subscription plan
     const subscriptionPlan = await getUserSubscriptionPlan()
-
-    return { subscriptionPlan, kindeId: user.id } // whatever we return here, will end up below as metadata
+    // Pass user and subscription plan info as metadata
+    return { subscriptionPlan, kindeId: user.id }
 }
 
+// Handles post-upload processing, including file indexing and status updates
 const onUploadComplete = async ({ metadata, file }: {
-
-    /**
-        ReturnType is another utility type in TypeScript that takes a function type and produces its return 
-        type. So, ReturnType<typeof middleware> gives you the type of the value that middleware returns. 
-        Since middleware is an async function, it returns a Promise. The actual type inside the promise
-     
-        We need to declare types ourselves, because these are not automatically inferred by uploadthing
-        In the context of your code, Awaited is used to represent the type of the resolved value of the promise 
-        returned by the middleware function. It's a way to tell TypeScript, "Whatever type comes out of this 
-        promise, that's what we're dealing with.
-     
-    */
     metadata: Awaited<ReturnType<typeof middleware>>
     file: {
         key: string
@@ -58,51 +44,34 @@ const onUploadComplete = async ({ metadata, file }: {
         url: string
     }
 }) => {
+    // Create a file record in the database
     const createdFile = await db.file.create({
         data: {
-            id: file.key, // Note: this is the uploadthing key/id
+            id: file.key,                       // Note: this is the uploadthing key/id
             key: file.key,
             name: file.name,
             kindeId: metadata.kindeId,
-            // Sometimes uploadthing file.url timesout. So there is a workaround via S3
-            // This is just as good as the upload thing url because its a wrapper over amazon
-            // url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+
             url: `https://utfs.io/f/${file.key}`,
             uploadStatus: 'PROCESSING',
         }
     })
-    /**
-        The basis to be able to answer a questions here, is before hand, indexing the entire pdf file, 
-        so now we can search for just the parts of the pdf file, so now we can just search for the parts
-        of the pdf file that are closest to the question or the message that the user has sent.
-        When we upload a file, right away we are going to index it, so when we ask a question later, it
-        is already indexed and we can then search for the parts that are most similar.
-        We are going to index using a vector database, Pinecone.
-
-        Pinecone - we create an index, where we are going to store our pdf vectors     
-    */    
 
     try {
-        // Now we have the url in memory, and we can generate some pages that we want to
-        // index in our vector store from them
-        // first we need them as a blob object
+        // Fetch the uploaded file
         const response = await fetch(`https://utfs.io/f/${file.key}`)
-
         const blob = await response.blob()
 
-        // load the pdf into memory
+        // Load the pdf into memory
         const loader = new PDFLoader(blob)
 
-        // extract page level text
+        // Extract page level text
         const pageLevelDocs = await loader.load()
-        // later we can check if you are on the pro or the free plan
         const pagesAmt = pageLevelDocs.length
 
-        // Now we need to know the plan of the user:
+        // Check if the user's upload exceeds their plan limits
         const { subscriptionPlan } = metadata
         const { isSubscribed } = subscriptionPlan
-
-        // Find out if the user is trying to upload more pages than they should
         const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Plus')!.pagesPerPdf
         const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Free')!.pagesPerPdf
 
@@ -110,7 +79,7 @@ const onUploadComplete = async ({ metadata, file }: {
         if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
             await db.file.update({
                 data: {
-                    uploadStatus: 'FAILED', // as to inform the user that something went wrong
+                    uploadStatus: 'FAILED', 
                 },
                 where: {
                     id: createdFile.id,
@@ -118,28 +87,22 @@ const onUploadComplete = async ({ metadata, file }: {
             })
         }
 
-        // vectorize and index entire document
+        // Vectorize and index the document
         const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
-
-        // take the text and turn it into a vectors
         const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
 
-        //  In the latest versions of LangChain, the chat history should be passed as an array of 
-        //  HumanMessage objects, not as an array of strings. The HumanMessage object is a class 
-        //  in LangChain that represents a human message in a conversation.
+        
         await PineconeStore.fromDocuments(
             pageLevelDocs,
             embeddings,                         //   OpenAi embedding tell langchain how to generate the vectors from the text
             {
                 pineconeIndex,
-                namespace: createdFile.id,      //  We can save a vector to certain namespaces, in this case fileId, so when 
-                // maxConcurrency: 5,              // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
-                //  we query by file id we can get all the vectors for that certain file
+                namespace: createdFile.id,      //  We can save a vector to certain namespaces, in this case fileId 
             }
         )
 
 
-        // Update the database file to indicated a 'successful' upload state
+        // Update upload status to 'SUCCESS'
         await db.file.update({
             data: {
                 uploadStatus: 'SUCCESS'
@@ -163,7 +126,7 @@ const onUploadComplete = async ({ metadata, file }: {
         })
     }
 }
-
+// Define routers for different plan uploaders
 export const ourFileRouter = {
 
     pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
@@ -178,6 +141,4 @@ export const ourFileRouter = {
 
 } satisfies FileRouter;
 
-// Uploadthing needs to know this type exported below. You can't just infer this type in the pkg.
-// therefore it expects on you to write this hook, but uploadthing supplies the snippet
 export type OurFileRouter = typeof ourFileRouter;
