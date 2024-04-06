@@ -12,6 +12,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { trpc } from '@/app/_trpc/client';
 import ProjectQuestions from '@/components/ProjectQuestions';
+import ProjectFiles from '@/components/ProjectFiles';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -23,27 +24,24 @@ interface PageProps {
 
 const Project = async ({ params }: PageProps) => {
 
-    const { projectid } = params
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
+    // Redirect users that are not logged in
     if (!user || !user.id) redirect(`/auth-callback?origin=dashboard/${projectid}`)
+    
+    const subscriptionPlan = await getUserSubscriptionPlan()
 
-    // Make DB call
+    
+    
+    const { projectid } = params
     const project = await db.project.findFirst({
         where: {
             id: projectid,
             kindeId: user.id
         }
     })
-
     if (!project) notFound()
-
-
-
-    // Find Files
-
-    const subscriptionPlan = await getUserSubscriptionPlan()
 
     return (
         <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
@@ -62,7 +60,7 @@ const Project = async ({ params }: PageProps) => {
                             </div>
 
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
-                            {/* <ProjectFiles projectId={projectid} subscriptionPlan={subscriptionPlan}/> */}
+                            <ProjectFiles projectId={projectid} subscriptionPlan={subscriptionPlan}/>
 
                             {/* Display all research questions */}
 

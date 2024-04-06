@@ -64,15 +64,16 @@ export const appRouter = router({
             if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
             return file
         }),
-    getUserFiles: privateProcedure.query(async ({ ctx }) => {
-        const { user, kindeId } = ctx
+    getUserFiles: privateProcedure
+        .query(async ({ ctx }) => {
+            const { user, kindeId } = ctx
 
-        return await db.file.findMany({
-            where: {
-                kindeId: kindeId
-            }
-        })
-    }),
+            return await db.file.findMany({
+                where: {
+                    kindeId: kindeId
+                }
+            })
+        }),
     deleteFile: privateProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async ({ ctx, input }) => {
@@ -192,16 +193,17 @@ export const appRouter = router({
 
             return project;
         }),
-    getUserProjects: privateProcedure.query(async ({ ctx }) => {
-        const { kindeId } = ctx;
-        if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+    getUserProjects: privateProcedure
+        .query(async ({ ctx }) => {
+            const { kindeId } = ctx;
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-        const projects = await db.project.findMany({
-            where: { kindeId },
-        });
+            const projects = await db.project.findMany({
+                where: { kindeId },
+            });
 
-        return projects;
-    }),
+            return projects;
+        }),
     deleteProject: privateProcedure
         .input(z.object({ projectId: z.string() }))
         .mutation(async ({ ctx, input }) => {
@@ -289,7 +291,27 @@ export const appRouter = router({
                 where: { id: questionId },
             });
         }),
+    getProjectFiles: privateProcedure
+        .input(z.object({ projectId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const { kindeId } = ctx
 
+            const allFiles = await db.file.findMany({
+                where: {
+                    kindeId: kindeId,
+                },
+            })
+
+            if (!allFiles) throw new TRPCError({ code: 'NOT_FOUND' })
+
+            const filesWithProjectId = allFiles.filter(file => 
+                file.projectIds && file.projectIds.includes(input.projectId)
+            );
+    
+            if (!filesWithProjectId.length) throw new TRPCError({ code: 'NOT_FOUND' });
+            return filesWithProjectId;
+            
+        }),
 
     // PROTECTED ROUTES - STRIPE
     createStripeSession: privateProcedure.mutation(

@@ -19,6 +19,8 @@ const Dashboard = async () => {
     // Redirect users that are not logged in
     if (!user || !user.id) redirect('/auth-callback?origin=dashboard') // origin=dashboard so user can be redirected back to dashboard after auth
     
+    const subscriptionPlan = await getUserSubscriptionPlan()    
+
     const dbUser = await db.user.findFirst({
         where: {
             id: user.id
@@ -26,11 +28,7 @@ const Dashboard = async () => {
     })
 
     if (!dbUser) redirect('/auth-callback?origin=dashboard')
-
-    const subscriptionPlan = await getUserSubscriptionPlan()
-
-    console.log('From DASHBOARD, subscriptionPlan', subscriptionPlan);    
-    
+   
     return (
         <>
             <UserDashboard subscriptionPlan={subscriptionPlan} />

@@ -79,7 +79,7 @@ const onUploadComplete = async ({ metadata, file }: {
         if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
             await db.file.update({
                 data: {
-                    uploadStatus: 'FAILED', 
+                    uploadStatus: 'FAILED',
                 },
                 where: {
                     id: createdFile.id,
@@ -91,7 +91,7 @@ const onUploadComplete = async ({ metadata, file }: {
         const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
         const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
 
-        
+
         await PineconeStore.fromDocuments(
             pageLevelDocs,
             embeddings,                         //   OpenAi embedding tell langchain how to generate the vectors from the text

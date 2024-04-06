@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 
 // Project Imports
 import { Button } from './ui/button';
-import UploadButton from './UploadButton';
+import AddFileButton from './AddFile';
 import { trpc } from '@/app/_trpc/client';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 

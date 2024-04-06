@@ -62,15 +62,12 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
         //  needs an extra step to link it to the form, hence the resolver
     })
 
-    console.log(errors)
-
     const handlePageSubmit = ({
         page,
     }: TCustomPageValidator) => {
         setCurrPage(Number(page))
         setValue('page', String(page))
     }
-
 
     const { toast } = useToast()
     //  Note the location where the 'ref' is assigned. Since you synced 
