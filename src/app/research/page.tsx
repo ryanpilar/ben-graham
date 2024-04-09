@@ -26,7 +26,7 @@ const Research = async () => {
             id: user.id
         }
     })
-    if (!dbUser) redirect('/auth-callback?origin=dashboard')
+    if (!dbUser) redirect('/auth-callback?origin=research')
     const subscriptionPlan = await getUserSubscriptionPlan()
 
     return (

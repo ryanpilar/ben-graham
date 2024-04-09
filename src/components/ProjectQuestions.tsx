@@ -23,7 +23,6 @@ interface QuestionProps {
   }
   
 const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
-    
 
     // We need to know exactly what file is currently being deleted
     const [currentlyDeletingQuestion, setCurrentlyDeletingQuestion] = useState<string | null>(null)
@@ -58,12 +57,7 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
             {/* Display all research projects */}
             {questions && questions?.length !== 0 ? (
                 <ul className='mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3'>
-                    {questions
-                        // .sort(
-                        //     (a, b) =>
-                        //         new Date(b.createdAt).getTime() -
-                        //         new Date(a.createdAt).getTime()
-                        // )
+                    {questions                        
                         .map((question) => (
                             <li
                                 key={question.id}

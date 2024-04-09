@@ -29,8 +29,8 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
         if (type === 'project' && params.projectid) {
             return Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
-        } else if (type === 'question' && params.questionId) {
-            return Array.isArray(params.questionId) ? params.questionId[0] : params.questionId;
+        } else if (type === 'question' && params.questionid) {
+            return Array.isArray(params.questionid) ? params.questionid[0] : params.questionid;
         }
         return '#';
     };
