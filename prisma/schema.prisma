@@ -18,9 +18,10 @@ model User {
   email String @unique
 
   files     File[]
-  messages  Message[]
   projects  Project[]
   questions Question[]
+  messages  Message[]
+  // contexts  Context[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -36,74 +37,99 @@ enum UploadStatus {
 }
 
 model File {
-  id     String  @id @map("_id")
-  fileId String? @default(cuid())
-  name   String
-
+  id           String       @id @map("_id")
+  fileId       String?      @default(cuid())
+  name         String
   uploadStatus UploadStatus @default(PENDING)
+  url          String
+  key          String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  url String
-  key String
+  User        User       @relation(fields: [kindeId], references: [id])
+  kindeId     String
+  projects    Project[]  @relation(fields: [projectIds], references: [id])
+  projectIds  String[]   @db.ObjectId
+  questions   Question[] @relation(fields: [questionIds], references: [id])
+  questionIds String[]   @db.ObjectId
+  messages    Message[]
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  User       User?     @relation(fields: [kindeId], references: [id])
-  kindeId    String?
-  messages   Message[]
-  projects   Project[] @relation(fields: [projectIds], references: [id])
-  projectIds String[]  @db.ObjectId
+  // Context   Context @relation(fields: [contextId], references: [id])
+  // contextId String  @db.ObjectId
 }
 
 model Message {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  text String
-
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  text          String
   isUserMessage Boolean // so we can differenciate between user messages and ai messages
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  User       User?     @relation(fields: [kindeId], references: [id])
-  kindeId    String?
+  User       User      @relation(fields: [kindeId], references: [id])
+  kindeId    String
   File       File?     @relation(fields: [fileId], references: [id])
   fileId     String?
   Project    Project?  @relation(fields: [projectId], references: [id])
   projectId  String?   @db.ObjectId
   Question   Question? @relation(fields: [questionId], references: [id])
   questionId String?   @db.ObjectId
+  // Context    Context   @relation(fields: [contextId], references: [id])
+  // contextId  String    @db.ObjectId
 }
 
 model Project {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  kindeId String
-  User    User?  @relation(fields: [kindeId], references: [id])
-
-  fileIds String[]
-  Files   File[]   @relation(fields: [fileIds], references: [id])
-
-  messages  Message[]
-  questions Question[]
-
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  kindeId   String
+  User      User      @relation(fields: [kindeId], references: [id])
+  fileIds   String[]
+  Files     File[]     @relation(fields: [fileIds], references: [id])
+  questions Question[]
+  messages  Message[]
+
+  // Context   Context  @relation(fields: [contextId], references: [id])
+  // contextId String   @db.ObjectId
 }
 
 model Question {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  text String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  kindeId String
-  User    User?  @relation(fields: [kindeId], references: [id])
-
-  projectId String?  @db.ObjectId
-  Project   Project? @relation(fields: [projectId], references: [id])
-
-  messages Message[]
-
+  kindeId          String
+  User             User?      @relation(fields: [kindeId], references: [id])
+  File             File[]     @relation(fields: [fileId], references: [id])
+  fileId           String[]
+  projectId        String?    @db.ObjectId
+  Project          Project?   @relation(fields: [projectId], references: [id])
   parentQuestionId String?    @db.ObjectId
   parentQuestion   Question?  @relation("ParentChild", fields: [parentQuestionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subQuestions     Question[] @relation("ParentChild")
+  messages         Message[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Context   Context  @relation(fields: [contextId], references: [id])
+  // contextId String   @db.ObjectId
 }
+
+// enum ContextType {
+//   user
+//   project
+//   question
+//   message
+//   file
+// }
+
+// model Context {
+//   id        String      @id @default(auto()) @map("_id") @db.ObjectId
+//   kindeId   String
+//   user      User        @relation(fields: [kindeId], references: [id])
+//   type      ContextType
+//   projects  Project[]
+//   questions Question[]
+//   messages  Message[]
+//   files     File[]
+// }

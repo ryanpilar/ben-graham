@@ -76,7 +76,7 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
                 description: 'You have added a new project.',
                 variant: 'default',
             });
-            router.push(`/research/${project.id}`)
+            router.push(`/research/project/${project.id}`)
                         
         },
         onError: () => {

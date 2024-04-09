@@ -9,36 +9,24 @@ import { buttonVariants } from "./ui/button";
 import { UploadedFileProps } from "./UploadFileDropzone";
 import ChooseFileContextForm from "./ChooseFileContextForm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-]
+import { trpcServer } from "@/trpc/trpc-caller";
+import { trpc } from "@/app/_trpc/client";
+import { Dispatch, SetStateAction, Suspense } from "react";
+import Skeleton from "react-loading-skeleton";
 
 /** ================================|| Choose File Context ||=================================== **/
 
 interface ChooseFileContextProps {
-  uploadedFile: UploadedFileProps
+  uploadedFile?: UploadedFileProps | {}
+  onClose: Dispatch<SetStateAction<boolean>>
 }
-const ChooseFileContext = ({ uploadedFile }: ChooseFileContextProps) => {
+const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) => {
+
+
+  
+
+  // projectId, look up project and get a list of files for that id
+  // questionId, look up question and get a list of files for that id
 
   return (
     <>
@@ -49,14 +37,17 @@ const ChooseFileContext = ({ uploadedFile }: ChooseFileContextProps) => {
             <div className='flex flex-col items-center justify-center pt-6 pb-1'>
 
               <FileCheck2 className='h-6 w-6 mb-3' />
-              <p className='text-sm text-zinc-700'>
-                <span className='font-semibold text-md'>
-                  Upload Complete: <Link className={cn(buttonVariants({
 
-                    variant: 'linkHover1',
-                  }), 'pl-2')} href={uploadedFile.path}>{uploadedFile.fileName}</Link>
-                </span>
-              </p>
+              {uploadedFile ?
+                <p className='text-sm text-zinc-700'>
+                  <span className='font-semibold text-md'>
+                    Upload Complete: <Link className={cn(buttonVariants({
+                      variant: 'linkHover1',
+                    }), 'pl-2')} href={uploadedFile.path}>{uploadedFile.fileName}</Link>
+                  </span>
+                </p>
+                : null}
+
 
             </div>
 
@@ -67,7 +58,8 @@ const ChooseFileContext = ({ uploadedFile }: ChooseFileContextProps) => {
                   <section className="flex flex-wrap gap-x-2">
                     <Separator className='mb-5' />
                     <div>
-                      Make this file more useful and add it to a project or question.
+
+                    Attach a file, or several, to a project, multiple projects, or questions.
                       <Tooltip delayDuration={300}>
                         <TooltipTrigger className='cursor-default ml-1.5 pt-1'>
                           <HelpCircle className='h-4 w-4 text-zinc-500 hover:text-blue-500' />
@@ -80,7 +72,9 @@ const ChooseFileContext = ({ uploadedFile }: ChooseFileContextProps) => {
                   </section>
 
                   <section className="flex flex-row flex-wrap w-full justify-center gap-y-2 py-3">
-                    <ChooseFileContextForm uploadedFile={uploadedFile} />
+
+                    <ChooseFileContextForm uploadedFile={uploadedFile} onClose={onClose}  />
+
                   </section>
 
                 </div>

@@ -10,5 +10,3 @@ import { createTRPCReact } from "@trpc/react-query"
 
 // This is pretty identicle to delcaring and api route like you would in next13, just with the added benefit of type safety for your backend
 export const trpc = createTRPCReact<AppRouter>({})
-
-export const trpcServer = createTRPCReact<AppRouter>({});

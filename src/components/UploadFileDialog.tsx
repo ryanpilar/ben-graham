@@ -8,9 +8,10 @@ import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 
 interface UploadFileDialogProps {
     isSubscribed: boolean
+    label: string
     children: ReactNode
 }
-const UploadFileDialog = ({ isSubscribed, children }: UploadFileDialogProps) => {
+const UploadFileDialog = ({ isSubscribed, label, children }: UploadFileDialogProps) => {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
@@ -28,7 +29,7 @@ const UploadFileDialog = ({ isSubscribed, children }: UploadFileDialogProps) => 
             {/* Note:   We need to use 'asChild' if you want to use a custom button, 
                         b/c a DialogTrigger, if not changed with asChild, is a button by default */}
             <DialogTrigger onClick={() => setIsOpen(true)} asChild>
-                <Button>Upload File</Button>
+                <Button>{label}</Button>
             </DialogTrigger>
 
             {/* Note:   Tooltip is focused on and opens when dialog renders. 
@@ -36,6 +37,7 @@ const UploadFileDialog = ({ isSubscribed, children }: UploadFileDialogProps) => 
             <DialogContent onOpenAutoFocus={(event) => { event.preventDefault() }}>
                 {children}
             </DialogContent>
+            
         </Dialog>
     );
 };

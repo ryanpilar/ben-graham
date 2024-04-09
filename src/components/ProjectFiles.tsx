@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 
 // Project Imports
 import { Button } from './ui/button';
-import AddFileButton from './AddFile';
+import AddFile from './AddFile';
 import { trpc } from '@/app/_trpc/client';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 
@@ -13,24 +13,23 @@ import Link from 'next/link';
 import { format } from 'date-fns'
 import Skeleton from "react-loading-skeleton"
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
-import FileComboBox from './ChooseFileContext';
 
 /** ================================|| Project Files ||=================================== **/
 
 interface ProjectFilesProps {
     subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
     projectId: string
-  }
-  
-const ProjectFiles = ({subscriptionPlan, projectId}: ProjectFilesProps) => {
+}
+
+const ProjectFiles = ({ subscriptionPlan, projectId }: ProjectFilesProps) => {
 
     // We need to know exactly what file is currently being deleted
     const [currentlyRemovingFile, setCurrentlyRemovingFile] = useState<string | null>(null)
 
     // If we invalidate the data, we force an automatic refresh
-    const utils = trpc.useUtils()          
+    const utils = trpc.useUtils()
 
-    const { data: files, isLoading } = trpc.getProjectFiles.useQuery({projectId})     // automatically gets queried on page load
+    const { data: files, isLoading } = trpc.getProjectFiles.useQuery({ projectId })     // automatically gets queried on page load
 
     // const { mutate: removeFile } = trpc.removeFile.useMutation({       
     //     onSuccess() {
@@ -49,11 +48,17 @@ const ProjectFiles = ({subscriptionPlan, projectId}: ProjectFilesProps) => {
         <main className='mx-auto max-w-7xl md:p-10'>
             <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
                 <h1 className='mb-3 font-bold text-5xl text-gray-900'>
-                    My Files
+                    Attached Files
                 </h1>
 
-                <AddFileButton isSubscribed={subscriptionPlan.isSubscribed} />
-               
+                <Suspense fallback={<Skeleton count={1} />}>
+                    <AddFile isSubscribed={subscriptionPlan.isSubscribed} label='Upload File' skipUpload={true} />
+                </Suspense>
+                {/*
+                    label
+                    skipFileUpload
+
+                              */}
 
             </div>
 
@@ -99,9 +104,9 @@ const ProjectFiles = ({subscriptionPlan, projectId}: ProjectFilesProps) => {
                                     </div>
 
                                     <Button
-                                        onClick={() =>
-                                            deleteFile({ id: file.id })
-                                        }
+                                        // onClick={() =>
+                                        //     deleteFile({ id: file.id })
+                                        // }
                                         size='sm'
                                         className='w-full'
                                         variant='destructive'>

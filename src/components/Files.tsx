@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
 // Project Imports
 import { Button } from './ui/button';
@@ -13,70 +13,74 @@ import Link from 'next/link';
 import { format } from 'date-fns'
 import Skeleton from "react-loading-skeleton"
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
-import AddProjectButton from './AddProjectButton';
 
-/** ================================|| Project Questions ||=================================== **/
+import { useParams } from 'next/navigation';
 
-interface QuestionProps {
-    subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
-    projectId: string
-  }
-  
-const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
-    
+/** =================================|| Files ||==================================== **/
+
+interface FilesProps {
+    subscriptionPlan?: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
+    type: "all" | "project" | "question"
+}
+const Files = ({ type }: FilesProps) => {
+
+    const params = useParams()
+
+    const getKey = () => {
+        if (type === 'project' && params.projectid) {
+            return Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
+        } else if (type === 'question' && params.questionId) {
+            return Array.isArray(params.questionId) ? params.questionId[0] : params.questionId;
+        }
+        return '#'; 
+    };
 
     // We need to know exactly what file is currently being deleted
-    const [currentlyDeletingQuestion, setCurrentlyDeletingQuestion] = useState<string | null>(null)
+    const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
 
     // If we invalidate the data, we force an automatic refresh
     const utils = trpc.useUtils()          
 
-    // automatically gets queried on page load
-    const { data: questions, isLoading } = trpc.getProjectQuestions.useQuery({ projectId })     
+    const { data: files, isLoading } = trpc.getFiles.useQuery({type: type, key:getKey()})
 
-    const { mutate: deleteQuestion } = trpc.deleteQuestion.useMutation({       
+    const { mutate: deleteFile } = trpc.deleteFile.useMutation({
         onSuccess() {
-            utils.getProjectQuestions.invalidate()
+            utils.getUserFiles.invalidate()
         },
-        onMutate({ questionId }) {    
-            setCurrentlyDeletingQuestion(questionId)
+        onMutate({ id }) {    // Callback right away when the button is clicked
+            setCurrentlyDeletingFile(id)
         },
         onSettled() {
             // Whether there is an error or not, the loading state should stop
-            setCurrentlyDeletingQuestion(null) 
+            setCurrentlyDeletingFile(null)
         }
     })
 
     return (
-        <main className='mx-auto max-w-7xl md:p-10'>
-            <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
-                <h1 className='mb-3 font-bold text-5xl text-gray-900'>
-                    Research Questions
-                </h1>
-            </div>
+        <>
 
-            {/* Display all research projects */}
-            {questions && questions?.length !== 0 ? (
+            {/* DISPLAY ALL USER FILES */}
+            {files && files?.length !== 0 ? (
                 <ul className='mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3'>
-                    {questions
-                        // .sort(
-                        //     (a, b) =>
-                        //         new Date(b.createdAt).getTime() -
-                        //         new Date(a.createdAt).getTime()
-                        // )
-                        .map((question) => (
+                    {files
+                        .sort(
+                            (a, b) =>
+                                new Date(b.createdAt).getTime() -
+                                new Date(a.createdAt).getTime()
+                        )
+                        .map((file) => (
                             <li
-                                key={question.id}
+                                key={file.id}
                                 className='col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg'>
                                 <Link
-                                    href={`/research/question/${question.id}`}
+                                    href={`/dashboard/${file.id}`}
                                     className='flex flex-col gap-2'>
                                     <div className='pt-6 px-6 flex w-full items-center justify-between space-x-6'>
                                         <div className='h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500' />
                                         <div className='flex-1 truncate'>
                                             <div className='flex items-center space-x-3'>
                                                 <h3 className='truncate text-lg font-medium text-zinc-900'>
-                                                    {question.text}
+                                                    {file.name}
                                                 </h3>
                                             </div>
                                         </div>
@@ -87,7 +91,7 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
                                     <div className='flex items-center gap-2'>
                                         <Plus className='h-4 w-4' />
                                         {format(
-                                            new Date(question.createdAt),
+                                            new Date(file.createdAt),
                                             'MMM dd yyyy'
                                         )}
                                     </div>
@@ -98,19 +102,18 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
 
                                     <Button
                                         onClick={() =>
-                                            deleteQuestion({ questionId: question.id })
+                                            deleteFile({ id: file.id })
                                         }
                                         size='sm'
                                         className='w-full'
                                         variant='destructive'>
-                                        {currentlyDeletingQuestion === question.id ? (
+                                        {currentlyDeletingFile === file.id ? (
                                             <Loader2 className='h-4 w-4 animate-spin' />
                                         ) : (
                                             <Trash className='h-4 w-4' />
                                         )}
                                     </Button>
                                 </div>
-
                             </li>
                         ))}
                 </ul>
@@ -124,12 +127,12 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
                     <h3 className='font-semibold text-xl'>
                         Pretty empty around here...
                     </h3>
-                    <p>Let&apos;s create your first question.</p>
+                    <p>Let&apos;s upload your first PDF.</p>
                 </div>
             )}
 
-        </main>
+        </>
     );
 };
 
-export default ProjectQuestions;
+export default Files;

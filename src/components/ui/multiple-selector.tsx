@@ -383,7 +383,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     }}
                     onClick={() => handleUnselect(option)}
                   >
-                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    <X className="h-3 w-3 text-muted hover:text-foreground" />
                   </button>
                 </Badge>
               );
@@ -452,7 +452,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                 'cursor-pointer',
                                 option.disable && 'cursor-default text-muted-foreground',
                               )}
-                            >
+                            >                              
                               {option.label}
                             </CommandItem>
                           );

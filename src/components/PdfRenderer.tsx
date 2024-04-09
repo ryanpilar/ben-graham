@@ -1,5 +1,5 @@
 "use client"
-import { ChevronDown, ChevronUp, Expand, Loader2, RotateCcw, RotateCw, Search } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronUp, Expand, Loader2, RotateCcw, RotateCw, Search } from 'lucide-react';
 import React, { useState } from 'react'
 // Project Imports
 import PDFFullscreen from './PDFFullscreen';
@@ -20,6 +20,9 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 
+import { useRouter } from 'next/navigation'
+import GoBack from './GoBack';
+
 
 /** ================================|| Pdf Renderer ||=================================== **/
 
@@ -28,6 +31,7 @@ interface PdfRendererProps {
 }
 
 const PdfRenderer = ({ url }: PdfRendererProps) => {
+
 
     const [numPages, setNumPages] = useState<number>()
     const [currPage, setCurrPage] = useState<number>(1)

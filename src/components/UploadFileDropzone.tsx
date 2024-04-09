@@ -1,34 +1,40 @@
 "use client";
-import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react';
+import React, { Dispatch, ReactNode, SetStateAction, Suspense, useState } from 'react';
 import { Progress } from './ui/progress';
 import { useToast } from './ui/use-toast';
 import { trpc } from '@/app/_trpc/client';
 import { useUploadThing } from '@/lib/uploadthing/clientHelpers';
 import Dropzone from 'react-dropzone';
-import { useRouter } from 'next/navigation';
 import { FileCheck2, File, Loader2, Cloud } from 'lucide-react';
 import ChooseFileContext from './ChooseFileContext';
+import Skeleton from "react-loading-skeleton"
+
 
 /** ================================|| Upload Dropzone ||=================================== **/
 
 export interface UploadedFileProps {
     fileName: string;
     path: string;
-  }
+    id: string;
+}
 
 export interface UploadDropzoneProps {
     isSubscribed: boolean
     children?: ReactNode
+    skipUpload?: boolean
+    onClose: Dispatch<SetStateAction<boolean>>
 }
 
-const UploadFileDropzone = ({ isSubscribed, children }: UploadDropzoneProps) => {
+const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: UploadDropzoneProps) => {
+
+    
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [uploadProgress, setUploadProgress] = useState<number>(0); // For the determinate progress bar
-    const [isChoosingContext, setIsChoosingContext] = useState(true);
+    const [isChoosingContext, setIsChoosingContext] = useState(skipUpload);
     const { toast } = useToast();
 
-    const [uploadedFile, setUploadedFile] = useState<UploadedFileProps>({ fileName: 'demo.pdf', path: '#' })
+    const [uploadedFile, setUploadedFile] = useState<UploadedFileProps | {} >({})
 
     // Depending on if the user is on the free plan or the plus plan, choose the appropriate uploader
     const { startUpload } = useUploadThing(isSubscribed ? 'plusPlanUploader' : 'freePlanUploader');
@@ -36,19 +42,25 @@ const UploadFileDropzone = ({ isSubscribed, children }: UploadDropzoneProps) => 
     const { mutate: startPolling } = trpc.getFile.useMutation({
 
         onSuccess: (file) => {
+
             // Now ask the user to choose what projects or questions they would like to add there file too
-            setIsChoosingContext(true);
             setUploadedFile({
                 fileName: file.name,
-                path: `/dashboard/${file.id}`
+                path: `/dashboard/${file.id}`,
+                id: file.id
             })
+
+            setIsChoosingContext(true);
+
             // router.push(`/dashboard/${file.id}`)
         },
+        
         // Retry indefinitely until we get our file
         retry: true,
         retryDelay: 500
-    });
+    });  
 
+    
     const startSimulateProgress = () => {
         setUploadProgress(0);
 
@@ -66,6 +78,7 @@ const UploadFileDropzone = ({ isSubscribed, children }: UploadDropzoneProps) => 
     };
     return (
         <div className='flex items-center justify-center border min-h-64 m-4 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100'>
+
             {!isChoosingContext ? (
                 <Dropzone
                     multiple={false}
@@ -169,11 +182,12 @@ const UploadFileDropzone = ({ isSubscribed, children }: UploadDropzoneProps) => 
                 </Dropzone>
             ) : null}
 
-            {isChoosingContext ? (
+            {(isChoosingContext) ? (
                 <>
-                    <ChooseFileContext uploadedFile={uploadedFile} />
+                    <ChooseFileContext uploadedFile={uploadedFile} onClose={onClose}/>
                 </>
             ) : null}
+
         </div>
     );
 };

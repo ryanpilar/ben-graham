@@ -19,6 +19,11 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 
 /** ================================|| TRPC Routes ||=================================== **/
 
+// createCaller method exists on our API endpoint on the core wrapper around the appRouter 
+// which means serverTrpc has access to all the same api endpoints that we can also call 
+// from the client side
+
+
 export const appRouter = router({
     // PUBLIC ROUTES
     authCallback: publicProcedure.query(async () => {
@@ -50,7 +55,7 @@ export const appRouter = router({
 
     }),
 
-    // PROTECTED ROUTES
+    // FILES, LINKED FILES & UNLINKED FILES
     getFile: privateProcedure
         .input(z.object({ key: z.string() }))
         .mutation(async ({ ctx, input }) => {
@@ -62,17 +67,10 @@ export const appRouter = router({
                 }
             })
             if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
-            return file
-        }),
-    getUserFiles: privateProcedure
-        .query(async ({ ctx }) => {
-            const { user, kindeId } = ctx
 
-            return await db.file.findMany({
-                where: {
-                    kindeId: kindeId
-                }
-            })
+
+
+            return file
         }),
     deleteFile: privateProcedure
         .input(z.object({ id: z.string() }))
@@ -94,12 +92,11 @@ export const appRouter = router({
             await Promise.all([
                 deletePineconeNamespace(fileId),
                 deleteUploadthingFile(fileId),
-                async () => (
-                    await db.message.deleteMany({
-                        where: { fileId: fileId },
-                    })
-                )
-            ]);
+                db.message.deleteMany({
+                    where: { fileId: fileId },
+                }),
+
+            ])
 
             // Leaving the Mongo File for last...       
             await db.file.delete({
@@ -109,6 +106,257 @@ export const appRouter = router({
             })
 
             return file
+        }),
+    getUserFiles: privateProcedure
+        .query(async ({ ctx }) => {
+            const { user, kindeId } = ctx
+
+            return await db.file.findMany({
+                where: {
+                    kindeId: kindeId
+                }
+            })
+        }),
+    getFiles: privateProcedure
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
+        .query(async ({ input, ctx }) => {
+            const { kindeId } = ctx;
+            const { key, type } = input
+
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            return await db.file.findMany({
+                where: {
+                    ...(type !== 'all' && {
+                        [type === 'project' ? 'projectIds' : 'questionIds']: {
+                            has: key,
+                        },
+                    }),
+                    kindeId: kindeId,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    projectIds: true,
+                    questionIds: true,
+                    createdAt: true,
+                },
+            })
+
+        }),
+    getUnlinkedFiles: privateProcedure
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
+        .query(async ({ input, ctx }) => {
+            const { kindeId } = ctx;
+            const { key, type } = input
+
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            if (type === 'all') {
+                // Assuming definition of unlinked when type is 'all' might differ
+                // For simplicity, this returns an empty list here but adjust based on your criteria
+                return [];
+            } else {
+                const condition = type === 'project' ? 'projectIds' : 'questionIds';
+
+                // Fetch unlinked files
+                const unlinkedFiles = await db.file.findMany({
+                    where: {
+                        NOT: {
+                            [condition]: {
+                                has: key,
+                            },
+                        },
+                        kindeId: kindeId,
+                    }
+                });
+
+                return unlinkedFiles;
+            }
+
+        }),
+    getNonLinkedFiles: privateProcedure
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
+        .query(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { type, key } = input
+
+            // Fetch files along with their related projects
+            const filesWithProjects = await db.file.findMany({
+                where: {
+                    kindeId: kindeId,
+                },
+                include: {
+                    projects: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+
+            // Transform the data to match the data table structure
+            const result = filesWithProjects.map(file => ({
+                id: file.id,
+                name: file.name,
+                projects: file.projects.map((project) => { return { id: project.id ?? '', name: project.name ?? '' } }),
+            }));
+
+            return result;
+        }),
+    removeLinkedFile: privateProcedure
+        .input(z.object({ fileId: z.string(), projectId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+
+            const { kindeId } = ctx
+            const { fileId, projectId } = input
+
+            // Verify if the file exists
+            const file = await db.file.findFirst({
+                where: {
+                    id: fileId,
+                    kindeId,
+                },
+            })
+
+            if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+
+            // Fetch the project and manually remove the fileId from its fileIds array
+            const project = await db.project.findUnique({
+                where: {
+                    id: projectId,
+                    kindeId
+                },
+            });
+
+            if (project) {
+                const updatedFileIds = project.fileIds.filter(id => id !== fileId);
+                await db.project.update({
+                    where: { id: projectId },
+                    data: { fileIds: updatedFileIds },
+                });
+            }
+
+            const updatedProjectIds = file.projectIds.filter(id => id !== projectId);
+            await db.file.update({
+                where: { id: fileId },
+                data: { projectIds: updatedProjectIds },
+            });
+
+            return file;
+        }),
+    addLinkedFile: privateProcedure
+        .input(z.object({ fileId: z.string(), projectId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { fileId, projectId } = input;
+
+            // Verify if the file exists
+            const fileExists = await db.file.findFirst({
+                where: {
+                    id: fileId,
+                    kindeId,
+                },
+            })
+
+            if (!fileExists) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            // Ensure the project exists and belongs to the current kindeId
+            const projectExists = await db.project.findUnique({
+                where: {
+                    id: projectId,
+                    kindeId,
+                },
+            })
+
+            if (!projectExists) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            // Check if fileId is already linked to the project to avoid duplicates
+            if (!projectExists.fileIds.includes(fileId)) {
+                await db.project.update({
+                    where: { id: projectId },
+                    data: {
+                        fileIds: {
+                            push: fileId,
+                        },
+                    },
+                });
+            }
+
+            // Similar approach for file.projectIds update, assuming similar structure
+            const file = await db.file.findUnique({
+                where: { id: fileId },
+                select: { projectIds: true }, // Select only projectIds
+            });
+
+            if (file && !file.projectIds.includes(projectId)) {
+                await db.file.update({
+                    where: { id: fileId },
+                    data: {
+                        projectIds: {
+                            push: projectId,
+                        },
+                    },
+                });
+            }
+        }),
+    addLinkedFiles: privateProcedure
+        .input(z.object({ fileIds: z.array(z.string()), projectId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { fileIds, projectId } = input;
+
+            // Ensure the project exists and belongs to the current kindeId
+            const project = await db.project.findUnique({
+                where: {
+                    id: projectId,
+                    kindeId,
+                },
+                select: { fileIds: true }, // Select existing fileIds to check against
+            });
+
+            if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            // Filter fileIds to only those that are not already linked to avoid duplicates
+            const filteredFileIds = fileIds.filter(fileId => !project.fileIds.includes(fileId));
+
+            // Verify each fileId exists and belongs to the current kindeId
+            const files = await db.file.findMany({
+                where: {
+                    id: { in: filteredFileIds },
+                    kindeId,
+                },
+                select: { id: true, projectIds: true },
+            });
+
+            if (files.length !== filteredFileIds.length) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            // Update the project with new fileIds
+            await db.project.update({
+                where: { id: projectId },
+                data: {
+                    fileIds: {
+                        push: filteredFileIds,
+                    },
+                },
+            });
+
+            // For each file, update its projectIds if the projectId is not already associated
+            await Promise.all(files.map(async file => {
+                if (!file.projectIds.includes(projectId)) {
+                    await db.file.update({
+                        where: { id: file.id },
+                        data: {
+                            projectIds: {
+                                push: projectId,
+                            },
+                        },
+                    });
+                }
+            }));
         }),
     getFileUploadStatus: privateProcedure
         .input(z.object({ fileId: z.string() }))
@@ -178,6 +426,35 @@ export const appRouter = router({
                 nextCursor,                                 // nextCursor tells us where to start fetching if we start scrolling through the messages
             }
         }),
+    getFileContext: privateProcedure
+        .input(z.object({ fileId: z.string() }))
+        .query(async ({ input, ctx }) => {
+
+            const { kindeId } = ctx;
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            const file = await db.file.findFirst({
+                where: {
+                    id: input.fileId,
+                    kindeId: kindeId,
+                },
+            })
+
+            if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+
+            // Find projects linked to 
+            // Find linked questions
+
+
+
+
+
+
+            // return {'fileContext'}
+
+        }),
+
+    // PROJECTS
     addProject: privateProcedure
         .input(z.object({ name: z.string() }))
         .mutation(async ({ ctx, input }) => {
@@ -215,21 +492,126 @@ export const appRouter = router({
             const project = await db.project.findFirst({
                 where: {
                     id: projectId,
-                    kindeId: kindeId,
+                    kindeId: kindeId, // Ensure the project belongs to the current user
                 },
-            });
+            })
 
             if (!project) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found or you do not have permission to delete this project.' });
 
-            // Delete all messages associated with the project
+            // Find all questions associated with the project
+            const questions = await db.question.findMany({
+                where: { projectId: projectId },
+            });
+
+            // Each question being deleted also needs its messages deleted
+            for (const question of questions) {
+                await db.message.deleteMany({
+                    where: { questionId: question.id },
+                });
+            }
+
+            // Now delete the question
+            await db.question.deleteMany({
+                where: { projectId: projectId },
+            });
+
+            // Delete all messages directly associated with the project
             await db.message.deleteMany({
                 where: { projectId: projectId },
             });
 
-            // Finally, delete the project itself and return the deleted project details
-            return await db.project.delete({
+            // Finally, delete the project itself
+            await db.project.delete({
                 where: { id: projectId },
             });
+
+            return { success: true, message: 'Project and all associated data deleted successfully.' };
+
+        }),
+    getProject: privateProcedure
+        .input(z.object({ projectId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { projectId } = input
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            const project = await db.project.findUnique({
+                where: {
+                    id: projectId,
+                    kindeId
+                },
+            });
+
+            if (!project) throw new TRPCError({ code: 'NOT_FOUND' })
+
+            return project;
+        }),
+
+    getResearchDetails: privateProcedure
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
+
+        // .input(z.object({ projectId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { type, key } = input;
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            console.log('input', input);
+            
+
+            // Handle case when type is 'project'
+            if (type === 'project' && key) {
+                const project = await db.project.findUnique({
+                    where: {
+                        id: key,
+                        kindeId
+                    },
+                    select: {
+                        name: true
+                    }
+                });
+                if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+                return project
+            }
+
+            // Handle when type is 'question'
+            else if (type === 'question' && key) {
+                const question = await db.question.findUnique({
+                    where: {
+                        id: key,
+                        kindeId
+                    },
+                    select: {
+                        text: true
+                    }
+                });
+
+                if (!question) throw new TRPCError({ code: 'NOT_FOUND' });
+                
+                console.log('quest', question);
+
+                return question
+            }
+
+            // Handle when type is 'all'
+            else if (type === 'question' && key) {
+                console.log('Handle condition "all" not complete')
+            }
+        }),
+
+    // QUESTIONS
+    getUserQuestions: privateProcedure
+        .query(async ({ ctx }) => {
+            const { kindeId } = ctx;
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            const questions = await db.question.findMany({
+                where: { kindeId },
+            });
+
+            return questions;
         }),
     addQuestion: privateProcedure
         .input(z.object({
@@ -286,34 +668,18 @@ export const appRouter = router({
 
             if (!question) throw new TRPCError({ code: 'NOT_FOUND', message: 'Question not found or you do not have permission to delete this question.' });
 
+            await Promise.all([
+                db.message.deleteMany({
+                    where: { questionId: questionId },
+                })
+            ])
             // Delete the question and return the deleted question details
             return await db.question.delete({
                 where: { id: questionId },
             });
         }),
-    getProjectFiles: privateProcedure
-        .input(z.object({ projectId: z.string() }))
-        .query(async ({ ctx, input }) => {
-            const { kindeId } = ctx
 
-            const allFiles = await db.file.findMany({
-                where: {
-                    kindeId: kindeId,
-                },
-            })
-
-            if (!allFiles) throw new TRPCError({ code: 'NOT_FOUND' })
-
-            const filesWithProjectId = allFiles.filter(file => 
-                file.projectIds && file.projectIds.includes(input.projectId)
-            );
-    
-            if (!filesWithProjectId.length) throw new TRPCError({ code: 'NOT_FOUND' });
-            return filesWithProjectId;
-            
-        }),
-
-    // PROTECTED ROUTES - STRIPE
+    // STRIPE
     createStripeSession: privateProcedure.mutation(
         async ({ ctx }) => {
 

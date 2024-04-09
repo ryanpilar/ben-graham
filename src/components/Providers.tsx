@@ -1,5 +1,5 @@
 "use client"
-import { PropsWithChildren, useState } from 'react'
+import { PropsWithChildren, createContext, useState } from 'react'
 // Project Imports
 import { trpc } from '@/app/_trpc/client';
 // 3rd Party Imports
@@ -8,6 +8,8 @@ import {
 } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client';
 import { absoluteUrl } from '@/lib/utils';
+import OriginTrackerProvider from './OriginProvider';
+import { LoadingProvider } from './LoadingContext';
 // Styles
 
 /** ================================|| Providers ||=================================== 
@@ -26,16 +28,23 @@ const Providers = ({ children }: PropsWithChildren) => {
         links: [
             httpBatchLink({
                 // url: 'http://localhost:3000/api/trpc'
-                url:absoluteUrl('/api/trpc')
+                url: absoluteUrl('/api/trpc')
             })
         ]
     }))
+    // Create a Origin client and set the state and value
+    // const OriginTracker = createContext<boolean>(false)
+    // const [isWithinPage, setIsWithinPage] = useState(false)
 
     // trpc is just a type safe wrapper around react-query. To use react-query independent we also include QueryClientProvider as another independent wrapper
     return (
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
-                {children}
+                {/* <LoadingProvider> */}
+                    <OriginTrackerProvider>
+                        {children}
+                    </OriginTrackerProvider>
+                {/* </LoadingProvider> */}
             </QueryClientProvider>
         </trpc.Provider>
     );

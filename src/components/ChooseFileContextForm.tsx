@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import {
   Form,
   FormControl,
@@ -20,6 +20,7 @@ import { Button, buttonVariants } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { UploadedFileProps } from './UploadFileDropzone';
+import { trpc } from '@/app/_trpc/client';
 
 
 const OPTIONS: Option[] = [
@@ -51,9 +52,10 @@ const FormSchema = z.object({
 /** ================================|| Choose File Context Form ||=================================== **/
 
 interface ChooseFileContextFormProps {
-  uploadedFile: UploadedFileProps
+  uploadedFile?: UploadedFileProps
+  onClose: Dispatch<SetStateAction<boolean>>
 }
-const ChooseFileContextForm = ({ uploadedFile }: ChooseFileContextFormProps) => {
+const ChooseFileContextForm = ({ uploadedFile, onClose }: ChooseFileContextFormProps) => {
 
   const [loading, setLoading] = useState(false);
   const [userWantsContext, setUserWantsContext] = useState(false);
@@ -77,7 +79,9 @@ const ChooseFileContextForm = ({ uploadedFile }: ChooseFileContextFormProps) => 
 
   function handleSkip() {
     setLoading(true)
-    router.push(uploadedFile.path)
+    onClose(false)
+    
+    // router.push(uploadedFile.path)
   }
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -123,6 +127,7 @@ const ChooseFileContextForm = ({ uploadedFile }: ChooseFileContextFormProps) => 
                 <FormItem className='pb-2 pt-3'>
                   <FormLabel className='text-default'>Add To Projects</FormLabel>
                   <FormControl>
+
                     <MultipleSelector
                       value={field.value}
                       // onChange={field.onChange}
@@ -130,15 +135,17 @@ const ChooseFileContextForm = ({ uploadedFile }: ChooseFileContextFormProps) => 
                         field.onChange(value);
                         handleSelectorChange(value)
                       }}
-                      defaultOptions={OPTIONS}
+                      // defaultOptions={transformedProjectData}
                       placeholder="Search your projects..."
                       emptyIndicator={
                         <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
                           no results found.
                         </p>
                       }
+                      groupBy="group"
                       className={`bg-white ${errors.projects ? 'border-red-500' : ''}`}
                     />
+
                   </FormControl>
                   {errors.projects && <FormMessage className="text-red-500">{errors.projects.message}</FormMessage>}
 
@@ -159,13 +166,14 @@ const ChooseFileContextForm = ({ uploadedFile }: ChooseFileContextFormProps) => 
                         field.onChange(value);
                         handleSelectorChange(value);
                       }}
-                      defaultOptions={OPTIONS}
+                      // defaultOptions={transformedQuestionData}
                       placeholder="Search your questions..."
                       emptyIndicator={
                         <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
                           no results found.
                         </p>
                       }
+                      groupBy='group'
                       className={`bg-white ${errors.questions ? 'border-red-500' : ''}`}
                     />
                   </FormControl>

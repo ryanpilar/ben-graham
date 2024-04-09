@@ -1,22 +1,28 @@
-import React from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 // Project Imports
 import UploadFileDropzone from './UploadFileDropzone';
-import ChooseFileContext from './ChooseFileContext';
 import UploadFileDialog from './UploadFileDialog';
 
 /** =================================|| Upload Button ||==================================== **/
 
-const AddFileButton = ({ isSubscribed, }: { isSubscribed: boolean }) => {
+interface AddFileProps {
+    isSubscribed: boolean
+    label: string
+    skipUpload: boolean
+    onClose: Dispatch<SetStateAction<boolean>>
+
+}
+const AddFile = ({ isSubscribed, label, skipUpload, onClose }: AddFileProps) => {
 
     return (
         <>
-            <UploadFileDialog isSubscribed={isSubscribed}>
+            <UploadFileDialog isSubscribed={isSubscribed} label={label} >
 
-                <UploadFileDropzone isSubscribed={isSubscribed} />
+                    <UploadFileDropzone isSubscribed={isSubscribed} skipUpload={skipUpload} onClose={onClose}/>                
 
             </UploadFileDialog>
         </>
     );
 };
 
-export default AddFileButton;
+export default AddFile;

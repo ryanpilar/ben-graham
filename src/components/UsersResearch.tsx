@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 
 // Project Imports
 import { Button } from './ui/button';
-import AddFileButton from './AddFile';
 import { trpc } from '@/app/_trpc/client';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 
@@ -13,48 +12,39 @@ import Link from 'next/link';
 import { format } from 'date-fns'
 import Skeleton from "react-loading-skeleton"
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
-import AddProjectButton from './AddProjectButton';
 
 /** ================================|| User Research ||=================================== **/
 
 interface PageProps {
     subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
-  }
-  
-const UserResearch = ({subscriptionPlan}: PageProps) => {
+}
+
+const UsersResearch = ({ subscriptionPlan }: PageProps) => {
 
     // We need to know exactly what file is currently being deleted
     const [currentlyDeletingProject, setCurrentlyDeletingProject] = useState<string | null>(null)
 
     // If we invalidate the data, we force an automatic refresh
-    const utils = trpc.useUtils()          
+    const utils = trpc.useUtils()
 
     // automatically gets queried on page load
-    const { data: projects, isLoading } = trpc.getUserProjects.useQuery()     
+    const { data: projects, isLoading } = trpc.getUserProjects.useQuery()
 
-    const { mutate: deleteProject } = trpc.deleteProject.useMutation({       
+    const { mutate: deleteProject } = trpc.deleteProject.useMutation({
         onSuccess() {
             utils.getUserProjects.invalidate()
         },
-        onMutate({ projectId }) {    
+        onMutate({ projectId }) {
             setCurrentlyDeletingProject(projectId)
         },
         onSettled() {
             // Whether there is an error or not, the loading state should stop
-            setCurrentlyDeletingProject(null) 
+            setCurrentlyDeletingProject(null)
         }
     })
 
     return (
-        <main className='mx-auto max-w-7xl md:p-10'>
-            <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
-                <h1 className='mb-3 font-bold text-5xl text-gray-900'>
-                    Research Projects
-                </h1>
-                <AddProjectButton isSubscribed={subscriptionPlan.isSubscribed} />
-            </div>
-
-            {/* Display all research projects */}
+        <>
             {projects && projects?.length !== 0 ? (
                 <ul className='mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3'>
                     {projects
@@ -68,7 +58,7 @@ const UserResearch = ({subscriptionPlan}: PageProps) => {
                                 key={project.id}
                                 className='col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg'>
                                 <Link
-                                    href={`/research/${project.id}`}
+                                    href={`/research/project/${project.id}`}
                                     className='flex flex-col gap-2'>
                                     <div className='pt-6 px-6 flex w-full items-center justify-between space-x-6'>
                                         <div className='h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500' />
@@ -127,8 +117,8 @@ const UserResearch = ({subscriptionPlan}: PageProps) => {
                 </div>
             )}
 
-        </main>
+        </>
     );
 };
 
-export default UserResearch;
+export default UsersResearch;
