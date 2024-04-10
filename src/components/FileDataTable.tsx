@@ -36,7 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useParams } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { trpc } from "@/app/_trpc/client"
 import { Badge, badgeVariants } from "./ui/badge"
 import Link from "next/link"
@@ -192,7 +192,7 @@ const FileDataTable = ({ type }: FilesProps) => {
     // COLUMN: PROJECT BADGES
     {
       accessorKey: "projects",
-      header: 'Linked Projects',
+      header: 'All Projects',
       cell: ({ row }) => {
 
         const projects = row.getValue("projects") as FileProject[] | undefined;
@@ -208,6 +208,32 @@ const FileDataTable = ({ type }: FilesProps) => {
                 <Badge
                   variant='outline' className='text-zinc-500 hover:text-zinc-700 hover:bg-secondary/60 font-normal'>
                   {project.name.length > 15 ? `${project.name.substring(0, 15)}...` : project.name}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        )
+      },
+    },
+    // COLUMN: QUESTION BADGES
+    {
+      accessorKey: "questions",
+      header: 'All Questions',
+      cell: ({ row }) => {
+
+        const questions = row.getValue("questions") as FileQuestion[] | undefined;
+
+        return (
+          <div className="space-x-2">
+            {questions?.map((question, index) => question.id === key ? (
+              <Badge key={index} variant='outline' className='font-normal border-primary/50'>
+                {question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text}
+              </Badge>
+            ) : (
+              <Link href={`/research/question/${question.id}`} key={index}>
+                <Badge
+                  variant='outline' className='text-zinc-500 hover:text-zinc-700 hover:bg-secondary/60 font-normal'>
+                  {question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text}
                 </Badge>
               </Link>
             ))}
@@ -280,11 +306,18 @@ const FileDataTable = ({ type }: FilesProps) => {
 
     // Extract the desired values from the selected rows 
     const selectedValues = selectedRows.map(row => row.original.id)
-    addLinkedFiles({ key: key, fileIds: selectedValues, type:type })
+    addLinkedFiles({ key: key, fileIds: selectedValues, type: type })
 
     // Clear checkbox state in data table
     table.resetRowSelection()
   };
+  useEffect(() => {
+    const columnVisibility = {
+      'projects': type === 'project' || type === 'all',
+      'questions': type === 'question' || type === 'all',
+    };
+    table.setColumnVisibility(columnVisibility);
+  }, [type, table])
 
   return (
     <div className="w-full">

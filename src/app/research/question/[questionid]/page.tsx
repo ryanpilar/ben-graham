@@ -8,6 +8,7 @@ import { getUserSubscriptionPlan } from '@/lib/stripe';
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import FileDrawer from '@/components/FileDrawer';
+import GoBack from '@/components/GoBack';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -25,10 +26,10 @@ const Question = async ({ params }: PageProps) => {
 
     // Redirect users that are not logged in
     if (!user || !user.id) redirect(`/auth-callback?origin=research/question/${questionid}`)
-    
-    const subscriptionPlan = await getUserSubscriptionPlan()   
-    
-    
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+
     const question = await db.question.findFirst({
         where: {
             id: questionid,
@@ -45,17 +46,17 @@ const Question = async ({ params }: PageProps) => {
                 {/* Left sidebar & main wrapper */}
                 <div className='flex-1 xl:flex'>
                     <div className='px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6'>
-
+                        <GoBack />
                         <main className='mx-auto max-w-7xl md:p-10'>
                             <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
                                 <h1 className='mb-3 font-bold text-5xl text-gray-900'>
-                                    Question: {question.text}
+                                    Question: <span className='text-xl'>{question.text}</span>
                                 </h1>
 
                             </div>
 
                             {/* Display all research questions */}
-                            <FileDrawer isSubscribed={subscriptionPlan.isSubscribed}  type={'question'} />
+                            <FileDrawer isSubscribed={subscriptionPlan.isSubscribed} type={'question'} />
 
                         </main>
                     </div>

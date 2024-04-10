@@ -18,7 +18,7 @@ const AddFile = ({ isSubscribed, label, skipUpload, onClose }: AddFileProps) => 
         <>
             <UploadFileDialog isSubscribed={isSubscribed} label={label} >
 
-                    <UploadFileDropzone isSubscribed={isSubscribed} skipUpload={skipUpload} onClose={onClose}/>                
+                <UploadFileDropzone isSubscribed={isSubscribed} skipUpload={skipUpload} onClose={onClose} />
 
             </UploadFileDialog>
         </>
