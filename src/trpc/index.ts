@@ -184,7 +184,6 @@ export const appRouter = router({
             return result;
         }),
     removeLinkedFile: privateProcedure
-        // .input(z.object({ fileId: z.string(), projectId: z.string() }))
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional(), fileId: z.string() }))
 
         .mutation(async ({ ctx, input }) => {
@@ -257,11 +256,10 @@ export const appRouter = router({
             // return file;
         }),
     addLinkedFile: privateProcedure
-        // .input(z.object({ fileId: z.string(), projectId: z.string() }))
         .input(z.object({
             fileId: z.string(),
-            key: z.string(), // This will be either projectId or questionId based on the type
-            type: z.enum(['all', 'project', 'question']) // Define the type as 'project' or 'question'
+            key: z.string(),
+            type: z.enum(['all', 'project', 'question'])
         }))
         .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx;
@@ -362,60 +360,165 @@ export const appRouter = router({
 
 
         }),
+    // addLinkedFiless: privateProcedure
+    //     .input(z.object({ fileIds: z.array(z.string()), projectId: z.string() }))
+    //     .mutation(async ({ ctx, input }) => {
+
+    //         const { kindeId } = ctx;
+    //         const { fileIds, projectId } = input;
+
+    //         // Ensure the project exists and belongs to the current kindeId
+    //         const project = await db.project.findUnique({
+    //             where: {
+    //                 id: projectId,
+    //                 kindeId,
+    //             },
+    //             select: { fileIds: true }, // Select existing fileIds to check against
+    //         });
+
+    //         if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+
+    //         // Filter fileIds to only those that are not already linked to avoid duplicates
+    //         const filteredFileIds = fileIds.filter(fileId => !project.fileIds.includes(fileId));
+
+    //         // Verify each fileId exists and belongs to the current kindeId
+    //         const files = await db.file.findMany({
+    //             where: {
+    //                 id: { in: filteredFileIds },
+    //                 kindeId,
+    //             },
+    //             select: { id: true, projectIds: true },
+    //         });
+
+    //         if (files.length !== filteredFileIds.length) throw new TRPCError({ code: 'NOT_FOUND' });
+
+    //         await db.project.update({
+    //             where: { id: projectId },
+    //             data: {
+    //                 fileIds: {
+    //                     push: filteredFileIds,
+    //                 },
+    //             },
+    //         });
+
+    //         // For each file, update its projectIds if the projectId is not already associated
+    //         await Promise.all(files.map(async file => {
+    //             if (!file.projectIds.includes(projectId)) {
+    //                 await db.file.update({
+    //                     where: { id: file.id },
+    //                     data: {
+    //                         projectIds: {
+    //                             push: projectId,
+    //                         },
+    //                     },
+    //                 });
+    //             }
+    //         }));
+    //     }),
     addLinkedFiles: privateProcedure
-        .input(z.object({ fileIds: z.array(z.string()), projectId: z.string() }))
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string(), fileIds: z.array(z.string()) }))
         .mutation(async ({ ctx, input }) => {
+
             const { kindeId } = ctx;
-            const { fileIds, projectId } = input;
+            const { fileIds, key, type } = input;
 
-            // Ensure the project exists and belongs to the current kindeId
-            const project = await db.project.findUnique({
-                where: {
-                    id: projectId,
-                    kindeId,
-                },
-                select: { fileIds: true }, // Select existing fileIds to check against
-            });
+            
 
-            if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (type === 'project') {
 
-            // Filter fileIds to only those that are not already linked to avoid duplicates
-            const filteredFileIds = fileIds.filter(fileId => !project.fileIds.includes(fileId));
-
-            // Verify each fileId exists and belongs to the current kindeId
-            const files = await db.file.findMany({
-                where: {
-                    id: { in: filteredFileIds },
-                    kindeId,
-                },
-                select: { id: true, projectIds: true },
-            });
-
-            if (files.length !== filteredFileIds.length) throw new TRPCError({ code: 'NOT_FOUND' });
-
-            // Update the project with new fileIds
-            await db.project.update({
-                where: { id: projectId },
-                data: {
-                    fileIds: {
-                        push: filteredFileIds,
+                const project = await db.project.findUnique({
+                    where: {
+                        id: key,
+                        kindeId,
                     },
-                },
-            });
+                    select: { fileIds: true }, // Select existing fileIds to check against
+                });
 
-            // For each file, update its projectIds if the projectId is not already associated
-            await Promise.all(files.map(async file => {
-                if (!file.projectIds.includes(projectId)) {
-                    await db.file.update({
-                        where: { id: file.id },
-                        data: {
-                            projectIds: {
-                                push: projectId,
-                            },
+                if (!project) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project cannot be found' });
+
+                const filteredFileIds = fileIds.filter(fileId => !project.fileIds.includes(fileId));
+
+                // Verify each fileId exists and belongs to the current kindeId
+                const files = await db.file.findMany({
+                    where: {
+                        id: { in: filteredFileIds },
+                        kindeId,
+                    },
+                    select: { id: true, projectIds: true },
+                });
+
+                if (files.length !== filteredFileIds.length) throw new TRPCError({ code: 'NOT_FOUND' });
+
+                await db.project.update({
+                    where: { id: key },
+                    data: {
+                        fileIds: {
+                            push: filteredFileIds,
                         },
-                    });
-                }
-            }));
+                    },
+                });
+
+                // For each file, update its projectIds if the projectId is not already associated
+                await Promise.all(files.map(async file => {
+                    if (!file.projectIds.includes(key)) {
+                        await db.file.update({
+                            where: { id: file.id },
+                            data: {
+                                projectIds: {
+                                    push: key,
+                                },
+                            },
+                        });
+                    }
+                }))
+
+            } else if (type === 'question') {
+                const question = await db.question.findUnique({
+                    where: {
+                        id: key,
+                        kindeId,
+                    },
+                    select: { fileIds: true },
+                });
+
+                if (!question) throw new TRPCError({ code: 'NOT_FOUND', message: 'Question cannot be found' });
+
+                const filteredFileIds = fileIds.filter(fileId => !question.fileIds.includes(fileId));
+
+                // Verify each fileId exists and belongs to the current kindeId
+                const files = await db.file.findMany({
+                    where: {
+                        id: { in: filteredFileIds },
+                        kindeId,
+                    },
+                    select: { id: true, questionIds: true },
+                });
+
+                if (files.length !== filteredFileIds.length) throw new TRPCError({ code: 'NOT_FOUND' });
+
+                await db.question.update({
+                    where: { id: key },
+                    data: {
+                        fileIds: {
+                            push: filteredFileIds,
+                        },
+                    },
+                });
+
+                // For each file, update its projectIds if the projectId is not already associated
+                await Promise.all(files.map(async file => {
+                    if (!file.questionIds.includes(key)) {
+                        await db.file.update({
+                            where: { id: file.id },
+                            data: {
+                                questionIds: {
+                                    push: key,
+                                },
+                            },
+                        });
+                    }
+                }));
+            }
         }),
     getFileUploadStatus: privateProcedure
         .input(z.object({ fileId: z.string() }))

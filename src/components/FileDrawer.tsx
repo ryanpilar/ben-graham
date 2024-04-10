@@ -1,20 +1,20 @@
 'use client'
-import React from 'react'
+
+import React, { useState } from 'react'
 // Project Imports
-// 3rd Party Imports
-import { useState } from "react";
-import { Drawer } from "vaul";
-import { clsx } from "clsx";
-import { Button } from './ui/button';
-import FileDataTable from './FileDataTable';
 import AddFile from './AddFile';
-import { useParams } from 'next/navigation';
-import { trpc } from '@/app/_trpc/client';
+import { Button } from './ui/button';
 import LinkedFiles from './LinkedFiles';
+import { trpc } from '@/app/_trpc/client';
+import { useParams } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
-// Styles
+import FileDataTable from './FileDataTable';
+// 3rd Party Imports
+import { clsx } from "clsx";
+import { Drawer } from "vaul";
 
 /** ================================|| File Drawer ||=================================== **/
+
 interface FileDrawerProps {
     isSubscribed: boolean
     type: "all" | "project" | "question"
@@ -22,7 +22,6 @@ interface FileDrawerProps {
 const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
     const params = useParams()
-
     const getKey = () => {
 
         if (type === 'project' && params.projectid) {
@@ -44,24 +43,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
     // If we invalidate the data, we force an automatic refresh
     const utils = trpc.useUtils()
 
-
-    // MAYBE TURN INTO GET RESEARCH?
     const { data: research, isLoading: isLoadingProject } = trpc.getResearchDetails.useQuery({ type: type, key: key })
-
-    console.log('research deets:', research, isLoadingProject);
-
-    const { mutate: deleteFile } = trpc.deleteFile.useMutation({
-        onSuccess() {
-            utils.getUserFiles.invalidate()
-        },
-        onMutate({ id }) {    // Callback right away when the button is clicked
-            setCurrentlyDeletingFile(id)
-        },
-        onSettled() {
-            // Whether there is an error or not, the loading state should stop
-            setCurrentlyDeletingFile(null)
-        }
-    })
 
     return (
         <Drawer.Root
@@ -86,10 +68,11 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                     >
 
                         <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 mb-8" />
+
                         <div className='flex justify-between'>
 
                             <div >
-                                <h2 className='flex items-center capitalize'>{type} <ChevronRight className='text-zinc-400 px-1' /> { type === 'project' ? research?.name : type === 'question' ?  research?.text : ''}</h2>
+                                <h2 className='flex items-center capitalize'>{type} <ChevronRight className='text-zinc-400 px-1' /> {type === 'project' ? research?.name : type === 'question' ? research?.text : ''}</h2>
                                 <h3 className="text-2xl mt-2 mb-4 font-medium">Currently Linked Files </h3>
                             </div>
 
@@ -97,7 +80,6 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
                         </div>
 
-                        {/* <LinkedFiles type='project' /> */}
                         <LinkedFiles type={type} />
 
                         <h3 className="text-2xl mt-8 font-medium">All Files</h3>

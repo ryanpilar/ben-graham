@@ -280,7 +280,7 @@ const FileDataTable = ({ type }: FilesProps) => {
 
     // Extract the desired values from the selected rows 
     const selectedValues = selectedRows.map(row => row.original.id)
-    addLinkedFiles({ projectId: key, fileIds: selectedValues })
+    addLinkedFiles({ key: key, fileIds: selectedValues, type:type })
 
     // Clear checkbox state in data table
     table.resetRowSelection()
