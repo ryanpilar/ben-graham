@@ -1,11 +1,10 @@
 "use client"
 
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 // Project Imports
 import { Button, buttonVariants } from './ui/button';
 import { trpc } from '@/app/_trpc/client';
-import { getUserSubscriptionPlan } from '@/lib/stripe'
 
 // 3rd Party Imports
 import Link from 'next/link';
@@ -21,18 +20,17 @@ import { cn } from '@/lib/utils';
 /** =================================|| Linked Files ||==================================== **/
 
 interface FilesProps {
-    // subscriptionPlan?: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
     type: "all" | "project" | "question"
 }
 const LinkedFiles = ({ type }: FilesProps) => {
 
-    const params = useParams()
+    const params = useParams()  
 
     const getKey = () => {
         if (type === 'project' && params.projectid) {
             return Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
-        } else if (type === 'question' && params.questionId) {
-            return Array.isArray(params.questionId) ? params.questionId[0] : params.questionId;
+        } else if (type === 'question' && params.questionid) {
+            return Array.isArray(params.questionid) ? params.questionid[0] : params.questionid;
         }
         return '#'
     };

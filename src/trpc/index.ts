@@ -145,38 +145,6 @@ export const appRouter = router({
             })
 
         }),
-    getUnlinkedFiles: privateProcedure
-        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
-        .query(async ({ input, ctx }) => {
-            const { kindeId } = ctx;
-            const { key, type } = input
-
-
-            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
-
-            if (type === 'all') {
-                // Assuming definition of unlinked when type is 'all' might differ
-                // For simplicity, this returns an empty list here but adjust based on your criteria
-                return [];
-            } else {
-                const condition = type === 'project' ? 'projectIds' : 'questionIds';
-
-                // Fetch unlinked files
-                const unlinkedFiles = await db.file.findMany({
-                    where: {
-                        NOT: {
-                            [condition]: {
-                                has: key,
-                            },
-                        },
-                        kindeId: kindeId,
-                    }
-                });
-
-                return unlinkedFiles;
-            }
-
-        }),
     getNonLinkedFiles: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
         .query(async ({ ctx, input }) => {
@@ -556,10 +524,7 @@ export const appRouter = router({
             const { kindeId } = ctx;
             const { type, key } = input;
 
-            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
-
-            console.log('input', input);
-            
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });          
 
             // Handle case when type is 'project'
             if (type === 'project' && key) {
@@ -590,8 +555,6 @@ export const appRouter = router({
 
                 if (!question) throw new TRPCError({ code: 'NOT_FOUND' });
                 
-                console.log('quest', question);
-
                 return question
             }
 
