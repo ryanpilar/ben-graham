@@ -53,9 +53,6 @@ model File {
   questions   Question[] @relation(fields: [questionIds], references: [id])
   questionIds String[]   @db.ObjectId
   messages    Message[]
-
-  // Context   Context @relation(fields: [contextId], references: [id])
-  // contextId String  @db.ObjectId
 }
 
 model Message {
@@ -102,8 +99,8 @@ model Question {
 
   kindeId          String
   User             User?      @relation(fields: [kindeId], references: [id])
-  File             File[]     @relation(fields: [fileId], references: [id])
-  fileId           String[]
+  File             File[]     @relation(fields: [fileIds], references: [id])
+  fileIds           String[]
   projectId        String?    @db.ObjectId
   Project          Project?   @relation(fields: [projectId], references: [id])
   parentQuestionId String?    @db.ObjectId

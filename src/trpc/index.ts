@@ -176,14 +176,16 @@ export const appRouter = router({
             return result;
         }),
     removeLinkedFile: privateProcedure
-        .input(z.object({ fileId: z.string(), projectId: z.string() }))
+        // .input(z.object({ fileId: z.string(), projectId: z.string() }))
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional(), fileId: z.string() }))
+
         .mutation(async ({ ctx, input }) => {
 
             const { kindeId } = ctx
-            const { fileId, projectId } = input
+            const { type, fileId, key } = input
 
             // Verify if the file exists
-            const file = await db.file.findFirst({
+            const file = await db.file.findUnique({
                 where: {
                     id: fileId,
                     kindeId,
@@ -192,32 +194,67 @@ export const appRouter = router({
 
             if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
 
-            // Fetch the project and manually remove the fileId from its fileIds array
-            const project = await db.project.findUnique({
-                where: {
-                    id: projectId,
-                    kindeId
-                },
-            });
+            if (type === 'project') {
+                // Fetch the project and manually remove the fileId from its fileIds
+                const project = await db.project.findUnique({
+                    where: {
+                        id: key,
+                        kindeId,
+                    },
+                });
 
-            if (project) {
+                if (!project) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
+
                 const updatedFileIds = project.fileIds.filter(id => id !== fileId);
                 await db.project.update({
-                    where: { id: projectId },
+                    where: { id: key },
                     data: { fileIds: updatedFileIds },
+                });
+
+                // Also, update the File to remove the projectId from its projectIds
+                const updatedProjectIds = file.projectIds.filter(id => id !== key);
+                await db.file.update({
+                    where: { id: fileId },
+                    data: { projectIds: updatedProjectIds },
+                });
+            } else if (type === 'question') {
+                // Fetch the question and manually remove the fileId from its fileIds 
+                const question = await db.question.findUnique({
+                    where: {
+                        id: key,
+                        kindeId,
+                    },
+                });
+
+                if (!question) throw new TRPCError({ code: 'NOT_FOUND', message: 'Question not found' });
+
+                const updatedFileIds = question.fileIds.filter(id => id !== fileId)
+                await db.question.update({
+                    where: { id: key },
+                    data: { fileIds: updatedFileIds }, 
+                });
+
+                // Update the file to remove the questionId from its questionIds array
+                const updatedQuestionIds = file.questionIds.filter(id => id !== key);
+                await db.file.update({
+                    where: { id: fileId },
+                    data: { questionIds: updatedQuestionIds },
                 });
             }
 
-            const updatedProjectIds = file.projectIds.filter(id => id !== projectId);
-            await db.file.update({
-                where: { id: fileId },
-                data: { projectIds: updatedProjectIds },
-            });
-
             return file;
+
+
+
+            // return file;
         }),
     addLinkedFile: privateProcedure
         .input(z.object({ fileId: z.string(), projectId: z.string() }))
+        // .input(z.object({
+        //     fileId: z.string(),
+        //     key: z.string(), // This will be either projectId or questionId based on the type
+        //     type: z.enum(['project', 'question']) // Define the type as 'project' or 'question'
+        // }))
         .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx;
             const { fileId, projectId } = input;
@@ -524,7 +561,7 @@ export const appRouter = router({
             const { kindeId } = ctx;
             const { type, key } = input;
 
-            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });          
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
             // Handle case when type is 'project'
             if (type === 'project' && key) {
@@ -554,7 +591,7 @@ export const appRouter = router({
                 });
 
                 if (!question) throw new TRPCError({ code: 'NOT_FOUND' });
-                
+
                 return question
             }
 
