@@ -27,14 +27,14 @@ export interface UploadDropzoneProps {
 
 const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: UploadDropzoneProps) => {
 
-    
-
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [uploadProgress, setUploadProgress] = useState<number>(0); // For the determinate progress bar
-    const [isChoosingContext, setIsChoosingContext] = useState(skipUpload);
+    // const [isChoosingContext, setIsChoosingContext] = useState(skipUpload);
+    const [isChoosingContext, setIsChoosingContext] = useState(true);
+
     const { toast } = useToast();
 
-    const [uploadedFile, setUploadedFile] = useState<UploadedFileProps | {} >({})
+    const [uploadedFile, setUploadedFile] = useState<UploadedFileProps | {}>({})
 
     // Depending on if the user is on the free plan or the plus plan, choose the appropriate uploader
     const { startUpload } = useUploadThing(isSubscribed ? 'plusPlanUploader' : 'freePlanUploader');
@@ -54,13 +54,13 @@ const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: Upl
 
             // router.push(`/dashboard/${file.id}`)
         },
-        
+
         // Retry indefinitely until we get our file
         retry: true,
         retryDelay: 500
-    });  
+    });
 
-    
+
     const startSimulateProgress = () => {
         setUploadProgress(0);
 
@@ -184,7 +184,13 @@ const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: Upl
 
             {(isChoosingContext) ? (
                 <>
-                    <ChooseFileContext uploadedFile={uploadedFile} onClose={onClose}/>
+                    {/* <ChooseFileContext uploadedFile={uploadedFile} onClose={onClose} /> */}
+                    <ChooseFileContext uploadedFile={{
+                        fileName: 'string',
+                        path: 'string',
+                        id: 'string'
+                    }} onClose={onClose} />
+
                 </>
             ) : null}
 

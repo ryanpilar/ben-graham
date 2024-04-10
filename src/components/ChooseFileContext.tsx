@@ -23,10 +23,6 @@ interface ChooseFileContextProps {
 const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) => {
 
 
-  
-
-  // projectId, look up project and get a list of files for that id
-  // questionId, look up question and get a list of files for that id
 
   return (
     <>
@@ -40,15 +36,15 @@ const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) =>
 
               {uploadedFile ?
                 <p className='text-sm text-zinc-700'>
+
                   <span className='font-semibold text-md'>
                     Upload Complete: <Link className={cn(buttonVariants({
                       variant: 'linkHover1',
                     }), 'pl-2')} href={uploadedFile.path}>{uploadedFile.fileName}</Link>
                   </span>
+
                 </p>
                 : null}
-
-
             </div>
 
             <div className='w-full max-w-xs mx-auto'>
@@ -57,9 +53,9 @@ const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) =>
 
                   <section className="flex flex-wrap gap-x-2">
                     <Separator className='mb-5' />
-                    <div>
 
-                    Attach a file, or several, to a project, multiple projects, or questions.
+                    <div>
+                      Attach a file, or several, to a project, multiple projects, or questions.
                       <Tooltip delayDuration={300}>
                         <TooltipTrigger className='cursor-default ml-1.5 pt-1'>
                           <HelpCircle className='h-4 w-4 text-zinc-500 hover:text-blue-500' />
@@ -73,7 +69,7 @@ const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) =>
 
                   <section className="flex flex-row flex-wrap w-full justify-center gap-y-2 py-3">
 
-                    <ChooseFileContextForm uploadedFile={uploadedFile} onClose={onClose}  />
+                    <ChooseFileContextForm uploadedFile={uploadedFile} onClose={onClose} />
 
                   </section>
 

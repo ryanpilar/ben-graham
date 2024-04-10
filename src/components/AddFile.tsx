@@ -10,8 +10,8 @@ interface AddFileProps {
     label: string
     skipUpload: boolean
     onClose: Dispatch<SetStateAction<boolean>>
-
 }
+
 const AddFile = ({ isSubscribed, label, skipUpload, onClose }: AddFileProps) => {
 
     return (

@@ -2,19 +2,16 @@
 import React from 'react'
 // Project Imports
 import { db } from '@/db';
-import { getUserSubscriptionPlan } from '@/lib/stripe';
-import AddQuestionButton from '@/components/AddQuestionButton';
-
-import PdfRenderer from '@/components/PdfRenderer';
-import ChatWrapper from '@/components/chat/ChatWrapper';
-// 3rd Party Imports
-import { notFound, redirect } from 'next/navigation';
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { trpc } from '@/app/_trpc/client';
-import ProjectQuestions from '@/components/ProjectQuestions';
-import ProjectFiles from '@/components/ProjectFiles';
-import FileDrawer from '@/components/FileDrawer';
 import GoBack from '@/components/GoBack';
+import { Button } from '@/components/ui/button';
+import FileDrawer from '@/components/FileDrawer';
+import { getUserSubscriptionPlan } from '@/lib/stripe';
+import ProjectQuestions from '@/components/ProjectQuestions';
+import AddQuestionButton from '@/components/AddQuestionButton';
+// 3rd Party Imports
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -64,13 +61,18 @@ const Project = async ({ params }: PageProps) => {
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
 
                             <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
+                            
+                            <Link href="?file-drawer">
+                                <Button variant="default">Open Dialog</Button>
+                            </Link>
+
                         </main>
                     </div>
                 </div>
-
+                
+                {/* Right sidebar */}
                 <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
                     OTHER AREA {project.kindeId}
-
                 </div>
             </div>
         </div>

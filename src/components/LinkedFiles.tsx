@@ -8,12 +8,10 @@ import { trpc } from '@/app/_trpc/client';
 
 // 3rd Party Imports
 import Link from 'next/link';
-import { format } from 'date-fns'
 import Skeleton from "react-loading-skeleton"
 import { Ghost, Loader2, MessageSquare, Plus, Trash, X } from 'lucide-react';
 
 import { useParams } from 'next/navigation';
-import { Tag } from './Tag';
 import { Badge, badgeVariants } from './ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +22,7 @@ interface FilesProps {
 }
 const LinkedFiles = ({ type }: FilesProps) => {
 
-    const params = useParams()  
+    const params = useParams()
 
     const getKey = () => {
         if (type === 'project' && params.projectid) {
@@ -46,7 +44,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
             utils.getFiles.invalidate()
             utils.getNonLinkedFiles.invalidate()
         },
-        onMutate({ fileId }) {    
+        onMutate({ fileId }) {
             setCurrentlyDeletingFile(fileId)
         },
         onSettled() {
@@ -56,33 +54,33 @@ const LinkedFiles = ({ type }: FilesProps) => {
     })
 
     return (
-        <>
+        <div className="rounded-md border">
             {files && files?.length !== 0 ? (
-                <div className='flex flex-wrap gap-2'>
+                <div className='flex flex-wrap gap-2 p-2'>
                     {files
                         .map((file) => (
 
-                            <Badge variant='outline' className='flex gap-x-8 justify-between'>
+                            <Badge variant='outline' className='flex gap-x-8 justify-between  shadow-md rounded-xl hover:scale-105 border-primary/50'>
                                 <Link
                                     href={`/dashboard/${file.id}`}
-                                    className={cn(buttonVariants({variant: 'none', size: 'sm'}),'ml-2 text-black/65 hover:text-black/90')}>
+                                    className={cn(buttonVariants({ variant: 'none', size: 'sm' }), 'ml-2 text-black/65 hover:text-black/90')}>
                                     {file.name}
 
                                 </Link>
                                 <Button
-                                        onClick={() =>
-                                            removeLinkedFile({ fileId: file.id, key: key, type: type })
-                                        }
-                                        size='sm'
-                                        className='w-full rounded-full bg-white'
-                                        variant='destructive'>
-                                        {currentlyDeletingFile === file.id ? (
-                                            <Loader2 className='h-4 w-4 animate-spin' />
-                                        ) : (
-                                            <Trash className='h-4 w-4' />
-                                            // <X className='h-4 w-4' />
-                                        )}
-                                    </Button>
+                                    onClick={() =>
+                                        removeLinkedFile({ fileId: file.id, key: key, type: type })
+                                    }
+                                    size='sm'
+                                    className='w-full rounded-full bg-white'
+                                    variant='destructive'>
+                                    {currentlyDeletingFile === file.id ? (
+                                        <Loader2 className='h-4 w-4 animate-spin' />
+                                    ) : (
+                                        <Trash className='h-4 w-4' />
+                                        // <X className='h-4 w-4' />
+                                    )}
+                                </Button>
                             </Badge>
 
                         ))
@@ -101,7 +99,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
                     <p>Let&apos;s link your first project file.</p>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

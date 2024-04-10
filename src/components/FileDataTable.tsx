@@ -100,7 +100,7 @@ const FileDataTable = ({ type }: FilesProps) => {
   const [loadingSelectedFiles, setLoadingSelectedFiles] = useState(false)
   const [currentlyAddingMultipleFiles, setCurrentlyAddingMultipleFiles] = useState<string[] | null>(null)
 
-  // If we invalidate the data, we force an automatic refresh
+  // Invalidate the data to force an automatic refresh
   const utils = trpc.useUtils()
 
   const { data, isLoading } = trpc.getNonLinkedFiles.useQuery({ type: type, key: key })
@@ -192,7 +192,7 @@ const FileDataTable = ({ type }: FilesProps) => {
     // COLUMN: PROJECT BADGES
     {
       accessorKey: "projects",
-      header: 'All Projects',
+      header: 'Linked Projects',
       cell: ({ row }) => {
 
         const projects = row.getValue("projects") as FileProject[] | undefined;
@@ -218,7 +218,7 @@ const FileDataTable = ({ type }: FilesProps) => {
     // COLUMN: QUESTION BADGES
     {
       accessorKey: "questions",
-      header: 'All Questions',
+      header: 'Linked Questions',
       cell: ({ row }) => {
 
         const questions = row.getValue("questions") as FileQuestion[] | undefined;
@@ -254,8 +254,8 @@ const FileDataTable = ({ type }: FilesProps) => {
         const isAlreadyLinked = (type === 'project' ? fileProjects : fileQuestions).some(item => item.id === key);
 
         return (
-          <div className="lowercase">
-            {!isAlreadyLinked && (
+          <div className="lowercase text-right">
+            {!isAlreadyLinked ? (
               <LoadingButton
                 onClick={() => addLinkedFile({ fileId: fileIdFromTable, key: key, type: type })}
                 size='sm'
@@ -269,7 +269,7 @@ const FileDataTable = ({ type }: FilesProps) => {
                   <Plus className='h-4 w-4' />
                 )}
               </LoadingButton>
-            )}
+            ) : <span className='capitalize'>Added</span> }
           </div>
         )
       },
