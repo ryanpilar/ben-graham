@@ -18,9 +18,8 @@ import Skeleton from "react-loading-skeleton";
 
 interface ChooseFileContextProps {
   uploadedFile?: UploadedFileProps | {}
-  onClose: Dispatch<SetStateAction<boolean>>
 }
-const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) => {
+const ChooseFileContext = ({ uploadedFile }: ChooseFileContextProps) => {
 
 
 
@@ -69,7 +68,7 @@ const ChooseFileContext = ({ uploadedFile, onClose }: ChooseFileContextProps) =>
 
                   <section className="flex flex-row flex-wrap w-full justify-center gap-y-2 py-3">
 
-                    <ChooseFileContextForm uploadedFile={uploadedFile} onClose={onClose} />
+                    <ChooseFileContextForm uploadedFile={uploadedFile} />
 
                   </section>
 

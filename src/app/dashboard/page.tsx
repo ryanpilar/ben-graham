@@ -8,8 +8,7 @@ import UserDashboard from '@/components/UserDashboard';
 // 3rd Party Imports
 import { redirect } from 'next/navigation'
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import AddFile from '@/components/AddFile';
-import { trpcServer } from '@/trpc/trpc-caller';
+
 
 /** ================================|| Dashboard ||=================================== **/
 

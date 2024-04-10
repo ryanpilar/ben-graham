@@ -8,7 +8,7 @@ import UploadFileDialog from './UploadFileDialog';
 interface AddFileProps {
     isSubscribed: boolean
     label: string
-    skipUpload: boolean
+    skipUpload?: boolean
     onClose: Dispatch<SetStateAction<boolean>>
 }
 
@@ -18,7 +18,7 @@ const AddFile = ({ isSubscribed, label, skipUpload, onClose }: AddFileProps) => 
         <>
             <UploadFileDialog isSubscribed={isSubscribed} label={label} >
 
-                <UploadFileDropzone isSubscribed={isSubscribed} skipUpload={skipUpload} onClose={onClose} />
+                <UploadFileDropzone isSubscribed={isSubscribed} />
 
             </UploadFileDialog>
         </>

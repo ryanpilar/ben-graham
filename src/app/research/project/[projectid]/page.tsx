@@ -62,14 +62,11 @@ const Project = async ({ params }: PageProps) => {
 
                             <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
                             
-                            <Link href="?file-drawer">
-                                <Button variant="default">Open Dialog</Button>
-                            </Link>
-
+                            
                         </main>
                     </div>
                 </div>
-                
+
                 {/* Right sidebar */}
                 <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
                     OTHER AREA {project.kindeId}

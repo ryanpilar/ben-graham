@@ -8,6 +8,8 @@ import Dropzone from 'react-dropzone';
 import { FileCheck2, File, Loader2, Cloud } from 'lucide-react';
 import ChooseFileContext from './ChooseFileContext';
 import Skeleton from "react-loading-skeleton"
+import { useRouter } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 
 
 /** ================================|| Upload Dropzone ||=================================== **/
@@ -21,24 +23,42 @@ export interface UploadedFileProps {
 export interface UploadDropzoneProps {
     isSubscribed: boolean
     children?: ReactNode
-    skipUpload?: boolean
-    onClose: Dispatch<SetStateAction<boolean>>
 }
 
-const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: UploadDropzoneProps) => {
+const UploadFileDropzone = ({ isSubscribed, children }: UploadDropzoneProps) => {
 
     const [isUploading, setIsUploading] = useState<boolean>(false);
-    const [uploadProgress, setUploadProgress] = useState<number>(0); // For the determinate progress bar
-    // const [isChoosingContext, setIsChoosingContext] = useState(skipUpload);
-    const [isChoosingContext, setIsChoosingContext] = useState(true);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
+    const [isChoosingContext, setIsChoosingContext] = useState(false);
+
+
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const router = useRouter()
 
     const { toast } = useToast();
+
+    const utils = trpc.useUtils()
 
     const [uploadedFile, setUploadedFile] = useState<UploadedFileProps | {}>({})
 
     // Depending on if the user is on the free plan or the plus plan, choose the appropriate uploader
     const { startUpload } = useUploadThing(isSubscribed ? 'plusPlanUploader' : 'freePlanUploader');
 
+    const onOpenChange = (isOpen: boolean) => {
+
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        if (isOpen) {
+            // Add the "drop-doc" parameter, indicating the dialog should be open
+            newSearchParams.set("drop-doc", "");
+        } else {
+            // Remove the "drop-doc" parameter when closing the dialog
+            newSearchParams.delete("drop-doc");
+        }
+        const newPath = `${pathname}${newSearchParams.toString() ? `?${newSearchParams}` : ''}`;
+        router.push(newPath);
+
+    };
     const { mutate: startPolling } = trpc.getFile.useMutation({
 
         onSuccess: (file) => {
@@ -49,17 +69,24 @@ const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: Upl
                 path: `/dashboard/${file.id}`,
                 id: file.id
             })
+            
+            utils.getFiles.invalidate()
+            utils.getNonLinkedFiles.invalidate()
 
-            setIsChoosingContext(true);
-
+            // setIsChoosingContext(true);
             // router.push(`/dashboard/${file.id}`)
+            toast({
+                title: 'File added successfully',
+                // description: 'You have added a new file.',
+                variant: 'default',
+            })
+            onOpenChange(false)
         },
 
         // Retry indefinitely until we get our file
         retry: true,
         retryDelay: 500
     });
-
 
     const startSimulateProgress = () => {
         setUploadProgress(0);
@@ -72,7 +99,7 @@ const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: Upl
                 }
                 return prevValue + 5;
             });
-        }, 950);
+        }, 1100);
 
         return interval;
     };
@@ -189,7 +216,7 @@ const UploadFileDropzone = ({ isSubscribed, children, skipUpload, onClose }: Upl
                         fileName: 'string',
                         path: 'string',
                         id: 'string'
-                    }} onClose={onClose} />
+                    }} />
 
                 </>
             ) : null}

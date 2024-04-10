@@ -18,7 +18,7 @@ import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { Separator } from './ui/separator';
 import { Button, buttonVariants } from './ui/button';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { UploadedFileProps } from './UploadFileDropzone';
 import { trpc } from '@/app/_trpc/client';
 
@@ -53,15 +53,33 @@ const FormSchema = z.object({
 
 interface ChooseFileContextFormProps {
   uploadedFile?: UploadedFileProps
-  onClose: Dispatch<SetStateAction<boolean>>
 }
-const ChooseFileContextForm = ({ uploadedFile, onClose }: ChooseFileContextFormProps) => {
+const ChooseFileContextForm = ({ uploadedFile }: ChooseFileContextFormProps) => {
 
   const [loading, setLoading] = useState(false);
   const [userWantsContext, setUserWantsContext] = useState(false);
   const [submissionError, setSubmissionError] = useState('');
 
-  const router = useRouter()
+
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const onOpenChange = (isOpen: boolean) => {
+
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      if (isOpen) {
+          // Add the "drop-doc" parameter, indicating the dialog should be open
+          newSearchParams.set("drop-doc", "");
+      } else {
+          // Remove the "drop-doc" parameter when closing the dialog
+          newSearchParams.delete("drop-doc");
+      }
+      const newPath = `${pathname}${newSearchParams.toString() ? `?${newSearchParams}` : ''}`;
+      router.push(newPath);
+
+  };
+
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -79,7 +97,7 @@ const ChooseFileContextForm = ({ uploadedFile, onClose }: ChooseFileContextFormP
 
   function handleSkip() {
     setLoading(true)
-    onClose(false)
+    onOpenChange(false)
     
     // router.push(uploadedFile.path)
   }
