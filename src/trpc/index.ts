@@ -163,6 +163,12 @@ export const appRouter = router({
                             name: true,
                         },
                     },
+                    questions: {
+                        select: {
+                            id: true,
+                            text: true,
+                        },
+                    }
                 },
             });
 
@@ -171,6 +177,8 @@ export const appRouter = router({
                 id: file.id,
                 name: file.name,
                 projects: file.projects.map((project) => { return { id: project.id ?? '', name: project.name ?? '' } }),
+                questions: file.questions.map((question) => { return { id: question.id ?? '', text: question.text ?? '' } }),
+
             }));
 
             return result;
@@ -231,7 +239,7 @@ export const appRouter = router({
                 const updatedFileIds = question.fileIds.filter(id => id !== fileId)
                 await db.question.update({
                     where: { id: key },
-                    data: { fileIds: updatedFileIds }, 
+                    data: { fileIds: updatedFileIds },
                 });
 
                 // Update the file to remove the questionId from its questionIds array
@@ -249,15 +257,15 @@ export const appRouter = router({
             // return file;
         }),
     addLinkedFile: privateProcedure
-        .input(z.object({ fileId: z.string(), projectId: z.string() }))
-        // .input(z.object({
-        //     fileId: z.string(),
-        //     key: z.string(), // This will be either projectId or questionId based on the type
-        //     type: z.enum(['project', 'question']) // Define the type as 'project' or 'question'
-        // }))
+        // .input(z.object({ fileId: z.string(), projectId: z.string() }))
+        .input(z.object({
+            fileId: z.string(),
+            key: z.string(), // This will be either projectId or questionId based on the type
+            type: z.enum(['all', 'project', 'question']) // Define the type as 'project' or 'question'
+        }))
         .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx;
-            const { fileId, projectId } = input;
+            const { fileId, key, type } = input;
 
             // Verify if the file exists
             const fileExists = await db.file.findFirst({
@@ -267,46 +275,92 @@ export const appRouter = router({
                 },
             })
 
-            if (!fileExists) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (!fileExists) throw new TRPCError({ code: 'NOT_FOUND', message: 'File cannot be found' });
 
-            // Ensure the project exists and belongs to the current kindeId
-            const projectExists = await db.project.findUnique({
-                where: {
-                    id: projectId,
-                    kindeId,
-                },
-            })
+            if (type === 'project') {
 
-            if (!projectExists) throw new TRPCError({ code: 'NOT_FOUND' });
-
-            // Check if fileId is already linked to the project to avoid duplicates
-            if (!projectExists.fileIds.includes(fileId)) {
-                await db.project.update({
-                    where: { id: projectId },
-                    data: {
-                        fileIds: {
-                            push: fileId,
-                        },
+                // Ensure the project exists and belongs to the current kindeId
+                const projectExists = await db.project.findUnique({
+                    where: {
+                        id: key,
+                        kindeId,
                     },
-                });
-            }
+                })
 
-            // Similar approach for file.projectIds update, assuming similar structure
-            const file = await db.file.findUnique({
-                where: { id: fileId },
-                select: { projectIds: true }, // Select only projectIds
-            });
+                if (!projectExists) throw new TRPCError({ code: 'NOT_FOUND', message: 'Project cannot be found' });
 
-            if (file && !file.projectIds.includes(projectId)) {
-                await db.file.update({
+                // Check if fileId is already linked to the project to avoid duplicates
+                if (!projectExists.fileIds.includes(fileId)) {
+                    await db.project.update({
+                        where: { id: key },
+                        data: {
+                            fileIds: {
+                                push: fileId,
+                            },
+                        },
+                    });
+                }
+
+                // Similar approach for file.projectIds update, assuming similar structure
+                const file = await db.file.findUnique({
                     where: { id: fileId },
-                    data: {
-                        projectIds: {
-                            push: projectId,
-                        },
-                    },
+                    select: { projectIds: true }, // Select only projectIds
                 });
+
+                if (file && !file.projectIds.includes(key)) {
+                    await db.file.update({
+                        where: { id: fileId },
+                        data: {
+                            projectIds: {
+                                push: key,
+                            },
+                        },
+                    });
+                }
+
+            } else if (type === 'question') {
+                // Ensure the project exists and belongs to the current kindeId
+                const questionExists = await db.question.findUnique({
+                    where: {
+                        id: key,
+                        kindeId,
+                    },
+                })
+
+                if (!questionExists) throw new TRPCError({ code: 'NOT_FOUND', message: 'Question cannot be found' });
+
+                // Check if fileId is already linked to the project to avoid duplicates
+                if (!questionExists.fileIds.includes(fileId)) {
+                    await db.question.update({
+                        where: { id: key },
+                        data: {
+                            fileIds: {
+                                push: fileId,
+                            },
+                        },
+                    });
+                }
+
+                // Similar approach for file.projectIds update, assuming similar structure
+                const file = await db.file.findUnique({
+                    where: { id: fileId },
+                    select: { questionIds: true }, // Select only projectIds
+                });
+
+                if (file && !file.questionIds.includes(key)) {
+                    await db.file.update({
+                        where: { id: fileId },
+                        data: {
+                            questionIds: {
+                                push: key,
+                            },
+                        },
+                    });
+                }
+
             }
+
+
         }),
     addLinkedFiles: privateProcedure
         .input(z.object({ fileIds: z.array(z.string()), projectId: z.string() }))

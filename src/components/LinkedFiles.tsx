@@ -36,22 +36,17 @@ const LinkedFiles = ({ type }: FilesProps) => {
     };
 
     const key = getKey()
-
-    // We need to know exactly what file is currently being deleted
     const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
 
-    // If we invalidate the data, we force an automatic refresh
     const utils = trpc.useUtils()
-
     const { data: files, isLoading } = trpc.getFiles.useQuery({ type: type, key: key })
 
-    // One more useQuery to get all files
     const { mutate: removeLinkedFile } = trpc.removeLinkedFile.useMutation({
         onSuccess() {
             utils.getFiles.invalidate()
             utils.getNonLinkedFiles.invalidate()
         },
-        onMutate({ fileId }) {    // Callback right away when the button is clicked
+        onMutate({ fileId }) {    
             setCurrentlyDeletingFile(fileId)
         },
         onSettled() {
@@ -59,8 +54,6 @@ const LinkedFiles = ({ type }: FilesProps) => {
             setCurrentlyDeletingFile(null)
         }
     })
-
-
 
     return (
         <>

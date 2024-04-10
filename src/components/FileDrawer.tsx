@@ -89,7 +89,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                         <div className='flex justify-between'>
 
                             <div >
-                                <h2 className='flex items-center capitalize'>Viewing {type} <ChevronRight className='text-zinc-400 px-1' /> {research?.name || research?.text}</h2>
+                                <h2 className='flex items-center capitalize'>{type} <ChevronRight className='text-zinc-400 px-1' /> { type === 'project' ? research?.name : type === 'question' ?  research?.text : ''}</h2>
                                 <h3 className="text-2xl mt-2 mb-4 font-medium">Currently Linked Files </h3>
                             </div>
 
@@ -102,7 +102,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
                         <h3 className="text-2xl mt-8 font-medium">All Files</h3>
 
-                        <FileDataTable />
+                        <FileDataTable type={type} />
 
                     </div>
                 </Drawer.Content>

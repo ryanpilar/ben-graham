@@ -54,36 +54,53 @@ export type FileProject = {
   id: string
   name: string
 }
+export type FileQuestion = {
+  id: string
+  text: string
+}
 export type FileData = {
   id: string
-  questions?: string[]
+  questions: FileQuestion[]
   name: string
   projects: FileProject[]
 }
+interface FilesProps {
+  type: "project" | "question" | 'all'
+}
 
-const FileDataTable = () => {
+const FileDataTable = ({ type }: FilesProps) => {
 
   const params = useParams()
 
   // Infer type based on the key present in params
-  let type: "project" | "all" | "question" = 'all'
-  let key = '#';
 
-  if (params.projectid) {
-    type = 'project';
-    key = Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
-  } else if (params.questionId) {
-    type = 'question';
-    key = Array.isArray(params.questionId) ? params.questionId[0] : params.questionId;
-  }
+  // if (params.projectid) {
+  //   type = 'project';
+  //   key = Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
+  // } else if (params.questionid) {
+  //   type = 'question';
+  //   key = Array.isArray(params.questionid) ? params.questionid[0] : params.questionid;
+  // } 
 
-  // // We need to know exactly what file is currently being deleted
+  const getKey = () => {
+    if (type === 'project' && params.projectid) {
+      return Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
+    } else if (type === 'question' && params.questionid) {
+      return Array.isArray(params.questionid) ? params.questionid[0] : params.questionid;
+    }
+    return '#'
+  };
+
+  const key = getKey()
+
+
+  // We need to know exactly what file is currently being deleted
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
   const [currentlyAddingFile, setCurrentlyAddingFile] = useState<string | null>(null)
   const [loadingSelectedFiles, setLoadingSelectedFiles] = useState(false)
   const [currentlyAddingMultipleFiles, setCurrentlyAddingMultipleFiles] = useState<string[] | null>(null)
 
-  // // If we invalidate the data, we force an automatic refresh
+  // If we invalidate the data, we force an automatic refresh
   const utils = trpc.useUtils()
 
   const { data, isLoading } = trpc.getNonLinkedFiles.useQuery({ type: type, key: key })
@@ -92,6 +109,7 @@ const FileDataTable = () => {
     async onSuccess() {
       utils.getFiles.invalidate()
       utils.getNonLinkedFiles.invalidate()
+      table.resetRowSelection()
 
     },
     onMutate({ fileId }) {
@@ -114,42 +132,43 @@ const FileDataTable = () => {
     onSettled() {
       setCurrentlyAddingMultipleFiles(null)
       setLoadingSelectedFiles(false)
-
     }
   })
 
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
 
+  // TABLE COLUMN COMPONENTS
   const columns: ColumnDef<FileData>[] = [
+
+    // COLUMN: CHECKBOX
     {
       id: "select",
       cell: ({ row }) => {
-        const fileProjects = row.getValue("projects") as FileProject[];
+        const filterProjects = row.original.projects as FileProject[];
+        const filterQuestions = row.original.questions as FileQuestion[];
 
-        // Determine if the current file is linked to the project by checking if the project's ID matches the `key`
-        const isAlreadyLinked = fileProjects.some(project => project.id === key);
+        const isProjectAlreadyLinked = filterProjects.some(project => project.id === key);
+        const isQuestionAlreadyLinked = filterQuestions.some(question => question.id === key);
 
-        if (isAlreadyLinked) return null
+        if (isProjectAlreadyLinked || isQuestionAlreadyLinked) return null
 
         return (
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
             aria-label="Select row"
-            disabled={isAlreadyLinked || loadingSelectedFiles}
+            disabled={isProjectAlreadyLinked || loadingSelectedFiles}
           />
         )
       },
       enableSorting: false,
       enableHiding: false,
     },
+    // COLUMN: NAME
     {
       accessorKey: "name",
       // header: "Name",
@@ -170,6 +189,7 @@ const FileDataTable = () => {
         </Link>
       ),
     },
+    // COLUMN: PROJECT BADGES
     {
       accessorKey: "projects",
       header: 'Linked Projects',
@@ -179,7 +199,6 @@ const FileDataTable = () => {
 
         return (
           <div className="space-x-2">
-
             {projects?.map((project, index) => project.id === key ? (
               <Badge key={index} variant='outline' className='font-normal border-primary/50'>
                 {project.name.length > 15 ? `${project.name.substring(0, 15)}...` : project.name}
@@ -192,11 +211,11 @@ const FileDataTable = () => {
                 </Badge>
               </Link>
             ))}
-
           </div>
         )
       },
     },
+    // COLUMN: ADD BUTTON
     {
       accessorKey: "id",
       header: () => null,
@@ -204,18 +223,15 @@ const FileDataTable = () => {
       cell: ({ row }) => {
 
         const fileIdFromTable = row.getValue("id") as string
-        const fileProjects = row.getValue("projects") as FileProject[];
-
-        // Determine if the current file is linked to the project by checking if the project's ID matches the `key`
-        const isAlreadyLinked = fileProjects.some(project => project.id === key);
-
+        const fileProjects = row.original.projects as FileProject[];
+        const fileQuestions = row.original.questions as FileQuestion[];
+        const isAlreadyLinked = (type === 'project' ? fileProjects : fileQuestions).some(item => item.id === key);
 
         return (
           <div className="lowercase">
-
-            {!isAlreadyLinked && ( // Only show the button if the file is not linked to the project
+            {!isAlreadyLinked && (
               <LoadingButton
-                onClick={() => addLinkedFile({ fileId: fileIdFromTable, projectId: key })}
+                onClick={() => addLinkedFile({ fileId: fileIdFromTable, key: key, type: type })}
                 size='sm'
                 className='w-full'
                 variant='secondary'
@@ -228,7 +244,6 @@ const FileDataTable = () => {
                 )}
               </LoadingButton>
             )}
-
           </div>
         )
       },
@@ -268,7 +283,7 @@ const FileDataTable = () => {
     addLinkedFiles({ projectId: key, fileIds: selectedValues })
 
     // Clear checkbox state in data table
-    table.resetRowSelection() 
+    table.resetRowSelection()
   };
 
   return (
