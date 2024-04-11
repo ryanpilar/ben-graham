@@ -15,6 +15,7 @@ import { Drawer } from "vaul";
 import { DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import GoBack from './GoBack';
 import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle } from './ui/drawer';
+import Link from 'next/link';
 
 /** ================================|| File Drawer ||=================================== **/
 
@@ -64,6 +65,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
             setActiveSnapPoint={setSnap}
             // open={open} onOpenChange={setOpen}
             open={isOpen} onOpenChange={onOpenChange}
+
         >
             <Drawer.Trigger asChild>
                 <Button>Manage Files</Button>
@@ -73,28 +75,34 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
             <Drawer.Portal>
 
-                <Drawer.Content className="fixed flex flex-col bg-white border border-gray-200 border-b-none rounded-t-[10px] bottom-0 left-0 right-0 h-full max-h-[97%] mx-[-1px]">
-                    <div
-                        className={clsx("flex flex-col max-w-3xl mx-auto w-full p-4 pt-5", {
-                            "overflow-y-auto": snap === 1,
-                            "overflow-hidden": snap !== 1,
-                        })}
+                <Drawer.Content className={`
+                    fixed flex flex-col 
+                    bg-white border border-gray-200 border-b-none rounded-t-[10px] 
+                    bottom-0 left-0 right-0 
+                    h-full max-h-[97%] 
+                    max-w-5xl mx-auto
+                    `}>
+
+                    <div className={clsx("flex flex-col max-w-3xl mx-auto w-full p-4 pt-5", {
+                        "overflow-y-auto": snap === 1,
+                        "overflow-hidden": snap !== 1,
+                    })}
                     >
 
                         <DrawerHeader className='m-0 p-0'>
 
                             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 mb-5" />
 
-                            <GoBack />
+                            {/* <GoBack /> */}
 
                             <div className='flex w-full justify-between'>
 
                                 <DrawerTitle className='flex flex-wrap justify-start items-center'>
+                                    <h3 className="text-left w-full text-2xl font-medium">Currently Linked Files </h3>
 
                                     <h2 className='flex capitalize items-center'>{type} <ChevronRight className='text-zinc-400 px-1' />
                                         {type === 'project' ? research?.name : type === 'question' ? research?.text : ''}
                                     </h2>
-                                    <h3 className="text-left w-full text-2xl font-medium">Currently Linked Files </h3>
                                 </DrawerTitle>
 
                                 <AddFile isSubscribed={isSubscribed} label='Upload File' skipUpload={false} onClose={setOpen} />
@@ -109,7 +117,9 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
                         <LinkedFiles type={type} />
 
-                        <h3 className="text-2xl mt-8 font-medium">All Files</h3>
+                        <Link href='/dashboard'>
+                            <h3 className="text-2xl mt-8 font-medium">File Inventory</h3>
+                        </Link>
 
                         <FileDataTable type={type} />
 
