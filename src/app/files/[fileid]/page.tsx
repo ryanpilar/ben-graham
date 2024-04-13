@@ -46,6 +46,7 @@ const File = async ({ params }: PageProps) => {
     // Handle caching of resizable handles
     const layout = cookies().get("react-resizable-panels:layout");
     const collapsed = cookies().get("react-resizable-panels:collapsed");
+    
     let defaultCollapsed;
 
     if (collapsed?.value === undefined || collapsed?.value === "undefined") {

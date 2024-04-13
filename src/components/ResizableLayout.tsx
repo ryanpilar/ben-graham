@@ -29,7 +29,7 @@ import { Nav } from "@/app/mail/components/nav"
 import { Button } from "./ui/button"
 import { Button as NUIButton } from '@nextui-org/button';
 
-import { ImperativePanelHandle } from "react-resizable-panels"
+import { ImperativePanelHandle, PanelResizeHandle } from "react-resizable-panels"
 
 interface ResizableLayoutProps {
   accounts: {
@@ -50,16 +50,14 @@ export function ResizableLayout({
 
   const leftPanelRef = React.useRef<ImperativePanelHandle>(null);
   const rightPanelRef = React.useRef<ImperativePanelHandle>(null);
-
-
   const [isLeftCollapsed, setIsLeftCollapsed] = React.useState(defaultCollapsed)
   const [isRightCollapsed, setIsRightCollapsed] = React.useState(defaultCollapsed)
-
+  const [lastRightPosition, setLastRightPosition] = React.useState(30)
+  const [isRightHidden, setIsRightHidden] = React.useState(false)
 
   const toggleLeftCollapse = () => {
     if (leftPanelRef.current) {
       if (leftPanelRef.current.isCollapsed()) {
-        // panelRef.current.expand();
         leftPanelRef.current.resize(40)
       } else {
         leftPanelRef.current.collapse();
@@ -68,28 +66,40 @@ export function ResizableLayout({
   }
 
   const toggleRightCollapse = () => {
+
+    isRightHidden ? setIsRightHidden(false) : 'do nothing!'
+
     if (rightPanelRef.current) {
-      rightPanelRef.current.isCollapsed() ?
-        rightPanelRef.current.expand() : rightPanelRef.current.collapse();
+      if (rightPanelRef.current.isCollapsed()) {
+
+        const size = rightPanelRef.current.getSize()
+        console.log('lastRightPosition', lastRightPosition);
+        console.log('SIZE', size);
+
+
+        lastRightPosition > 25 ? rightPanelRef.current.expand() : rightPanelRef.current.resize(40)
+      } else {
+        const size = rightPanelRef.current.getSize()
+        setLastRightPosition(size)
+        rightPanelRef.current.collapse()
+        setIsRightHidden(true)
+      }
     }
   }
-
-  const handleResize = (newSize: number) => {
-    if (leftPanelRef.current) {
-      leftPanelRef.current.resize(newSize);
-    }
-  };
 
   return (
     <TooltipProvider delayDuration={0}>
 
       <ResizablePanelGroup
-        className="h-full max-h-[800px] items-stretch"
+        className="h-full max-h-[800px] items-stretch relative"
         direction="horizontal"
+        autoSaveId="persistence"
         onLayout={(sizes: number[]) => {
           document.cookie = `react-resizable-panels:layout=${JSON.stringify(sizes)}`
         }}
       >
+        
+
         <ResizablePanel
           id='left'
           ref={leftPanelRef}
@@ -224,34 +234,39 @@ export function ResizableLayout({
         </ResizablePanel>
 
         <ResizableHandle withHandle />
+        {/* <PanelResizeHandle /> */}
+
 
         {/* RIGHT PANEL */}
         <ResizablePanel
           id='right'
           ref={rightPanelRef}
           // className={`relative flex justify-center mt-52 transition-all duration-300 ease-in-out ${isRightCollapsed ? 'w-[50px]' : 'w-full'} mx-2 px-3`}
-          className={`relative transition-all duration-300 ease-in-out ${isRightCollapsed ? 'w-[50px]' : 'w-full'} mx-2 px-3`}
+          className={`transition-all duration-300 ease-in-out ${isRightCollapsed ? 'w-[50px]' : 'w-full '} px-0.5`}
 
           defaultSize={defaultLayout[2]}
-          // collapsedSize={50}  // Set a collapsed size for the icon only
+          collapsedSize={0}
+          minSize={0}
           collapsible={true}
           onCollapse={() => setIsRightCollapsed(true)}
           onExpand={() => setIsRightCollapsed(false)}
         >
 
+          {/* Floating Icon */}
+        <div className="absolute top-0 right-0 mt-2 mr-2" >
+          <Button variant='outline' className='' onClick={toggleRightCollapse}>
+            {isRightCollapsed ? <PanelLeftClose size={25} strokeWidth={1} absoluteStrokeWidth /> : <PanelLeftOpen size={25} strokeWidth={1.5} absoluteStrokeWidth />}
+          </Button>
+        </div>
+
           <NUIButton>RIGHT VIEW!</NUIButton>
 
-          {/* Floating Icon */}
-          <div className="absolute top-0 right-0 mt-2 mr-2">
-            <Button onClick={toggleRightCollapse} variant='outline'>
-              {isRightCollapsed ? <PanelLeftOpen size={25} strokeWidth={1} absoluteStrokeWidth /> : <PanelLeftClose size={25} strokeWidth={1.5} absoluteStrokeWidth />}
-            </Button>
-          </div>
-
           {/* Panel content */}
-          {!isRightCollapsed && <div className="p-10"></div>}
+          {/* {!isRightCollapsed && <div className="p-10"></div>} */}
 
         </ResizablePanel>
+
+        
 
       </ResizablePanelGroup>
     </TooltipProvider>
