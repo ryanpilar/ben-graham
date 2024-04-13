@@ -9,11 +9,14 @@ import { trpc } from '@/app/_trpc/client';
 // 3rd Party Imports
 import Link from 'next/link';
 import Skeleton from "react-loading-skeleton"
-import { Ghost, Loader2, MessageSquare, Plus, Trash, X } from 'lucide-react';
+import { CheckCheckIcon, Ghost, Loader2, MessageSquare, Plus, Trash, X } from 'lucide-react';
 
 import { useParams } from 'next/navigation';
 import { Badge, badgeVariants } from './ui/badge';
 import { cn } from '@/lib/utils';
+
+import { Chip } from '@nextui-org/chip';
+import { CheckCircle } from 'lucide-react';
 
 /** =================================|| Linked Files ||==================================== **/
 
@@ -43,6 +46,8 @@ const LinkedFiles = ({ type }: FilesProps) => {
         onSuccess() {
             utils.getFiles.invalidate()
             utils.getNonLinkedFiles.invalidate()
+            utils.getFileCount.invalidate()
+
         },
         onMutate({ fileId }) {
             setCurrentlyDeletingFile(fileId)
@@ -54,10 +59,12 @@ const LinkedFiles = ({ type }: FilesProps) => {
     })
 
     return (
-        <div className="rounded-md border">
+        <div className="rounded-md ">
+
             {files && files?.length !== 0 ? (
-                <div className='flex flex-wrap gap-2 p-2'>
-                    {files
+                <div className='flex flex-wrap gap-2 '>
+
+                    {/* {files
                         .map((file) => (
 
                             <Badge variant='outline' className='flex gap-x-8 justify-between  shadow-md rounded-xl hover:scale-105 border-primary/50'>
@@ -84,11 +91,60 @@ const LinkedFiles = ({ type }: FilesProps) => {
                             </Badge>
 
                         ))
+                    } */}
+
+                    {files
+                        .map((file, index) => (
+
+                            <Chip
+                                variant="shadow"
+                                color="secondary"
+                                size='lg'
+                                radius='sm'
+                                className='text-foreground-500'
+                                onClose={() => removeLinkedFile({ fileId: file.id, key: key, type: type })}
+                                // startContent={<CheckCircle strokeWidth={2} absoluteStrokeWidth />}
+                                startContent={<>{index + 1}.</>}
+                                endContent={currentlyDeletingFile === file.id ? (
+                                    <Loader2 className='h-4 w-4  ml-3 animate-spin' />
+                                ) : (
+                                    <X strokeWidth={2} className='h-4 w-4 ml-4 ' />
+                                )}
+                            >
+
+                                <Link
+                                    href={`/dashboard/${file.id}`}
+                                className='ml-1'
+                                >
+                                    {file.name}
+
+                                </Link>
+                                {/* <Button
+                                    onClick={() =>
+                                        removeLinkedFile({ fileId: file.id, key: key, type: type })
+                                    }
+                                    size='sm'
+                                    className='w-full rounded-full bg-white'
+                                    variant='destructive'
+                                    >
+                                    {currentlyDeletingFile === file.id ? (
+                                        <Loader2 className='h-4 w-4 animate-spin'  />
+                                    ) : (
+                                        <Trash className='h-4 w-4' />
+                                        // <X className='h-4 w-4' />
+                                    )}
+                                </Button> */}
+                            </Chip>
+
+                        ))
                     }
+
+
+
                 </div>
             ) : isLoading ? (
                 // Loading state condition:
-                <Skeleton height={100} className='my-2' count={3} />
+                <Skeleton height={40} className='my-2' count={3} />
             ) : (
                 // Empty state condition:
                 <div className='mt-16 flex flex-col items-center gap-2'>

@@ -8,8 +8,8 @@ import ChatWrapper from '@/components/chat/ChatWrapper';
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 
-import { ChevronLeft } from "lucide-react"
 import GoBack from '@/components/GoBack';
+
 
 /** ================================|| File ||=================================== **/
 

@@ -12,6 +12,7 @@ import AddQuestionButton from '@/components/AddQuestionButton';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import BadgeFileCounter from '@/components/BadgeFileCounter';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -60,8 +61,9 @@ const Project = async ({ params }: PageProps) => {
 
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
 
-                            <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
-                            
+                            <BadgeFileCounter type={'project'} >
+                                <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
+                            </BadgeFileCounter>
                             
                         </main>
                     </div>

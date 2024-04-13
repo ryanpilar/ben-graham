@@ -6,6 +6,8 @@ import React, { useCallback, useContext } from 'react'
 import { OriginContext } from './OriginProvider';
 import { cn } from '@/lib/utils';
 
+import { Button as NUIButton } from '@nextui-org/button';
+
 /** ================================|| Go Back ||=================================== 
 
     -   Give up on this and switch instead to Next Parallel Routing / Slots
@@ -20,21 +22,27 @@ import { cn } from '@/lib/utils';
 **/
 
 interface GoBackProps {
-    className?: 'string'
+    className?: string
 }
 
-const GoBack = ({className}: GoBackProps) => {
+const GoBack = ({ className }: GoBackProps) => {
     const router = useRouter();
     const isWithinPage = useContext(OriginContext);
-  
+
     const handleClick = useCallback(() => {
-      if (isWithinPage) router.back();
-      else router.push('/');
+        if (isWithinPage) router.back();
+        else router.push('/');
     }, [isWithinPage, router]);
 
     return (
         <>
-            <button className={cn('flex items-center text-secondary-foreground', className)} onClick={handleClick} ><ChevronLeft className='h-4 w-4'/>Back</button>
+            <button
+                className={cn('flex items-center text-foreground-400', className)}
+                aria-label="Go back to previous view" onClick={handleClick}
+            >
+                <ChevronLeft className='h-5 w-5 mr-1' />
+                Back
+            </button>
         </>
     );
 };

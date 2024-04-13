@@ -1,0 +1,116 @@
+
+import React from 'react';
+import { db } from '@/db';
+
+import { accounts } from "@/app/mail/data";
+import GoBack from '@/components/GoBack';
+
+import PdfRenderer from '@/components/PdfRenderer';
+import ChatWrapper from '@/components/chat/ChatWrapper';
+import { ResizableLayout } from '../../../components/ResizableLayout';
+
+import { cookies } from "next/headers";
+
+import { notFound, redirect } from 'next/navigation';
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+
+
+
+/** ================================|| Single File ||=================================== **/
+
+
+interface PageProps {
+  params: {
+    fileid: string
+  }
+}
+
+const File = async ({ params }: PageProps) => {
+
+  // User auth and verify if the given file exists
+  const { fileid } = params;
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user || !user.id) redirect(`/auth-callback?origin=files/${fileid}`);
+
+  const file = await db.file.findFirst({
+    where: {
+      id: fileid,
+      kindeId: user.id
+    }
+  });
+
+  if (!file) notFound();
+
+    // Handle caching of resizable handles
+    const layout = cookies().get("react-resizable-panels:layout");
+    const collapsed = cookies().get("react-resizable-panels:collapsed");
+    let defaultCollapsed;
+
+    if (collapsed?.value === undefined || collapsed?.value === "undefined") {
+      defaultCollapsed = false;
+
+    } else {
+      // Safely parse collapsed.value, assuming it can be valid JSON or undefined
+      try {
+        defaultCollapsed = JSON.parse(collapsed.value);
+      } catch (error) {
+        console.error("Error parsing collapsed value:", error);
+        defaultCollapsed = false;
+      }
+    }
+
+    let defaultLayout;
+
+    // Similar handling for layout to prevent similar errors
+    try {
+      defaultLayout = layout ? JSON.parse(layout.value) : undefined;
+    } catch (error) {
+      console.error("Error parsing layout value:", error);
+      defaultLayout = undefined;
+    }
+  
+  const LeftView = () => {
+    return (
+      <div className='flex-1 xl:flex'>
+        <div className='px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6'>
+
+          <GoBack />
+          <PdfRenderer url={file.url} />
+
+        </div>
+      </div>
+    );
+  };
+
+  const RightView = () => {
+    return (
+      <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
+        {/* <ChatWrapper isSubscribed={plan.isSubscribed} fileId={file.id} /> */}
+        <ChatWrapper fileId={file.id} />
+
+      </div>
+    );
+  };
+
+  return (
+    <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
+      <div className='mx-auto w-full max-w-8xl grow lg:flex xl:px-2'>
+
+        <ResizableLayout
+          accounts={accounts}
+          defaultLayout={defaultLayout}
+          defaultCollapsed={defaultCollapsed}
+          navCollapsedSize={4}
+        // left={<LeftView />}
+        // middle={<MiddleView />}
+        // right={<RightView />} 
+        />
+
+      </div>
+    </div>
+  );
+};
+
+export default File

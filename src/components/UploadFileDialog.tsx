@@ -1,10 +1,12 @@
 "use client"
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, Suspense, useState } from 'react'
 // Project Imports
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
-import { useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname, useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { trpc } from '@/app/_trpc/client';
+import BadgeFileCounter from './BadgeFileCounter';
 
 /** =================================|| Upload File Dialog ||==================================== **/
 
@@ -12,12 +14,10 @@ interface UploadFileDialogProps {
     isSubscribed: boolean
     label: string
     children: ReactNode
+    type: 'all' | 'project' | 'question'
 }
-const UploadFileDialog = ({ isSubscribed, label, children }: UploadFileDialogProps) => {
+const UploadFileDialog = ({ isSubscribed, label, children, type }: UploadFileDialogProps) => {
 
-    // const [isOpen, setIsOpen] = useState<boolean>(false)
-
-    // New Experimental Code
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -44,23 +44,16 @@ const UploadFileDialog = ({ isSubscribed, label, children }: UploadFileDialogPro
             // modal={false}
             open={isOpen}
             onOpenChange={onOpenChange}
-        // onOpenChange={(visible) => {
-        //     if (!visible) {
-        //         setIsOpen(visible)
-        //     }
-        // }}
         >
 
             {/* Note:   We need to use 'asChild' if you want to use a custom button, 
                         b/c a DialogTrigger, if not changed with asChild, is a button by default */}
-            <DialogTrigger
-                // onClick={() => setIsOpen(true)} 
-
-                onClick={() => onOpenChange(true)}
-
-                asChild>
-                <Button>{label}</Button>
-            </DialogTrigger>
+                <DialogTrigger
+                    onClick={() => onOpenChange(true)}
+                    asChild
+                >
+                    <Button>{label}</Button>
+                </DialogTrigger>
 
             {/* Note:   Tooltip is focused on and opens when dialog renders. 
                         onOpenAutoFocus prevents that but makes tabbing slightly weird */}

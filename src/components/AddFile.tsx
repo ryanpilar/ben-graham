@@ -1,22 +1,22 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 // Project Imports
 import UploadFileDropzone from './UploadFileDropzone';
 import UploadFileDialog from './UploadFileDialog';
 
-/** =================================|| Upload Button ||==================================== **/
+/** =================================|| Add File ||==================================== **/
 
 interface AddFileProps {
     isSubscribed: boolean
     label: string
     skipUpload?: boolean
-    onClose: Dispatch<SetStateAction<boolean>>
+    type: 'all' | 'project' | 'question'
 }
 
-const AddFile = ({ isSubscribed, label, skipUpload, onClose }: AddFileProps) => {
+const AddFile = ({ isSubscribed, label, type }: AddFileProps) => {
 
     return (
         <>
-            <UploadFileDialog isSubscribed={isSubscribed} label={label} >
+            <UploadFileDialog isSubscribed={isSubscribed} label={label} type={type} >
 
                 <UploadFileDropzone isSubscribed={isSubscribed} />
 

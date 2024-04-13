@@ -13,10 +13,11 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Loader2, LoaderIcon, MoreHorizontal, Plus, PlusSquare } from "lucide-react"
+import { ArrowUpDown, CheckIcon, ChevronDown, Loader2, LoaderIcon, MoreHorizontal, Plus, PlusSquare } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox as NUICheckbox, useCheckbox } from '@nextui-org/checkbox'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -39,9 +40,15 @@ import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { trpc } from "@/app/_trpc/client"
 import { Badge, badgeVariants } from "./ui/badge"
+import { Chip as NUIChip } from "@nextui-org/chip"
+import { Tooltip as NUITooltip } from "@nextui-org/tooltip"
+
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { LoadingButton } from "./ui/loading-button"
+import { tv } from "@nextui-org/theme"
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import Skeleton from "react-loading-skeleton"
 // Project Imports
 // 3rd Party Imports
 // Styles
@@ -72,16 +79,6 @@ const FileDataTable = ({ type }: FilesProps) => {
 
   const params = useParams()
 
-  // Infer type based on the key present in params
-
-  // if (params.projectid) {
-  //   type = 'project';
-  //   key = Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
-  // } else if (params.questionid) {
-  //   type = 'question';
-  //   key = Array.isArray(params.questionid) ? params.questionid[0] : params.questionid;
-  // } 
-
   const getKey = () => {
     if (type === 'project' && params.projectid) {
       return Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
@@ -92,7 +89,6 @@ const FileDataTable = ({ type }: FilesProps) => {
   };
 
   const key = getKey()
-
 
   // We need to know exactly what file is currently being deleted
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
@@ -109,6 +105,7 @@ const FileDataTable = ({ type }: FilesProps) => {
     async onSuccess() {
       utils.getFiles.invalidate()
       utils.getNonLinkedFiles.invalidate()
+      utils.getFileCount.invalidate()
       table.resetRowSelection()
 
     },
@@ -125,6 +122,8 @@ const FileDataTable = ({ type }: FilesProps) => {
     async onSuccess() {
       utils.getFiles.invalidate()
       utils.getNonLinkedFiles.invalidate()
+      utils.getFileCount.invalidate()
+
     },
     onMutate({ fileIds }) {
       setCurrentlyAddingMultipleFiles(fileIds)
@@ -145,29 +144,42 @@ const FileDataTable = ({ type }: FilesProps) => {
   const columns: ColumnDef<FileData>[] = [
 
     // COLUMN: CHECKBOX
-    {
-      id: "select",
-      cell: ({ row }) => {
-        const filterProjects = row.original.projects as FileProject[];
-        const filterQuestions = row.original.questions as FileQuestion[];
+    // {
+    //   id: "select",
+    //   cell: ({ row }) => {
+    //     const filterProjects = row.original.projects as FileProject[];
+    //     const filterQuestions = row.original.questions as FileQuestion[];
 
-        const isProjectAlreadyLinked = filterProjects.some(project => project.id === key);
-        const isQuestionAlreadyLinked = filterQuestions.some(question => question.id === key);
+    //     const isProjectAlreadyLinked = filterProjects.some(project => project.id === key);
+    //     const isQuestionAlreadyLinked = filterQuestions.some(question => question.id === key);
 
-        if (isProjectAlreadyLinked || isQuestionAlreadyLinked) return null
+    //     if (isProjectAlreadyLinked || isQuestionAlreadyLinked) return null
 
-        return (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-            disabled={isProjectAlreadyLinked || loadingSelectedFiles}
-          />
-        )
-      },
-      enableSorting: false,
-      enableHiding: false,
-    },
+    //     return (
+    //       <>
+    //         <NUICheckbox
+    //           isSelected={row.getIsSelected()}
+    //           onValueChange={(value) => row.toggleSelected(!!value)}
+    //           aria-label="Select row"
+    //           isDisabled={isProjectAlreadyLinked || isQuestionAlreadyLinked || loadingSelectedFiles}
+    //           color='primary'
+    //           size='md'
+    //           radius='sm'
+    //         />
+
+
+    //         <Checkbox
+    //           checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)}
+    //           aria-label="Select row"
+    //           disabled={isProjectAlreadyLinked || loadingSelectedFiles}
+    //         />
+    //       </>
+
+    //     )
+    //   },
+    //   enableSorting: false,
+    //   enableHiding: false,
+    // },
     // COLUMN: NAME
     {
       accessorKey: "name",
@@ -198,8 +210,9 @@ const FileDataTable = ({ type }: FilesProps) => {
         const projects = row.getValue("projects") as FileProject[] | undefined;
 
         return (
-          <div className="space-x-2">
-            {projects?.map((project, index) => project.id === key ? (
+          <div className="flex gap-x-2 gap-y-1">
+
+            {/* {projects?.map((project, index) => project.id === key ? (
               <Badge key={index} variant='outline' className='font-normal border-primary/50'>
                 {project.name.length > 15 ? `${project.name.substring(0, 15)}...` : project.name}
               </Badge>
@@ -210,7 +223,37 @@ const FileDataTable = ({ type }: FilesProps) => {
                   {project.name.length > 15 ? `${project.name.substring(0, 15)}...` : project.name}
                 </Badge>
               </Link>
-            ))}
+            ))} */}
+
+            {projects?.map((project, index) => {
+              // Determine if the project is the currently selected one
+              const isSelected = project.id === key;
+
+              // Truncate the project name if it's too long
+              const displayProjectName = project.name.length > 15 ? `${project.name.substring(0, 15)}...` : project.name;
+
+              return (
+                // <NUITooltip key={index} content={project.name} placement="top-start" radius="sm" showArrow >
+                  <NUIChip
+                    variant="shadow"
+                    color="secondary"
+                    size="sm"
+                    radius="sm"
+                    className="text-foreground-500"
+                  >
+                    {/* Conditionally render the content inside the chip based on whether the project is selected */}
+                    {isSelected ? (
+                      displayProjectName // Just display text if selected
+                    ) : (
+                      <Link href={`/research/project/${project.id}`}>
+                        {displayProjectName}
+                      </Link>
+                    )}
+                  </NUIChip>
+                // </NUITooltip> 
+              )
+            })}
+
           </div>
         )
       },
@@ -224,8 +267,8 @@ const FileDataTable = ({ type }: FilesProps) => {
         const questions = row.getValue("questions") as FileQuestion[] | undefined;
 
         return (
-          <div className="space-x-2">
-            {questions?.map((question, index) => question.id === key ? (
+          <div className="flex gap-x-2 gap-y-1">
+            {/* {questions?.map((question, index) => question.id === key ? (
               <Badge key={index} variant='outline' className='font-normal border-primary/50'>
                 {question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text}
               </Badge>
@@ -236,7 +279,35 @@ const FileDataTable = ({ type }: FilesProps) => {
                   {question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text}
                 </Badge>
               </Link>
-            ))}
+            ))} */}
+            {questions?.map((question, index) => {
+              // Check if the current question is the selected one
+              const isSelected = question.id === key;
+
+              // Truncate text if it's too long
+              const displayText = question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text;
+
+              return (
+                <NUITooltip key={index} content={question.text} placement="top-start" radius="sm" showArrow >
+                  <NUIChip
+                    variant="shadow"
+                    color="secondary"
+                    size="sm"
+                    radius="sm"
+                    className="text-foreground-500"
+                  >
+                    {/* Conditionally render the content inside the chip based on whether the question is selected */}
+                    {isSelected ? (
+                      displayText // Just display text if selected
+                    ) : (
+                      <Link href={`/research/question/${question.id}`}>
+                        {displayText}
+                      </Link>
+                    )}
+                  </NUIChip>
+                </NUITooltip>
+              );
+            })}
           </div>
         )
       },
@@ -253,9 +324,65 @@ const FileDataTable = ({ type }: FilesProps) => {
         const fileQuestions = row.original.questions as FileQuestion[];
         const isAlreadyLinked = (type === 'project' ? fileProjects : fileQuestions).some(item => item.id === key);
 
+        const checkbox = tv({
+          slots: {
+            base: "border-default hover:bg-default-200",
+            content: "text-default-500"
+          },
+          variants: {
+            isSelected: {
+              true: {
+                base: "border-primary bg-primary hover:bg-primary-500 hover:border-primary-500",
+                content: "text-primary-foreground pl-1"
+              }
+            },
+            isFocusVisible: {
+              true: {
+                base: "outline-none ring-2 ring-focus ring-offset-2 ring-offset-background",
+              }
+            }
+          }
+        })
+
+        const {
+          children,
+          isSelected,
+          isFocusVisible,
+          getBaseProps,
+          getLabelProps,
+          getInputProps,
+        } = useCheckbox({
+          defaultSelected: true,
+        })
+
+        const styles = checkbox({ isSelected, isFocusVisible })
+
         return (
+          // <label {...getBaseProps()}>
+          //   <VisuallyHidden.Root>
+          //     <input {...getInputProps()} />
+          //   </VisuallyHidden.Root>
+
+          //   <NUIChip
+          //     classNames={{
+          //       base: styles.base(),
+          //       content: styles.content(),
+          //     }}
+          //     color="primary"
+          //     startContent={isSelected ? <CheckIcon className="ml-1" /> : null}
+          //     variant="faded"
+          //     {...getLabelProps()}
+          //   >
+          //     {children ? children : isSelected ? "Added" : "Not Added"}
+          //   </NUIChip>
+          // </label>
+
           <div className="lowercase text-right">
             {!isAlreadyLinked ? (
+
+
+
+
               <LoadingButton
                 onClick={() => addLinkedFile({ fileId: fileIdFromTable, key: key, type: type })}
                 size='sm'
@@ -263,13 +390,20 @@ const FileDataTable = ({ type }: FilesProps) => {
                 variant='secondary'
                 disabled={loadingSelectedFiles}
               >
+
                 {currentlyAddingFile === fileIdFromTable ? (
+
                   <Loader2 className='h-4 w-4 animate-spin' />
                 ) : (
                   <Plus className='h-4 w-4' />
                 )}
+
               </LoadingButton>
-            ) : <span className='capitalize'>Added</span> }
+
+            ) : <span className='capitalize'>Added</span>
+
+
+            }
           </div>
         )
       },
@@ -378,7 +512,19 @@ const FileDataTable = ({ type }: FilesProps) => {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+
+            {isLoading ? (
+              // Assume you want to display 4 skeleton rows during loading
+              Array.from({ length: 4 }).map((_, index) => (
+                <TableRow key={`$skeleton-table-row-${index}-index`}>
+                  {Array.from({ length: columns.length }).map((_, index) => (
+                    <TableCell key={`$skeleton-table-cell-${index}-index`}>
+                      <Skeleton height={35} width="100%" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -404,11 +550,40 @@ const FileDataTable = ({ type }: FilesProps) => {
                 </TableCell>
               </TableRow>
             )}
+
+
+
+            {/* {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )} */}
           </TableBody>
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <LoadingButton
+        {/* <LoadingButton
           variant={Object.keys(table.getState().rowSelection).length > 0 ? `ringHover` : `outline`}
           size="sm"
           onClick={() => handleAddSelectionClick()}
@@ -421,7 +596,7 @@ const FileDataTable = ({ type }: FilesProps) => {
         <div className="flex-1 text-sm text-muted-foreground pl-2.5">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
+        </div> */}
 
         <div className="space-x-2">
           <Button

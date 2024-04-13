@@ -107,6 +107,30 @@ export const appRouter = router({
 
             return file
         }),
+    getFileCount: privateProcedure
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
+        .query(async ({ input, ctx }) => {
+
+            const { kindeId } = ctx;
+            const { key, type } = input
+
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            // Count files filtered by type and key
+            const count = await db.file.count({
+                where: {
+                    kindeId: kindeId,
+                    ...(type !== 'all' && {
+                        [type === 'project' ? 'projectIds' : 'questionIds']: {
+                            has: key
+                        }
+                    })
+                }
+            });
+            return count
+
+        }),
     getUserFiles: privateProcedure
         .query(async ({ ctx }) => {
             const { user, kindeId } = ctx
@@ -422,7 +446,7 @@ export const appRouter = router({
             const { kindeId } = ctx;
             const { fileIds, key, type } = input;
 
-            
+
 
             if (type === 'project') {
 

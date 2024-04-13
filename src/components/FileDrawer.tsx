@@ -4,18 +4,24 @@ import React, { useState } from 'react'
 // Project Imports
 import AddFile from './AddFile';
 import { Button } from './ui/button';
+import { Button as NUIButton } from '@nextui-org/button';
+
 import LinkedFiles from './LinkedFiles';
 import { trpc } from '@/app/_trpc/client';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import FileDataTable from './FileDataTable';
 // 3rd Party Imports
 import { clsx } from "clsx";
 import { Drawer } from "vaul";
 import { DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import GoBack from './GoBack';
-import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle } from './ui/drawer';
+import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from './ui/drawer';
 import Link from 'next/link';
+import { Expand } from 'lucide-react';
+
+import BadgeFileCounter from './BadgeFileCounter';
+import { Separator } from './ui/separator';
 
 /** ================================|| File Drawer ||=================================== **/
 
@@ -80,52 +86,75 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                     bg-white border border-gray-200 border-b-none rounded-t-[10px] 
                     bottom-0 left-0 right-0 
                     h-full max-h-[97%] 
-                    max-w-5xl mx-auto
+                    max-w-6xl mx-auto
                     `}>
 
-                    <div className={clsx("flex flex-col max-w-3xl mx-auto w-full p-4 pt-5", {
+                    <div className='relative flex justify-between'>
+
+                        {/* <GoBack className='pl-2 pt-4 text-foreground-400' /> */}
+
+                        <div className="mx-auto w-12 h-[4.5px] flex-shrink-0 rounded-full bg-zinc-300 mt-5 mb-5" />
+
+                        <div className='absolute flex w-full justify-between items-center gap-x-2  pt-1.5'>
+
+                            <DrawerClose className='px-4'>
+                                <X size={25} strokeWidth={1} absoluteStrokeWidth className='text-foreground-400' />
+                            </DrawerClose>
+
+                            {snap === 0.95 ?
+                                <Button variant="none" aria-label="Minimize file drawer" onClick={() => setSnap(0.30)}>
+                                    <Minimize2 size={25} strokeWidth={1} absoluteStrokeWidth className='text-foreground-400' />
+                                </Button>
+                                :
+                                <Button variant="none" aria-label="Maximize file drawer" onClick={() => setSnap(0.95)}>
+                                    <Maximize2 strokeWidth={1} absoluteStrokeWidth className='text-foreground-400' />
+                                </Button>
+                            }
+
+                        </div>
+                    </div>
+
+                    <div className={clsx("flex flex-col max-w-4xl mx-auto w-full p-4 pt-3", {
                         "overflow-y-auto": snap === 1,
                         "overflow-hidden": snap !== 1,
                     })}
                     >
+                        <DrawerHeader className='flex w-full justify-between items-end px-0'>
+                            <DrawerTitle className='flex flex-wrap justify-start items-center'>
 
-                        <DrawerHeader className='m-0 p-0'>
+                                <h2 className='flex w-full capitalize text-3xl  items-center pb-2 z-10'>{type} <ChevronRight className='text-zinc-400 px-1' />
+                                    {type === 'project' ? research?.name : type === 'question' ? research?.text : ''}
+                                </h2>
 
-                            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 mb-5" />
+                                <BadgeFileCounter type={type}>
+                                    <h3 className="text-left w-full text-xl font-medium mr-4">Currently Linked Files </h3>
+                                </BadgeFileCounter>
 
-                            {/* <GoBack /> */}
+                                <DrawerDescription className='w-full text-left font-normal'>
+                                    Link a file, or several files, to a project, or multiple projects, or even questions.
+                                </DrawerDescription>
+                            </DrawerTitle>
 
-                            <div className='flex w-full justify-between'>
-
-                                <DrawerTitle className='flex flex-wrap justify-start items-center'>
-                                    <h3 className="text-left w-full text-2xl font-medium">Currently Linked Files </h3>
-
-                                    <h2 className='flex capitalize items-center'>{type} <ChevronRight className='text-zinc-400 px-1' />
-                                        {type === 'project' ? research?.name : type === 'question' ? research?.text : ''}
-                                    </h2>
-                                </DrawerTitle>
-
-                                <AddFile isSubscribed={isSubscribed} label='Upload File' skipUpload={false} onClose={setOpen} />
-
-                            </div>
-
-                            <DrawerDescription className='text-left mb-4'>
-                                Link a file, or several files, to a project, or multiple projects, or even questions.
-                            </DrawerDescription>
+                            <AddFile isSubscribed={isSubscribed} label='Upload File' skipUpload={false} type={type} />
 
                         </DrawerHeader>
 
+                        <Separator className='mb-6 h-[1.5px]' />
+
                         <LinkedFiles type={type} />
 
-                        <Link href='/dashboard'>
-                            <h3 className="text-2xl mt-8 font-medium">File Inventory</h3>
-                        </Link>
+                        <h3 className="text-xl mt-8 font-medium py-2">
+                            <Link href='/dashboard'>
+                                File Inventory
+                            </Link>
+                        </h3>
+
+                        <Separator className='mb-2 h-[0.5px]' />
 
                         <FileDataTable type={type} />
 
                     </div>
                 </Drawer.Content>
-
             </Drawer.Portal>
         </Drawer.Root>
     );

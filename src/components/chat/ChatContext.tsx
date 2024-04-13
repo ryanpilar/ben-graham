@@ -240,7 +240,6 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                 )
             }
         },
-
         // THe only thing that we want to receive here, is not the first argument, not even the second, we just want the context
         onError: (_, __, context) => {
             // We want to put in the text that we already optimistically put in the chat window, back into the text box.

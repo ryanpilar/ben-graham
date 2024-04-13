@@ -13,14 +13,14 @@ import GoBack from './GoBack';
 
 /** ================================|| User Dashboard ||=================================== **/
 
-interface PageProps { 
+interface PageProps {
     subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
     params: any
- }
+}
 
 const UserDashboard = ({ subscriptionPlan, params }: PageProps) => {
     console.log('params user-d', params);
-    
+
     return (
         <main className='mx-auto max-w-7xl md:p-10'>
 
@@ -30,7 +30,7 @@ const UserDashboard = ({ subscriptionPlan, params }: PageProps) => {
                 </h1>
 
                 <Suspense fallback={<Skeleton count={1} />}>
-                    <AddFile isSubscribed={subscriptionPlan.isSubscribed} label='Upload File' skipUpload={false} />
+                    <AddFile isSubscribed={subscriptionPlan.isSubscribed} label='Upload File' skipUpload={false} type={'all'} />
                 </Suspense>
 
             </div>
