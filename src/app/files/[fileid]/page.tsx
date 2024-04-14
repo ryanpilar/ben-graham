@@ -43,41 +43,40 @@ const File = async ({ params }: PageProps) => {
 
   if (!file) notFound();
 
-    // Handle caching of resizable handles
-    const layout = cookies().get("react-resizable-panels:layout");
-    const collapsed = cookies().get("react-resizable-panels:collapsed");
-    
-    let defaultCollapsed;
+  // Handle caching of resizable handles
+  const layout = cookies().get("react-resizable-panels:layout");
+  const collapsed = cookies().get("react-resizable-panels:collapsed");
 
-    if (collapsed?.value === undefined || collapsed?.value === "undefined") {
-      defaultCollapsed = false;
+  let defaultCollapsed;
 
-    } else {
-      // Safely parse collapsed.value, assuming it can be valid JSON or undefined
-      try {
-        defaultCollapsed = JSON.parse(collapsed.value);
-      } catch (error) {
-        console.error("Error parsing collapsed value:", error);
-        defaultCollapsed = false;
-      }
-    }
+  if (collapsed?.value === undefined || collapsed?.value === "undefined") {
+    defaultCollapsed = false;
 
-    let defaultLayout;
+  } else {
 
-    // Similar handling for layout to prevent similar errors
     try {
-      defaultLayout = layout ? JSON.parse(layout.value) : undefined;
+      defaultCollapsed = JSON.parse(collapsed.value);
     } catch (error) {
-      console.error("Error parsing layout value:", error);
-      defaultLayout = undefined;
+      console.error("Error parsing collapsed value:", error);
+      defaultCollapsed = false;
     }
-  
+  }
+
+  let defaultLayout;
+
+  try {
+    defaultLayout = layout ? JSON.parse(layout.value) : undefined;
+  } catch (error) {
+    console.error("Error parsing layout value:", error);
+    defaultLayout = undefined;
+  }
+
   const LeftView = () => {
     return (
       <div className='flex-1 xl:flex'>
         <div className='px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6'>
 
-          <GoBack />
+          {/* <GoBack /> */}
           <PdfRenderer url={file.url} />
 
         </div>
@@ -87,30 +86,55 @@ const File = async ({ params }: PageProps) => {
 
   const RightView = () => {
     return (
-      <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
-        {/* <ChatWrapper isSubscribed={plan.isSubscribed} fileId={file.id} /> */}
+      <>
+        {/* ADJUSTABLE LAYOUT */}
+        {/* <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:border-l lg:border-t-0'>
+
+        <ChatWrapper isSubscribed={plan.isSubscribed} fileId={file.id} />
         <ChatWrapper fileId={file.id} />
 
-      </div>
+      </div> */}
+
+        <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
+
+          {/* <ChatWrapper isSubscribed={plan.isSubscribed} fileId={file.id} /> */}
+          <ChatWrapper fileId={file.id} />
+
+        </div>
+      </>
+
     );
   };
 
   return (
-    <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
-      <div className='mx-auto w-full max-w-8xl grow lg:flex xl:px-2'>
+    <>
+      {/* ADJUSTABLE LAYOUT */}
+      {/* <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
 
         <ResizableLayout
           accounts={accounts}
           defaultLayout={defaultLayout}
           defaultCollapsed={defaultCollapsed}
-          navCollapsedSize={4}
-        // left={<LeftView />}
-        // middle={<MiddleView />}
-        // right={<RightView />} 
+          navCollapsedSize={7}
+          // middle={<MiddleView />}
+          leftView={<LeftView />}
+          rightView={<RightView />}
         />
 
+    </div> */}
+
+      <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
+        <div className='mx-auto w-full max-w-8xl grow lg:flex xl:px-2'>
+
+          <LeftView />
+
+          <RightView />
+
+
+        </div>
       </div>
-    </div>
+    </>
+
   );
 };
 

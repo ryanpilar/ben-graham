@@ -56,13 +56,22 @@ const Navbar = async () => {
                             </>
                         ) : (
                             <>
+
                                 <Link
-                                    href='/dashboard'
+                                    href='/research'
                                     className={buttonVariants({
                                         variant: 'ghost',
                                         size: 'sm',
                                     })}>
-                                    Dashboard
+                                    Research
+                                </Link>
+                                <Link
+                                    href='/files'
+                                    className={buttonVariants({
+                                        variant: 'ghost',
+                                        size: 'sm',
+                                    })}>
+                                    Files
                                 </Link>
 
                                 <UserAccountNav

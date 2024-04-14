@@ -3,7 +3,7 @@
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useContext } from 'react'
-import { OriginContext } from './OriginProvider';
+// import { OriginContext } from './OriginProvider';
 import { cn } from '@/lib/utils';
 
 import { Button as NUIButton } from '@nextui-org/button';
@@ -27,18 +27,22 @@ interface GoBackProps {
 
 const GoBack = ({ className }: GoBackProps) => {
     const router = useRouter();
-    const isWithinPage = useContext(OriginContext);
+    // const isWithinPage = useContext(OriginContext);
 
-    const handleClick = useCallback(() => {
-        if (isWithinPage) router.back();
-        else router.push('/');
-    }, [isWithinPage, router]);
+    // const handleClick = useCallback(() => {
+    //     if (isWithinPage) router.back();
+    //     else router.push('/');
+    // }, [isWithinPage, router]);
+
+    const tempWorkAround = () => {
+        router.back();
+    }
 
     return (
         <>
             <button
                 className={cn('flex items-center text-foreground-400', className)}
-                aria-label="Go back to previous view" onClick={handleClick}
+                aria-label="Go back to previous view" onClick={tempWorkAround}
             >
                 <ChevronLeft className='h-5 w-5 mr-1' />
                 Back

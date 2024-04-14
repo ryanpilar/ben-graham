@@ -3,11 +3,11 @@ import { PropsWithChildren, createContext, useState } from 'react'
 // Project Imports
 import { trpc } from '@/app/_trpc/client';
 import { httpBatchLink } from '@trpc/client';
-import OriginTrackerProvider from './OriginProvider';
-import { LoadingProvider } from './LoadingContext';
+// import OriginTrackerProvider from './OriginProvider';
+// import { LoadingProvider } from './LoadingContext';
 // 3rd Party Imports
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { NextUIProvider } from '@nextui-org/system'
+// import { NextUIProvider } from '@nextui-org/system'
 import { absoluteUrl } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -49,10 +49,10 @@ const Providers = ({ children }: PropsWithChildren) => {
             <QueryClientProvider client={queryClient}>
                 {/* <LoadingProvider> */}
                 {/* <NextUIProvider navigate={router.push}> */}
-                    <OriginTrackerProvider>
+                    {/* <OriginTrackerProvider> */}
 
                         {children}
-                    </OriginTrackerProvider>
+                    {/* </OriginTrackerProvider> */}
 
                 {/* </NextUIProvider > */}
 

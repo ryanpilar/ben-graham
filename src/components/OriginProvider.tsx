@@ -1,6 +1,5 @@
 "use client";
 
-import { log } from 'console';
 import { usePathname } from 'next/navigation';
 import { useState, createContext, useEffect, useRef } from 'react';
 
@@ -23,8 +22,8 @@ export default function OriginTrackerProvider({ children }: React.PropsWithChild
     }, [pathname]);
 
     return (
-        <OriginContext.Provider value={isWithinPage}>
+        // <OriginContext.Provider value={isWithinPage}>
             {children}
-        </OriginContext.Provider>
+        // </OriginContext.Provider>
     );
 }
