@@ -97,6 +97,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
                         .map((file, index) => (
 
                             <Chip
+                                key={`file-chip-${index}`}
                                 variant="shadow"
                                 color="secondary"
                                 size='lg'
@@ -114,7 +115,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
 
                                 <Link
                                     href={`/dashboard/${file.id}`}
-                                className='ml-1'
+                                    className='ml-1'
                                 >
                                     {file.name}
 

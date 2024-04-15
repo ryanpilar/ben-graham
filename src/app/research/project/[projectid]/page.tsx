@@ -53,25 +53,37 @@ const Project = async ({ params }: PageProps) => {
                         <GoBack />
                         <main className='mx-auto max-w-7xl md:p-10'>
                             <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
+
                                 <h1 className='mb-3 font-bold text-5xl text-gray-900'>
                                     Project: <span className='text-xl'>{project.name}</span>
                                 </h1>
-                                <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
+
+                                <div className='flex gap-x-3'>
+                                   
+                                    <BadgeFileCounter type={'project'} >
+                                        <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
+                                    </BadgeFileCounter>
+
+                                    <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
+
+                                </div>
+
+
                             </div>
 
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
 
-                            <BadgeFileCounter type={'project'} >
-                                <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
-                            </BadgeFileCounter>
-                            
+
+
                         </main>
                     </div>
                 </div>
 
                 {/* Right sidebar */}
                 <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
-                    OTHER AREA {project.kindeId}
+
+                    {/* <ChatProjectWrapper projectId={project.id} /> */}
+
                 </div>
             </div>
         </div>

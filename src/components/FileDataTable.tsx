@@ -234,22 +234,23 @@ const FileDataTable = ({ type }: FilesProps) => {
 
               return (
                 // <NUITooltip key={index} content={project.name} placement="top-start" radius="sm" showArrow >
-                  <NUIChip
-                    variant="shadow"
-                    color="secondary"
-                    size="sm"
-                    radius="sm"
-                    className="text-foreground-500"
-                  >
-                    {/* Conditionally render the content inside the chip based on whether the project is selected */}
-                    {isSelected ? (
-                      displayProjectName // Just display text if selected
-                    ) : (
-                      <Link href={`/research/project/${project.id}`}>
-                        {displayProjectName}
-                      </Link>
-                    )}
-                  </NUIChip>
+                <NUIChip
+                  key={`linked-projects-cell-${index}`}
+                  variant="shadow"
+                  color="secondary"
+                  size="sm"
+                  radius="sm"
+                  className="text-foreground-500"
+                >
+                  {/* Conditionally render the content inside the chip based on whether the project is selected */}
+                  {isSelected ? (
+                    displayProjectName // Just display text if selected
+                  ) : (
+                    <Link href={`/research/project/${project.id}`}>
+                      {displayProjectName}
+                    </Link>
+                  )}
+                </NUIChip>
                 // </NUITooltip> 
               )
             })}
@@ -268,18 +269,6 @@ const FileDataTable = ({ type }: FilesProps) => {
 
         return (
           <div className="flex gap-x-2 gap-y-1">
-            {/* {questions?.map((question, index) => question.id === key ? (
-              <Badge key={index} variant='outline' className='font-normal border-primary/50'>
-                {question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text}
-              </Badge>
-            ) : (
-              <Link href={`/research/question/${question.id}`} key={index}>
-                <Badge
-                  variant='outline' className='text-zinc-500 hover:text-zinc-700 hover:bg-secondary/60 font-normal'>
-                  {question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text}
-                </Badge>
-              </Link>
-            ))} */}
             {questions?.map((question, index) => {
               // Check if the current question is the selected one
               const isSelected = question.id === key;
@@ -288,8 +277,10 @@ const FileDataTable = ({ type }: FilesProps) => {
               const displayText = question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text;
 
               return (
-                <NUITooltip key={index} content={question.text} placement="top-start" radius="sm" showArrow >
+                <NUITooltip key={`linked-questions-tooltip-cell-${index}`}
+                  content={question.text} placement="top-start" radius="sm" showArrow >
                   <NUIChip
+                    key={`linked-questions-cell-${index}`}
                     variant="shadow"
                     color="secondary"
                     size="sm"
@@ -298,7 +289,7 @@ const FileDataTable = ({ type }: FilesProps) => {
                   >
                     {/* Conditionally render the content inside the chip based on whether the question is selected */}
                     {isSelected ? (
-                      displayText // Just display text if selected
+                      displayText 
                     ) : (
                       <Link href={`/research/question/${question.id}`}>
                         {displayText}
@@ -358,24 +349,6 @@ const FileDataTable = ({ type }: FilesProps) => {
         const styles = checkbox({ isSelected, isFocusVisible })
 
         return (
-          // <label {...getBaseProps()}>
-          //   <VisuallyHidden.Root>
-          //     <input {...getInputProps()} />
-          //   </VisuallyHidden.Root>
-
-          //   <NUIChip
-          //     classNames={{
-          //       base: styles.base(),
-          //       content: styles.content(),
-          //     }}
-          //     color="primary"
-          //     startContent={isSelected ? <CheckIcon className="ml-1" /> : null}
-          //     variant="faded"
-          //     {...getLabelProps()}
-          //   >
-          //     {children ? children : isSelected ? "Added" : "Not Added"}
-          //   </NUIChip>
-          // </label>
 
           <div className="lowercase text-right">
             {!isAlreadyLinked ? (
@@ -477,7 +450,8 @@ const FileDataTable = ({ type }: FilesProps) => {
               .map((column) => {
                 return (
                   <DropdownMenuCheckboxItem
-                    key={column.id}
+                    // key={column.id}
+                    key={`dropdown-menu-checkbox-item-${column.id}`}
                     className="capitalize"
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) =>
@@ -495,10 +469,16 @@ const FileDataTable = ({ type }: FilesProps) => {
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                // key={headerGroup.id}
+                key={`table-header-row-one-${headerGroup.id}`}
+              >
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      // key={header.id}                    
+                      key={`table-head-${header.id}`}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -527,11 +507,15 @@ const FileDataTable = ({ type }: FilesProps) => {
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={row.id}
+                  key={`is-not-loading-table-row-${row.id}`}
+                  // key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell 
+                    key={`is-not-loading-table-cell-${cell.id}`}
+                    // key={cell.id}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -550,35 +534,6 @@ const FileDataTable = ({ type }: FilesProps) => {
                 </TableCell>
               </TableRow>
             )}
-
-
-
-            {/* {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )} */}
           </TableBody>
         </Table>
       </div>

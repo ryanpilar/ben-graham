@@ -122,9 +122,9 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                         <DrawerHeader className='flex w-full justify-between items-end px-0'>
                             <DrawerTitle className='flex flex-wrap justify-start items-center'>
 
-                                <h2 className='flex w-full capitalize text-3xl  items-center pb-2 z-10'>{type} <ChevronRight className='text-zinc-400 px-1' />
+                                <span className='flex w-full capitalize text-3xl  items-center pb-2 z-10'>{type} <ChevronRight className='text-zinc-400 px-1' />
                                     {type === 'project' ? research?.name : type === 'question' ? research?.text : ''}
-                                </h2>
+                                </span>
 
                                 <BadgeFileCounter type={type}>
                                     <h3 className="text-left w-full text-xl font-medium mr-4">Currently Linked Files </h3>
