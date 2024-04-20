@@ -9,19 +9,14 @@ import { buttonVariants } from "./ui/button";
 import { UploadedFileProps } from "./UploadFileDropzone";
 import ChooseFileContextForm from "./ChooseFileContextForm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { trpcServer } from "@/trpc/trpc-caller";
-import { trpc } from "@/app/_trpc/client";
-import { Dispatch, SetStateAction, Suspense } from "react";
-import Skeleton from "react-loading-skeleton";
+
 
 /** ================================|| Choose File Context ||=================================== **/
 
 interface ChooseFileContextProps {
-  uploadedFile?: UploadedFileProps | {}
+  uploadedFile?: UploadedFileProps 
 }
 const ChooseFileContext = ({ uploadedFile }: ChooseFileContextProps) => {
-
-
 
   return (
     <>
