@@ -25,7 +25,6 @@ const ContextUsage = () => {
         }
     };
 
-
     return (
         <>
             <CircularProgress

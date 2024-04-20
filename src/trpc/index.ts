@@ -16,6 +16,7 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import { countMessageTokens } from '@/lib/tiktoken/core'
 
 
 /** ================================|| TRPC Routes ||=================================== **/
@@ -935,6 +936,7 @@ export const appRouter = router({
             const { kindeId } = ctx;
             const { type, key } = input;
 
+            // Make sure the user exists
             const user = await db.user.findUnique({
                 where: {
                     id: kindeId,
@@ -944,17 +946,58 @@ export const appRouter = router({
 
             // Retrieve the current user's subscription plan
             const subscription = await getUserSubscriptionPlan();
+            console.log('subscription', subscription);
 
+            // Depending on the subscription sub get proper plan details and usage caps
+            let subscriptionDetails = !subscription ? PLANS[0] : PLANS[1]
 
-            // Handling based on the type
-            // switch (type) {
-            //     case 'project':
-            //         return await 
-            //     case 'question':
-            //         return await 
-            //     default:
-            //         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid type provided' });
-            // }
+            // Filter for the incoming type and key
+            const fileFieldMapping = {
+                project: 'projectIds',
+                question: 'questionIds'
+            };
+            const fileField = fileFieldMapping[type]
+
+            // Count files linked to the specified project or question
+            const fileCount = await db.file.count({
+                where: {
+                    kindeId: kindeId,
+                    [fileField]: {
+                        has: key
+                    }
+                }
+            })
+            console.log('fileCount', fileCount);
+
+            // Fetch the key's # of previous messages, but consider the the plan's usage cap
+            const prevMessages = await db.message.findMany({
+                where: { [`${type}Id`]: key },
+                orderBy: { createdAt: 'asc' },
+                take: subscription.prevMessagesCap
+            });
+
+            // Formatting is needed b/c it happens during prompt submission and adds tokens, so we do it here too
+            const formattedPrevMessages = prevMessages.map(msg => ({
+                role: msg.isUserMessage ? 'user' : 'assistant',
+                content: msg.text,
+            }))
+
+            // Calculate tokens used for previous messages
+            const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);           
+           
+            const approxVectorStoreTokens = fileCount * 500     // Assuming 500 tokens per page/file
+            const approxCompletionTokens = 4000;                // Another assumption that will change over time
+
+            // Total tokens used
+            const totalTokensUsed = prevMessageTokens + approxVectorStoreTokens + approxCompletionTokens
+
+            // Compute the usage percentage relative to the context window
+            const contextWindowCap = subscriptionDetails.gptModel.contextWindow
+            const usagePercentage = (totalTokensUsed / contextWindowCap) * 100;
+
+            return {
+                usagePercentage
+            }
         })
 })
 
