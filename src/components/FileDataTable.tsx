@@ -63,7 +63,7 @@ export type FileProject = {
 }
 export type FileQuestion = {
   id: string
-  text: string
+  name: string
 }
 export type FileData = {
   id: string
