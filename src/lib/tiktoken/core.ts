@@ -3,6 +3,21 @@ import { get_encoding, TiktokenEncoding } from "tiktoken";
 
 /** ================================|| TikToken Core - TRPC ||=================================== **/
 
+type Store = PageContent[];  // This changes if 'store' is used directly as an array.
+
+interface PageContent {
+    pageContent: string;
+}
+
+interface Message {
+    [key: string]: string;  // Ensure keys will have string values for token counting.
+}
+
+interface TokenCost {
+    tokensPerMessage: number;
+    tokensPerName: number;
+}
+
 export function countTikTokens(text: string) {
 
     try {
@@ -19,13 +34,14 @@ export function countTikTokens(text: string) {
     }
 }
 
-export function countVectorStoreTokens(vectorStores) {
-    try {
 
-        const tokenLengths = vectorStores.map((store) => {
+
+export function countVectorStoreTokens(vectorStores: Store[]) {
+    try {
+        const tokenLengths = vectorStores.map( (store: Store) => {
             try {
                 // Iterate over every included store
-                const pageContent = store.map((r) => r.pageContent).join('\n\n');
+                const pageContent = store.map( (r: PageContent) => r.pageContent).join('\n\n');
                 const tokenIntegers = countTikTokens(pageContent);
                 return tokenIntegers.length
 
@@ -37,7 +53,7 @@ export function countVectorStoreTokens(vectorStores) {
             }
         })
 
-        const totalTokens = tokenLengths.reduce((total, count) => total + count, 0);
+        const totalTokens = tokenLengths.reduce( (total: number, count: number) => total + count, 0);
 
         return totalTokens
 
@@ -46,7 +62,7 @@ export function countVectorStoreTokens(vectorStores) {
     }
 }
 
-export function countMessageTokens(messages, tokenCost) {
+export function countMessageTokens(messages: Message[], tokenCost: TokenCost) {
 
     const { tokensPerMessage, tokensPerName } = tokenCost
     let totalTokens = 0;
