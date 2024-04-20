@@ -70,7 +70,7 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
                                         <div className='flex-1 truncate'>
                                             <div className='flex items-center space-x-3'>
                                                 <h3 className='truncate text-lg font-medium text-zinc-900'>
-                                                    {question.text}
+                                                    {question.name}
                                                 </h3>
                                             </div>
                                         </div>

@@ -203,7 +203,7 @@ export const appRouter = router({
                 id: file.id,
                 name: file.name,
                 projects: file.projects.map((project) => { return { id: project.id ?? '', name: project.name ?? '' } }),
-                questions: file.questions.map((question) => { return { id: question.id ?? '', text: question.text ?? '' } }),
+                questions: file.questions.map((question) => { return { id: question.id ?? '', text: question.name ?? '' } }),
 
             }));
 

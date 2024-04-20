@@ -285,11 +285,11 @@ const FileDataTable = ({ type }: FilesProps) => {
               const isSelected = question.id === key;
 
               // Truncate text if it's too long
-              const displayText = question.text.length > 15 ? `${question.text.substring(0, 15)}...` : question.text;
+              const displayText = question.name.length > 15 ? `${question.name.substring(0, 15)}...` : question.name;
 
               return (
                 <NUITooltip key={`linked-questions-tooltip-cell-${index}`}
-                  content={question.text} placement="top-start" radius="sm" showArrow >
+                  content={question.name} placement="top-start" radius="sm" showArrow >
                   <NUIChip
                     key={`linked-questions-cell-${index}`}
                     variant="shadow"
