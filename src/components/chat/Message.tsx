@@ -6,7 +6,17 @@ import { ExtendedMessage } from '@/types/message'
 import { Icons } from '../Icons'
 import ReactMarkdown from 'react-markdown'
 import { format } from 'date-fns'
-import { forwardRef } from 'react'
+import { HTMLAttributes, forwardRef } from 'react'
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw'
+import { PrismLight  as SyntaxHighlighter } from 'react-syntax-highlighter'
+
+import { atomDark, coyWithoutShadows, nightOwl, oneLight, zTouch, androidstudio } from 'react-syntax-highlighter/dist/esm/styles/prism'
+// import { nnfxDark, nnfx } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+// import { isblEditorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+// import { grayscale } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+// import { coyWithoutShadows } from 'react-syntax-highlighter/dist/esm/styles/prism'
+
 
 interface MessageProps {
     message: ExtendedMessage  // Advanced typescript magic inferring types
@@ -33,10 +43,30 @@ interface MessageProps {
 
 **/
 
-
-
 const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, isNextMessageSamePerson }, ref) => {
+
+        type CodeBlockProps = HTMLAttributes<HTMLModElement>;
+
+        // Adjusting the type to match expected HTML attributes for a code element
+        function renderCodeBlock({ children, className, ...props }: CodeBlockProps) {
+            const match = /language-(\w+)/.exec(className || '');
+            if (match) {
+                const language = match[1];
+                return (
+                    <SyntaxHighlighter
+                        {...props} // Pass all other HTML attributes to SyntaxHighlighter
+                        PreTag="div"
+                        children={String(children).replace(/\n$/, '')}
+                        language={language}
+                        style={oneLight}  // Ensure 'dark' is correctly imported and defined
+                    />
+                );
+            } else {
+                return <code {...props} className={className}>{children}</code>;
+            }
+        }
+
         return (
             <div
                 ref={ref}
@@ -58,7 +88,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 </div>
 
                 <div className={cn(
-                    'flex flex-col space-y-2 text-base max-w-md mx-2',
+                    'flex flex-col space-y-2 text-base max-w-2xl mx-2',
                     {
                         'order-1 items-end': message.isUserMessage,
                         'order-2 items-start': !message.isUserMessage,
@@ -74,6 +104,33 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                         )}>
                         {typeof message.text === 'string' ? (
                             <ReactMarkdown
+                                rehypePlugins={[rehypeRaw]}
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                    table: ({ node, ...props }) => (
+                                        <table style={{ border: '' }} {...props} />
+                                    ),
+                                    ul: ({ className, ...props }) => (
+                                        <ul
+                                            className={cn('ml-3 pl-5 list-disc', className)}
+                                            {...props}
+                                        />
+                                    ),
+                                    ol: ({ className, ...props }) => (
+                                        <ol
+                                            className={cn('list-decimal pl-6', className)}
+                                            {...props}
+                                        />
+                                    ),
+                                    p: ({ className, ...props }) => (
+                                        <p
+                                            className={cn('pt-4 pb-1', className)}
+                                            {...props}
+                                        />
+                                    ),
+                                    code: renderCodeBlock,
+
+                                }}
                                 className={cn('prose', {
                                     'text-zinc-50': message.isUserMessage,
                                 })}>

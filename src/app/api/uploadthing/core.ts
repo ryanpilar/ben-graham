@@ -69,11 +69,20 @@ const onUploadComplete = async ({ metadata, file }: {
         const pageLevelDocs = await loader.load()
         const pagesAmt = pageLevelDocs.length
 
+        /**
+            Should I be TEXT SPLITTING using RecursiveCharacterTextSplitting here? 
+            -   Chunksize has been recommended at 1000
+            -   What about overlap?
+
+            Should I be cleaning the data? Like map over chunks and get rid of new lines and replace with spaces?
+         */
+
         // Check if the user's upload exceeds their plan limits
         const { subscriptionPlan } = metadata
         const { isSubscribed } = subscriptionPlan
         const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Plus')!.pagesPerPdf
         const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Free')!.pagesPerPdf
+
 
         // Is the user subscribed or not?
         if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {

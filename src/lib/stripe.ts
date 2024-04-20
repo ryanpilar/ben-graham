@@ -6,7 +6,7 @@ import Stripe from 'stripe'
 
 /** ================================|| Stripe ||=================================== 
 
-    See if the user is subscribed or not, and return communicating data
+    To see if the user is subscribed or not, and return communicating data
 **/
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
@@ -54,8 +54,7 @@ export async function getUserSubscriptionPlan() {
         dbUser.stripeCurrentPeriodEnd.getTime() + 86_400_000 > Date.now()
     )
 
-    const plan = isSubscribed
-        ? PLANS.find((plan) => plan.price.priceIds.test === dbUser.stripePriceId)
+    const plan = isSubscribed ? PLANS.find( (plan) => plan.price.priceIds.test === dbUser.stripePriceId )
         : null
 
     // Has the user cancelled their plan?

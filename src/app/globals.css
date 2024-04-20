@@ -21,6 +21,7 @@
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 86% 97%;             /* custom value */
     --destructive-foreground: 0 74% 42%;  /* custom value */
+    --destructive-danger: 0 84% 82%;      /* custom value */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;

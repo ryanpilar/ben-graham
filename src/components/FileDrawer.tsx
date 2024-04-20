@@ -77,7 +77,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                 <Button>Manage Files</Button>
             </Drawer.Trigger>
 
-            <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+            <Drawer.Overlay className="fixed inset-0 bg-black/60 z-10" />
 
             <Drawer.Portal>
 
@@ -87,6 +87,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                     bottom-0 left-0 right-0 
                     h-full max-h-[97%] 
                     max-w-6xl mx-auto
+                    z-20
                     `}>
 
                     <div className='relative flex justify-between'>

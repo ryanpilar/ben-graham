@@ -13,6 +13,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import BadgeFileCounter from '@/components/BadgeFileCounter';
+import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
+import ContextUsage from '@/components/ContextUsage';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -50,7 +52,7 @@ const Project = async ({ params }: PageProps) => {
                 <div className='flex-1 xl:flex'>
                     <div className='px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6'>
 
-                        <GoBack />
+                        {/* <GoBack /> */}
                         <main className='mx-auto max-w-7xl md:p-10'>
                             <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
 
@@ -59,6 +61,8 @@ const Project = async ({ params }: PageProps) => {
                                 </h1>
 
                                 <div className='flex gap-x-3'>
+
+                                    <ContextUsage />
                                    
                                     <BadgeFileCounter type={'project'} >
                                         <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
@@ -80,9 +84,9 @@ const Project = async ({ params }: PageProps) => {
                 </div>
 
                 {/* Right sidebar */}
-                <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
+                <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0 '>
 
-                    {/* <ChatProjectWrapper projectId={project.id} /> */}
+                    <ProjectChatWrapper projectId={project.id} />
 
                 </div>
             </div>

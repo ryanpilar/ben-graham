@@ -17,6 +17,7 @@ import { TRPCError } from '@trpc/server'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 
+
 /** ================================|| TRPC Routes ||=================================== **/
 
 // createCaller method exists on our API endpoint on the core wrapper around the appRouter 
@@ -384,61 +385,6 @@ export const appRouter = router({
 
 
         }),
-    // addLinkedFiless: privateProcedure
-    //     .input(z.object({ fileIds: z.array(z.string()), projectId: z.string() }))
-    //     .mutation(async ({ ctx, input }) => {
-
-    //         const { kindeId } = ctx;
-    //         const { fileIds, projectId } = input;
-
-    //         // Ensure the project exists and belongs to the current kindeId
-    //         const project = await db.project.findUnique({
-    //             where: {
-    //                 id: projectId,
-    //                 kindeId,
-    //             },
-    //             select: { fileIds: true }, // Select existing fileIds to check against
-    //         });
-
-    //         if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
-
-    //         // Filter fileIds to only those that are not already linked to avoid duplicates
-    //         const filteredFileIds = fileIds.filter(fileId => !project.fileIds.includes(fileId));
-
-    //         // Verify each fileId exists and belongs to the current kindeId
-    //         const files = await db.file.findMany({
-    //             where: {
-    //                 id: { in: filteredFileIds },
-    //                 kindeId,
-    //             },
-    //             select: { id: true, projectIds: true },
-    //         });
-
-    //         if (files.length !== filteredFileIds.length) throw new TRPCError({ code: 'NOT_FOUND' });
-
-    //         await db.project.update({
-    //             where: { id: projectId },
-    //             data: {
-    //                 fileIds: {
-    //                     push: filteredFileIds,
-    //                 },
-    //             },
-    //         });
-
-    //         // For each file, update its projectIds if the projectId is not already associated
-    //         await Promise.all(files.map(async file => {
-    //             if (!file.projectIds.includes(projectId)) {
-    //                 await db.file.update({
-    //                     where: { id: file.id },
-    //                     data: {
-    //                         projectIds: {
-    //                             push: projectId,
-    //                         },
-    //                     },
-    //                 });
-    //             }
-    //         }));
-    //     }),
     addLinkedFiles: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string(), fileIds: z.array(z.string()) }))
         .mutation(async ({ ctx, input }) => {
@@ -612,35 +558,87 @@ export const appRouter = router({
                 nextCursor,                                 // nextCursor tells us where to start fetching if we start scrolling through the messages
             }
         }),
-    getFileContext: privateProcedure
-        .input(z.object({ fileId: z.string() }))
-        .query(async ({ input, ctx }) => {
-
+    getProjectFiles: privateProcedure
+        .input(z.object({ projectId: z.string() }))
+        .query(async ({ ctx, input }) => {
             const { kindeId } = ctx;
-            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+            const { projectId } = input;
 
-            const file = await db.file.findFirst({
+            // Fetch files that are linked to the given projectId
+            const files = await db.file.findMany({
                 where: {
-                    id: input.fileId,
+                    projectIds: {
+                        hasSome: [projectId],
+                    },
+                    kindeId: kindeId,
+                },
+                select: {
+                    id: true,
+                }
+            });
+
+            if (!files || files.length === 0) {
+                throw new TRPCError({ code: 'NOT_FOUND', message: 'No files found for the specified project' });
+            }
+            // Return only a list of fileIds
+            return files.map(file => file.id)
+        }),
+
+    // PROJECTS
+    getProjectMessages: privateProcedure
+        .input(
+            z.object({
+                limit: z.number().min(1).max(100).nullish(),
+                cursor: z.string().nullish(),                // In the infinite query, this determines what the next amount to be shown is
+                projectId: z.string(),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+
+            const { kindeId } = ctx
+            const { projectId, cursor } = input
+            const limit = input.limit ?? INFINITE_QUERY_LIMIT
+
+            const project = await db.project.findFirst({
+                where: {
+                    id: projectId,
                     kindeId: kindeId,
                 },
             })
 
-            if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+            if (!project) throw new TRPCError({ code: 'NOT_FOUND' })
 
-            // Find projects linked to 
-            // Find linked questions
+            const messages = await db.message.findMany({
+                // +1 helps us determine if we need to scroll up, from where we want to fetch the next messages
+                take: limit + 1,
+                // We take from the db, +1, because we use that +1 as the cursor. So when we scroll up, with the cursor in place, we now know the next messages we need to fetch
+                where: {
+                    projectId,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                cursor: cursor ? { id: cursor } : undefined,
+                select: {
+                    id: true,
+                    isUserMessage: true,
+                    createdAt: true,
+                    text: true,
+                },
+            })
+            // Determine the cursor, and pop() it
+            let nextCursor: typeof cursor | undefined = undefined
 
-
-
-
-
-
-            // return {'fileContext'}
-
+            // If we also have additional messages in the database, lets grab more messages! But, grab that +1 that we intentionally brought in 
+            if (messages.length > limit) {
+                const nextItem = messages.pop()
+                nextCursor = nextItem?.id
+            }
+            return {
+                messages,
+                nextCursor,                                 // nextCursor tells us where to start fetching if we start scrolling through the messages
+            }
         }),
-
-    // PROJECTS
     addProject: privateProcedure
         .input(z.object({ name: z.string() }))
         .mutation(async ({ ctx, input }) => {
@@ -927,6 +925,55 @@ export const appRouter = router({
             return { url: stripeSession.url }
         }
     ),
+
+    // TIKTOKEN
+    estimateTikTokens: privateProcedure
+        .input(z.object({ pageContent: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { pageContent } = input;
+
+            const user = await db.user.findUnique({
+                where: {
+                    id: kindeId,
+                },
+            })
+
+            if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
+
+
+
+        }),
+    // CONTEXT USAGE
+    getContextUsage: privateProcedure
+        .input(z.object({
+            type: z.enum(['project', 'question']), key: z.string()
+        }))
+        .query(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { type, key } = input;
+
+            const user = await db.user.findUnique({
+                where: {
+                    id: kindeId,
+                },
+            })
+            if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
+
+            // Retrieve the current user's subscription plan
+            const subscription = await getUserSubscriptionPlan();
+
+
+            // Handling based on the type
+            // switch (type) {
+            //     case 'project':
+            //         return await 
+            //     case 'question':
+            //         return await 
+            //     default:
+            //         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid type provided' });
+            // }
+        })
 })
 
 export type AppRouter = typeof appRouter

@@ -26,6 +26,13 @@ const nextConfig = {
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.resolve.alias.canvas = false
     config.resolve.alias.encoding = false
+
+  
+    config.experiments = { // Related to Tiktoken config
+      asyncWebAssembly: true,
+      layers: true,
+    }
+    
     return config
   },
 

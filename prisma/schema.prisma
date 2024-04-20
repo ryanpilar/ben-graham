@@ -14,19 +14,18 @@ datasource db {
 }
 
 model User {
-  id    String @id @map("_id")
-  email String @unique
-
-  files     File[]
-  projects  Project[]
-  questions Question[]
-  messages  Message[]
-  // contexts  Context[]
-
-  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
-  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
-  stripePriceId          String?   @map(name: "stripe_price_id")
-  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+  id                     String      @id @map("_id")
+  email                  String      @unique
+  files                  File[]
+  projects               Project[]
+  questions              Question[]
+  messages               Message[]
+  stripeCustomerId       String?     @unique @map(name: "stripe_customer_id")
+  stripeSubscriptionId   String?     @unique @map(name: "stripe_subscription_id")
+  stripePriceId          String?     @map(name: "stripe_price_id")
+  stripeCurrentPeriodEnd DateTime?   @map(name: "stripe_current_period_end")
+  TokenCost              TokenCost[]
+  QueryCost              QueryCost[]
 }
 
 enum UploadStatus {
@@ -43,35 +42,32 @@ model File {
   uploadStatus UploadStatus @default(PENDING)
   url          String
   key          String
+  User         User         @relation(fields: [kindeId], references: [id])
+  kindeId      String
+  projects     Project[]    @relation(fields: [projectIds], references: [id])
+  projectIds   String[]     @db.ObjectId
+  questions    Question[]   @relation(fields: [questionIds], references: [id])
+  questionIds  String[]     @db.ObjectId
+  messages     Message[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-
-  User        User       @relation(fields: [kindeId], references: [id])
-  kindeId     String
-  projects    Project[]  @relation(fields: [projectIds], references: [id])
-  projectIds  String[]   @db.ObjectId
-  questions   Question[] @relation(fields: [questionIds], references: [id])
-  questionIds String[]   @db.ObjectId
-  messages    Message[]
 }
 
 model Message {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
   text          String
   isUserMessage Boolean // so we can differenciate between user messages and ai messages
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  User       User      @relation(fields: [kindeId], references: [id])
-  kindeId    String
-  File       File?     @relation(fields: [fileId], references: [id])
-  fileId     String?
-  Project    Project?  @relation(fields: [projectId], references: [id])
-  projectId  String?   @db.ObjectId
-  Question   Question? @relation(fields: [questionId], references: [id])
-  questionId String?   @db.ObjectId
-  // Context    Context   @relation(fields: [contextId], references: [id])
-  // contextId  String    @db.ObjectId
+  updatedAt     DateTime    @updatedAt
+  User          User        @relation(fields: [kindeId], references: [id])
+  kindeId       String
+  File          File?       @relation(fields: [fileId], references: [id])
+  fileId        String?
+  Project       Project?    @relation(fields: [projectId], references: [id])
+  projectId     String?     @db.ObjectId
+  Question      Question?   @relation(fields: [questionId], references: [id])
+  questionId    String?     @db.ObjectId
+  QueryCost     QueryCost[]
+  createdAt     DateTime    @default(now())
 }
 
 model Project {
@@ -81,14 +77,11 @@ model Project {
   updatedAt DateTime @updatedAt
 
   kindeId   String
-  User      User      @relation(fields: [kindeId], references: [id])
+  User      User       @relation(fields: [kindeId], references: [id])
   fileIds   String[]
   Files     File[]     @relation(fields: [fileIds], references: [id])
   questions Question[]
   messages  Message[]
-
-  // Context   Context  @relation(fields: [contextId], references: [id])
-  // contextId String   @db.ObjectId
 }
 
 model Question {
@@ -100,33 +93,46 @@ model Question {
   kindeId          String
   User             User?      @relation(fields: [kindeId], references: [id])
   File             File[]     @relation(fields: [fileIds], references: [id])
-  fileIds           String[]
+  fileIds          String[]
   projectId        String?    @db.ObjectId
   Project          Project?   @relation(fields: [projectId], references: [id])
   parentQuestionId String?    @db.ObjectId
   parentQuestion   Question?  @relation("ParentChild", fields: [parentQuestionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subQuestions     Question[] @relation("ParentChild")
   messages         Message[]
-
-  // Context   Context  @relation(fields: [contextId], references: [id])
-  // contextId String   @db.ObjectId
 }
 
-// enum ContextType {
-//   user
-//   project
-//   question
-//   message
-//   file
-// }
+enum ContextType {
+  PREV_MESSAGES
+  PINNED_MESSAGES
+  QUERY_MESSAGE
+  QUESTIONS
+  NOTES
+  GPT_COMPLETION
+  VECTOR_STORES
+}
 
-// model Context {
-//   id        String      @id @default(auto()) @map("_id") @db.ObjectId
-//   kindeId   String
-//   user      User        @relation(fields: [kindeId], references: [id])
-//   type      ContextType
-//   projects  Project[]
-//   questions Question[]
-//   messages  Message[]
-//   files     File[]
-// }
+model TokenCost {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  kindeId     String
+  User        User?       @relation(fields: [kindeId], references: [id])
+  contextType ContextType
+  gptModel    String
+  totalTokens BigInt
+  QueryCost   QueryCost?  @relation(fields: [queryCostId], references: [id])
+  queryCostId String      @db.ObjectId
+  createdAt   DateTime    @default(now())
+  // nTokenRate  BigInt
+}
+
+model QueryCost {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  kindeId    String
+  User       User        @relation(fields: [kindeId], references: [id])
+  message    Message?    @relation(fields: [messageId], references: [id])
+  messageId  String?     @db.ObjectId
+  questionId String?     @db.ObjectId
+  projectId  String?     @db.ObjectId
+  createdAt  DateTime    @default(now())
+  TokenCost  TokenCost[]
+}

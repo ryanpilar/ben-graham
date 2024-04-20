@@ -169,6 +169,7 @@ export const POST = async (req: NextRequest) => {
 
 
   console.log('ABOUT TO ENTER STREAM')
+  console.log('THE RESPONSE', response)
 
 
   // Here is the main reason we had to make that custom route earier, beacuse trpc can't handle streaming!
@@ -194,6 +195,8 @@ export const POST = async (req: NextRequest) => {
   })
 
   console.log('ABOUT TO RETURN STREAM')
+  console.log('THE STREAM', stream)
+
 
   // Pass in the stream here so we can stream a response to the client in real time
   return new StreamingTextResponse(stream)
