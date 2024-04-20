@@ -34,7 +34,7 @@ const UploadFileDropzoneServer = async ({ isSubscribed }: UploadFileUploadServer
 
     return (
         <Suspense fallback={<Skeleton count={2} />}>
-            <UploadFileDropzone isSubscribed={isSubscribed} userData={userData} />
+            <UploadFileDropzone isSubscribed={isSubscribed} />
 
         </Suspense>
 
