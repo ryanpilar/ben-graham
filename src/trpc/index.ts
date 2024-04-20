@@ -575,6 +575,8 @@ export const appRouter = router({
                 },
                 select: {
                     id: true,
+                    name: true,
+                    createdAt: true,
                 }
             });
 
@@ -582,7 +584,9 @@ export const appRouter = router({
                 throw new TRPCError({ code: 'NOT_FOUND', message: 'No files found for the specified project' });
             }
             // Return only a list of fileIds
-            return files.map(file => file.id)
+            // return files.map(file => file.id)
+            return files
+
         }),
 
     // PROJECTS

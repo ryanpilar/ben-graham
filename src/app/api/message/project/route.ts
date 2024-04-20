@@ -82,9 +82,9 @@ export const POST = async (req: NextRequest) => {
   const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
 
   // Create a Pinecone Store for the message embeddings
-  const vectorStores = await Promise.all(projectFileIds.map(async (fileID) => {
+  const vectorStores = await Promise.all(projectFileIds.map(async (file) => {
 
-    const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex, namespace: fileID });
+    const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex, namespace: file.id });
 
     // Perform a similarity search in Pinecone to find relevant PDF pages
     const results = await vectorStore.similaritySearch(
