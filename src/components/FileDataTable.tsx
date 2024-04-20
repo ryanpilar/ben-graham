@@ -67,8 +67,8 @@ export type FileQuestion = {
 }
 export type FileData = {
   id: string
-  questions: FileQuestion[]
   name: string
+  questions: FileQuestion[]
   projects: FileProject[]
 }
 interface FilesProps {

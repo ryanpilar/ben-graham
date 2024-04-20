@@ -65,7 +65,7 @@ const AddQuestion = ({ isSubscribed, projectId, setIsOpen }: AddQuestionProps) =
 
     const { toast } = useToast()
 
-    const questionSchema = z.object({ text: z.string().min(1, "Project question is required"), })
+    const questionSchema = z.object({ name: z.string().min(1, "Project question is required"), })
 
     type QuestionFormData = z.infer<typeof questionSchema>;
 
@@ -74,7 +74,7 @@ const AddQuestion = ({ isSubscribed, projectId, setIsOpen }: AddQuestionProps) =
         handleSubmit,
         formState: { errors },
     } = useForm<QuestionFormData>({
-        defaultValues: { text: '', },
+        defaultValues: { name: '', },
         resolver: zodResolver(questionSchema),
     });
 
@@ -137,11 +137,11 @@ const AddQuestion = ({ isSubscribed, projectId, setIsOpen }: AddQuestionProps) =
                     <div className='flex w-full justify-between gap-x-2 p-3 bg-white rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200'>
                         <div className='w-full h-full'>
                             <Input
-                                {...register('text')}
+                                {...register('name')}
                                 placeholder='Your Unanswered Question...'
-                                className={cn('', errors.text && 'focus-visible:ring-red-500')}
+                                className={cn('', errors.name && 'focus-visible:ring-red-500')}
                             />
-                            {errors.text && <p className='text-red-500 text-xs pl-3.5 py-1'>{errors.text.message}</p>}
+                            {errors.name && <p className='text-red-500 text-xs pl-3.5 py-1'>{errors.name.message}</p>}
                         </div>
 
                         <Button type="submit">Add Question</Button>

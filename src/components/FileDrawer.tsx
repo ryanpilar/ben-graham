@@ -51,8 +51,6 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
     };
     const key = getKey()
 
-    type ResearchDetails = { name?: string; text?: string; };
-
     const { data: research, isLoading: isLoadingProject } = trpc.getResearchDetails.useQuery({ type: type, key: key })
 
     return (

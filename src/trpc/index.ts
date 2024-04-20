@@ -192,7 +192,7 @@ export const appRouter = router({
                     questions: {
                         select: {
                             id: true,
-                            text: true,
+                            name: true,
                         },
                     }
                 },
@@ -203,7 +203,7 @@ export const appRouter = router({
                 id: file.id,
                 name: file.name,
                 projects: file.projects.map((project) => { return { id: project.id ?? '', name: project.name ?? '' } }),
-                questions: file.questions.map((question) => { return { id: question.id ?? '', text: question.name ?? '' } }),
+                questions: file.questions.map((question) => { return { id: question.id ?? '', name: question.name ?? '' } }),
 
             }));
 
@@ -766,7 +766,7 @@ export const appRouter = router({
                         kindeId
                     },
                     select: {
-                        text: true
+                        name: true
                     }
                 });
 
@@ -795,7 +795,7 @@ export const appRouter = router({
         }),
     addQuestion: privateProcedure
         .input(z.object({
-            text: z.string(),
+            name: z.string(),
             projectId: z.string().optional().nullable(),
             parentQuestionId: z.string().optional().nullable(),
         }).refine(data => data.projectId || data.parentQuestionId, {
@@ -807,7 +807,7 @@ export const appRouter = router({
 
             const question = await db.question.create({
                 data: {
-                    text: input.text,
+                    name: input.name,
                     kindeId: ctx.kindeId,
                     ...input.projectId && { projectId: input.projectId },
                     ...input.parentQuestionId && { parentQuestionId: input.parentQuestionId },
