@@ -4,24 +4,20 @@ import React, { useState } from 'react'
 // Project Imports
 import AddFile from './AddFile';
 import { Button } from './ui/button';
-import { Button as NUIButton } from '@nextui-org/button';
-
 import LinkedFiles from './LinkedFiles';
-import { trpc } from '@/app/_trpc/client';
-import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
+import { Separator } from './ui/separator';
 import FileDataTable from './FileDataTable';
+import BadgeFileCounter from './BadgeFileCounter';
+import { trpc } from '@/app/_trpc/client';
+import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from './ui/drawer';
+
 // 3rd Party Imports
 import { clsx } from "clsx";
 import { Drawer } from "vaul";
-import { DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import GoBack from './GoBack';
-import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from './ui/drawer';
 import Link from 'next/link';
-import { Expand } from 'lucide-react';
+import { ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import BadgeFileCounter from './BadgeFileCounter';
-import { Separator } from './ui/separator';
 
 /** ================================|| File Drawer ||=================================== **/
 
@@ -32,13 +28,9 @@ interface FileDrawerProps {
 const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
     const params = useParams()
-
     const [snap, setSnap] = useState<number | string | null>(0.95);
     const [open, setOpen] = useState(false);
 
-    //////////////////////////////////////////////////////
-
-    // New Experimental Code
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -49,10 +41,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
         router.push(pathName);
     };
 
-    //////////////////////////////////////////////////////
-
     const getKey = () => {
-
         if (type === 'project' && params.projectid) {
             return Array.isArray(params.projectid) ? params.projectid[0] : params.projectid;
         } else if (type === 'question' && params.questionid) {
@@ -60,8 +49,10 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
         }
         return '#';
     };
-
     const key = getKey()
+
+    type ResearchDetails = { name?: string; text?: string; };
+
     const { data: research, isLoading: isLoadingProject } = trpc.getResearchDetails.useQuery({ type: type, key: key })
 
     return (
@@ -123,8 +114,9 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                         <DrawerHeader className='flex w-full justify-between items-end px-0'>
                             <DrawerTitle className='flex flex-wrap justify-start items-center'>
 
-                                <span className='flex w-full capitalize text-3xl  items-center pb-2 z-10'>{type} <ChevronRight className='text-zinc-400 px-1' />
-                                    {type === 'project' ? research?.name : type === 'question' ? research?.text : ''}
+                                <span className='flex w-full capitalize text-3xl  items-center pb-2 z-10'>
+                                    {type} <ChevronRight className='text-zinc-400 px-1' />
+                                    {type === 'project' ? research?.name : type === 'question' ? research?.name : ''}
                                 </span>
 
                                 <BadgeFileCounter type={type}>

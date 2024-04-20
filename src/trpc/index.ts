@@ -776,7 +776,7 @@ export const appRouter = router({
             }
 
             // Handle when type is 'all'
-            else if (type === 'question' && key) {
+            else if (type === 'all' && key) {
                 console.log('Handle condition "all" not complete')
             }
         }),
