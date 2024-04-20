@@ -926,24 +926,6 @@ export const appRouter = router({
         }
     ),
 
-    // TIKTOKEN
-    estimateTikTokens: privateProcedure
-        .input(z.object({ pageContent: z.string() }))
-        .mutation(async ({ ctx, input }) => {
-            const { kindeId } = ctx;
-            const { pageContent } = input;
-
-            const user = await db.user.findUnique({
-                where: {
-                    id: kindeId,
-                },
-            })
-
-            if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
-
-
-
-        }),
     // CONTEXT USAGE
     getContextUsage: privateProcedure
         .input(z.object({

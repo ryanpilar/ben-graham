@@ -39,5 +39,9 @@ const BadgeFileCounter = forwardRef<HTMLDivElement, BadgeFileCounterProps>(({ ty
     )
 });
 
+// B/c we declared it as a forwardRef
+BadgeFileCounter.displayName = 'BadgeFileCounter'
+
+
 export default BadgeFileCounter;
 

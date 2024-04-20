@@ -9,9 +9,11 @@ import { format } from 'date-fns'
 import { HTMLAttributes, forwardRef } from 'react'
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw'
-import { PrismLight  as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 
-import { atomDark, coyWithoutShadows, nightOwl, oneLight, zTouch, androidstudio } from 'react-syntax-highlighter/dist/esm/styles/prism'
+// import { atomDark, coyWithoutShadows, nightOwl, oneLight, zTouch, androidstudio } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
+
 // import { nnfxDark, nnfx } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { isblEditorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { grayscale } from 'react-syntax-highlighter/dist/esm/styles/hljs'
@@ -57,10 +59,11 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     <SyntaxHighlighter
                         {...props} // Pass all other HTML attributes to SyntaxHighlighter
                         PreTag="div"
-                        children={String(children).replace(/\n$/, '')}
                         language={language}
                         style={oneLight}  // Ensure 'dark' is correctly imported and defined
-                    />
+                    >
+                        {String(children).replace(/\n$/, '')}
+                    </SyntaxHighlighter>
                 );
             } else {
                 return <code {...props} className={className}>{children}</code>;

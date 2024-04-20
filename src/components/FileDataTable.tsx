@@ -139,6 +139,17 @@ const FileDataTable = ({ type }: FilesProps) => {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const {
+    children,
+    isSelected,
+    isFocusVisible,
+    getBaseProps,
+    getLabelProps,
+    getInputProps,
+  } = useCheckbox({
+    defaultSelected: true,
+  })
+
 
   // TABLE COLUMN COMPONENTS
   const columns: ColumnDef<FileData>[] = [
@@ -310,6 +321,8 @@ const FileDataTable = ({ type }: FilesProps) => {
       enableHiding: false,
       cell: ({ row }) => {
 
+        
+
         const fileIdFromTable = row.getValue("id") as string
         const fileProjects = row.original.projects as FileProject[];
         const fileQuestions = row.original.questions as FileQuestion[];
@@ -335,16 +348,7 @@ const FileDataTable = ({ type }: FilesProps) => {
           }
         })
 
-        const {
-          children,
-          isSelected,
-          isFocusVisible,
-          getBaseProps,
-          getLabelProps,
-          getInputProps,
-        } = useCheckbox({
-          defaultSelected: true,
-        })
+        
 
         const styles = checkbox({ isSelected, isFocusVisible })
 
