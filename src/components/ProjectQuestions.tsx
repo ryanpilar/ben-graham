@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 
 // Project Imports
 import { Button } from './ui/button';
-import AddFile from './AddFile';
 import { trpc } from '@/app/_trpc/client';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 
@@ -13,7 +12,6 @@ import Link from 'next/link';
 import { format } from 'date-fns'
 import Skeleton from "react-loading-skeleton"
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
-import AddProjectButton from './AddProjectButton';
 
 /** ================================|| Project Questions ||=================================== **/
 

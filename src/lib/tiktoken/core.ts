@@ -1,5 +1,6 @@
-
-import { get_encoding, TiktokenEncoding } from "tiktoken";
+import assert from "node:assert";
+import { getEncoding } from "js-tiktoken";
+import { get_encoding } from "tiktoken";
 
 /** ================================|| TikToken Core - TRPC ||=================================== **/
 
@@ -21,11 +22,20 @@ interface TokenCost {
 export function countTikTokens(text: string) {
 
     try {
-        const encoding = get_encoding("cl100k_base");
+        const encoding = getEncoding('cl100k_base')
+        const encoding2 = get_encoding("cl100k_base");
         const tokens = encoding.encode(text);
+        const tokens2 = encoding2.encode(text);
+
+
+        console.log('tokens', tokens);
+        console.log('tokens2', tokens2);
+
+        
+
 
         // Free the encoder after it is done being used
-        encoding.free()
+        // encoding.free()
         return tokens
 
     } catch (error) {
