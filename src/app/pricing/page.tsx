@@ -213,7 +213,7 @@ const PricingPage = async () => {
                     {plan === 'Free' ? (
                       <Link
                         href={
-                          user ? '/dashboard' : '/sign-in'
+                          user ? '/files' : '/sign-in'
                         }
                         className={buttonVariants({
                           className: 'w-full',

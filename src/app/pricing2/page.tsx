@@ -256,7 +256,7 @@ const ActionSection: React.FC<ActionSectionProps> = ({ plan, user }) => (
     <div className='p-5'>
         {plan === 'Free' ? (
             <Link
-                href={user ? '/dashboard' : '/sign-in'}
+                href={user ? '/files' : '/sign-in'}
                 className={buttonVariants({
                     className: 'w-full',
                     variant: 'secondary',

@@ -66,7 +66,7 @@ const UploadFileDropzone = ({ isSubscribed, children }: UploadDropzoneProps) => 
             // Now ask the user to choose what projects or questions they would like to add there file too
             setUploadedFile({
                 fileName: file.name,
-                path: `/dashboard/${file.id}`,
+                path: `/files/${file.id}`,
                 id: file.id
             })
             

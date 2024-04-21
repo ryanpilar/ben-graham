@@ -135,7 +135,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                         <LinkedFiles type={type} />
 
                         <h3 className="text-xl mt-8 font-medium py-2">
-                            <Link href='/dashboard'>
+                            <Link href='/files'>
                                 File Inventory
                             </Link>
                         </h3>

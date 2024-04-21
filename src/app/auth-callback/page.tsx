@@ -26,7 +26,7 @@ const AuthCallback = () => {
 
     useEffect(() => {
         if (data?.success) {
-            router.push(origin ? `/${origin}` : '/dashboard');
+            router.push(origin ? `/${origin}` : '/files');
         } else if (error?.data?.code === "UNAUTHORIZED") {
             router.push('/sign-in');
         }

@@ -114,7 +114,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
                             >
 
                                 <Link
-                                    href={`/dashboard/${file.id}`}
+                                    href={`/files/${file.id}`}
                                     className='ml-1'
                                 >
                                     {file.name}

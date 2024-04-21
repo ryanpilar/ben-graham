@@ -107,7 +107,7 @@ const ChatWrapper = ({
               pages per PDF.
             </p>
             <Link
-              href='/dashboard'
+              href='/files'
               className={buttonVariants({
                 variant: 'secondary',
                 className: 'mt-4',

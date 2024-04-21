@@ -94,7 +94,7 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                                             closeOnCurrent('/files')
                                         }
                                         className='flex items-center w-full font-semibold'
-                                        href='/dashboard'>
+                                        href='/files'>
                                         Files
                                     </Link>
                                 </li>

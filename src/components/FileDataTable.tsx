@@ -207,7 +207,7 @@ const FileDataTable = ({ type }: FilesProps) => {
         )
       },
       cell: ({ row }) => (
-        <Link href={`/dashboard/${row.original.id}`} className={"text-sm"}>
+        <Link href={`/files/${row.original.id}`} className={"text-sm"}>
           {row.getValue("name")}
         </Link>
       ),

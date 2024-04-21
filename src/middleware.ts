@@ -20,5 +20,5 @@ export default function middleware(req: any) {
 
 export const config = {
     // Specifying which routes should be protected.
-    matcher: ['/dashboard/:path*', '/auth-callback']
+    matcher: ['/dashboard/:path*', '/auth-callback', '/files/:path*', ]
 }
