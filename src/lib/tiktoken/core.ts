@@ -59,6 +59,7 @@ export function countVectorStoreTokens(vectorStores: Store[]) {
 
     } catch (error) {
         console.error('An error occurred while processing tokens:', error);
+        return 0
     }
 }
 
