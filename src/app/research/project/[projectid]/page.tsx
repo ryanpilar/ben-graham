@@ -2,14 +2,11 @@
 import React from 'react'
 // Project Imports
 import { db } from '@/db';
-import GoBack from '@/components/GoBack';
-import { Button } from '@/components/ui/button';
 import FileDrawer from '@/components/FileDrawer';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 import ProjectQuestions from '@/components/ProjectQuestions';
 import AddQuestionButton from '@/components/AddQuestionButton';
 // 3rd Party Imports
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import BadgeFileCounter from '@/components/BadgeFileCounter';
@@ -72,12 +69,9 @@ const Project = async ({ params }: PageProps) => {
 
                                 </div>
 
-
                             </div>
 
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
-
-
 
                         </main>
                     </div>
