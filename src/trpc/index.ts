@@ -997,7 +997,7 @@ export const appRouter = router({
 
             // Compute the usage percentage relative to the context window
             const contextWindowCap = subscriptionDetails.gptModel.contextWindow
-            const usagePercentage = (totalTokensUsed / contextWindowCap) * 100;
+            const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
 
             return {
                 usagePercentage

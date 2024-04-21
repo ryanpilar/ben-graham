@@ -6,11 +6,16 @@ import { CircularProgress } from "@nextui-org/progress";
 
 /** ================================|| Context Usage ||=================================== **/
 
+
+interface ContextUsageProps {
+    percentage: number
+}
 type ColorScheme = 'danger' | 'warning' | 'primary' | 'secondary' | 'default'
 
-const ContextUsage = () => {
+const ContextUsage = ({percentage}: ContextUsageProps) => {
 
-    const value = 34;  // Example static value, you can make this dynamic
+
+    const value = percentage;  
 
     const getColor = (value: number): ColorScheme => {
         switch (true) {

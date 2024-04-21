@@ -12,6 +12,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import BadgeFileCounter from '@/components/BadgeFileCounter';
 import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
 import ContextUsage from '@/components/ContextUsage';
+import { trpcServer } from '@/trpc/trpc-caller';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -23,15 +24,16 @@ interface PageProps {
 
 const Project = async ({ params }: PageProps) => {
 
-    const { projectid } = params
     const { getUser } = getKindeServerSession()
     const user = await getUser()
+    const { projectid } = params
+    const { usagePercentage } = await trpcServer.getContextUsage({ type: 'project', key: projectid })
+
 
     // Redirect users that are not logged in
     if (!user || !user.id) redirect(`/auth-callback?origin=research/project/${projectid}`)
 
     const subscriptionPlan = await getUserSubscriptionPlan()
-
 
     const project = await db.project.findFirst({
         where: {
@@ -59,8 +61,8 @@ const Project = async ({ params }: PageProps) => {
 
                                 <div className='flex gap-x-3'>
 
-                                    <ContextUsage />
-                                   
+                                    <ContextUsage percentage={usagePercentage} />
+
                                     <BadgeFileCounter type={'project'} >
                                         <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
                                     </BadgeFileCounter>
