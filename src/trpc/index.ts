@@ -953,7 +953,7 @@ export const appRouter = router({
             console.log('subscription', subscription);
 
             // Depending on the subscription sub get proper plan details and usage caps
-            let subscriptionDetails = !subscription ? PLANS[0] : PLANS[1]
+            let subscriptionDetails = subscription.isSubscribed ? PLANS[1] : PLANS[0]
 
             // Filter for the incoming type and key
             const fileFieldMapping = {
@@ -971,7 +971,6 @@ export const appRouter = router({
                     }
                 }
             })
-            console.log('fileCount', fileCount);
 
             // Fetch the key's # of previous messages, but consider the the plan's usage cap
             const prevMessages = await db.message.findMany({
@@ -987,8 +986,8 @@ export const appRouter = router({
             }))
 
             // Calculate tokens used for previous messages
-            const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);           
-           
+            const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);
+
             const approxVectorStoreTokens = fileCount * 500     // Assuming 500 tokens per page/file
             const approxCompletionTokens = 4000;                // Another assumption that will change over time
 
@@ -999,8 +998,16 @@ export const appRouter = router({
             const contextWindowCap = subscriptionDetails.gptModel.contextWindow
             const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
 
+            const prevMessageUsage = Math.round(( prevMessageTokens / contextWindowCap) * 100)
+            const vectorStoreUsage = Math.round(( approxVectorStoreTokens / contextWindowCap) * 100)
+            const completionUsage = Math.round(( approxCompletionTokens / contextWindowCap) * 100)
+console.log('prevMessageUsage', prevMessageUsage);
+
             return {
-                usagePercentage
+                usagePercentage,
+                prevMessageUsage: prevMessageUsage,
+                vectorStoreUsage: vectorStoreUsage,
+                completionUsage: completionUsage,
             }
         })
 })

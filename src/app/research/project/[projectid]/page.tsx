@@ -26,8 +26,7 @@ const Project = async ({ params }: PageProps) => {
 
     const { getUser } = getKindeServerSession()
     const user = await getUser()
-    const { projectid } = params
-    const { usagePercentage } = await trpcServer.getContextUsage({ type: 'project', key: projectid })
+    const { projectid } = params    
 
 
     // Redirect users that are not logged in
@@ -61,7 +60,8 @@ const Project = async ({ params }: PageProps) => {
 
                                 <div className='flex gap-x-3'>
 
-                                    <ContextUsage percentage={usagePercentage} />
+
+                                    <ContextUsage type='project' usageKey={projectid} />
 
                                     <BadgeFileCounter type={'project'} >
                                         <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />

@@ -1,21 +1,27 @@
+'use client'
 import React from 'react'
 // Project Imports
 // 3rd Party Imports
 import { CircularProgress } from "@nextui-org/progress";
-// Styles
+import ContextUsagePopover from './ContextUsagePopover';
+// import { trpc } from '@/app/_trpc/client';
+import { trpcServer } from '@/trpc/trpc-caller';
+import { trpc } from '@/app/_trpc/client';
+
 
 /** ================================|| Context Usage ||=================================== **/
 
 
-interface ContextUsageProps {
-    percentage: number
+export interface ContextUsageProps {
+    type: 'project' | 'question'
+    usageKey: string
 }
 type ColorScheme = 'danger' | 'warning' | 'primary' | 'secondary' | 'default'
 
-const ContextUsage = ({percentage}: ContextUsageProps) => {
+const ContextUsage =  ({ type, usageKey }: ContextUsageProps) => {
 
-
-    const value = percentage;  
+    // const { usagePercentage } = await trpcServer.getContextUsage({ type, key })
+    const {data} = trpc.getContextUsage.useQuery({ type: type, key: usageKey })
 
     const getColor = (value: number): ColorScheme => {
         switch (true) {
@@ -32,14 +38,18 @@ const ContextUsage = ({percentage}: ContextUsageProps) => {
 
     return (
         <>
-            <CircularProgress
-                label="Context Usage"
-                size="lg"
-                value={value}
-                color={getColor(value)}
-                formatOptions={{ style: "unit", unit: "percent" }}
-                showValueLabel={true}
-            />
+            {data && (<ContextUsagePopover usageData={data} >
+                <CircularProgress
+                    size="lg"
+                    value={data.usagePercentage}
+                    color={getColor(data.usagePercentage)}
+                    formatOptions={{ style: "unit", unit: "percent" }}
+                    showValueLabel={true}
+                />
+            </ContextUsagePopover>)}
+
+
+
         </>
     );
 };

@@ -1,29 +1,22 @@
-// Project Imports
-// 3rd Party Imports
-// Styles
-import { cn } from '@/lib/utils'
-import { ExtendedMessage } from '@/types/message'
-import { Icons } from '../Icons'
-import ReactMarkdown from 'react-markdown'
-import { format } from 'date-fns'
 import { HTMLAttributes, forwardRef } from 'react'
-import remarkGfm from 'remark-gfm';
+
+// Project Imports
+import { Icons } from '../Icons'
+import { cn } from '@/lib/utils'
+// 3rd Party Imports
+import { format } from 'date-fns'
+import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
+import ReactMarkdown from 'react-markdown'
+import { ExtendedMessage } from '@/types/message'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
-
-// import { atomDark, coyWithoutShadows, nightOwl, oneLight, zTouch, androidstudio } from 'react-syntax-highlighter/dist/esm/styles/prism'
+// Code Block Styles
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
-
+// import { grayscale } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { nnfxDark, nnfx } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { isblEditorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-// import { grayscale } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { coyWithoutShadows } from 'react-syntax-highlighter/dist/esm/styles/prism'
-
-
-interface MessageProps {
-    message: ExtendedMessage  // Advanced typescript magic inferring types
-    isNextMessageSamePerson: boolean
-}
+// import { atomDark, coyWithoutShadows, nightOwl, oneLight, zTouch, androidstudio } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 /** ================================|| Message ||=================================== 
 
@@ -44,6 +37,11 @@ interface MessageProps {
     check if its intersecting with the screen, if its already visible.
 
 **/
+
+interface MessageProps {
+    message: ExtendedMessage  // Advanced typescript magic inferring types
+    isNextMessageSamePerson: boolean
+}
 
 const Message = forwardRef<HTMLDivElement, MessageProps>(
     ({ message, isNextMessageSamePerson }, ref) => {

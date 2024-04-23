@@ -13,18 +13,16 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, CheckIcon, ChevronDown, Loader2, LoaderIcon, MoreHorizontal, Plus, PlusSquare } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Loader2, Plus } from "lucide-react"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Checkbox as NUICheckbox, useCheckbox } from '@nextui-org/checkbox'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -39,16 +37,14 @@ import {
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { trpc } from "@/app/_trpc/client"
-import { Badge, badgeVariants } from "./ui/badge"
 import { Chip as NUIChip } from "@nextui-org/chip"
 import { Tooltip as NUITooltip } from "@nextui-org/tooltip"
 
 import Link from "next/link"
-import { cn } from "@/lib/utils"
 import { LoadingButton } from "./ui/loading-button"
 import { tv } from "@nextui-org/theme"
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import Skeleton from "react-loading-skeleton"
+import { ScrollArea } from "./ui/scroll-area"
 // Project Imports
 // 3rd Party Imports
 // Styles
@@ -300,7 +296,7 @@ const FileDataTable = ({ type }: FilesProps) => {
                   >
                     {/* Conditionally render the content inside the chip based on whether the question is selected */}
                     {isSelected ? (
-                      displayText 
+                      displayText
                     ) : (
                       <Link href={`/research/question/${question.id}`}>
                         {displayText}
@@ -321,7 +317,7 @@ const FileDataTable = ({ type }: FilesProps) => {
       enableHiding: false,
       cell: ({ row }) => {
 
-        
+
 
         const fileIdFromTable = row.getValue("id") as string
         const fileProjects = row.original.projects as FileProject[];
@@ -348,7 +344,7 @@ const FileDataTable = ({ type }: FilesProps) => {
           }
         })
 
-        
+
 
         const styles = checkbox({ isSelected, isFocusVisible })
 
@@ -431,8 +427,8 @@ const FileDataTable = ({ type }: FilesProps) => {
   }, [type, table])
 
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
+    <div className="w-full h-full">
+      <div className="flex items-center pt-2 pb-4">
         <Input
           placeholder="Filter files..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -469,80 +465,83 @@ const FileDataTable = ({ type }: FilesProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                // key={headerGroup.id}
-                key={`table-header-row-one-${headerGroup.id}`}
-              >
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      // key={header.id}                    
-                      key={`table-head-${header.id}`}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
 
-            {isLoading ? (
-              // Assume you want to display 4 skeleton rows during loading
-              Array.from({ length: 4 }).map((_, index) => (
-                <TableRow key={`$skeleton-table-row-${index}-index`}>
-                  {Array.from({ length: columns.length }).map((_, index) => (
-                    <TableCell key={`$skeleton-table-cell-${index}-index`}>
-                      <Skeleton height={35} width="100%" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
+
+      {/* <ScrollArea className="h-[335px] rounded-md "> */}
+        <div className="rounded-md border">
+          <Table className='w-full '>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
-                  key={`is-not-loading-table-row-${row.id}`}
-                  // key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  // key={headerGroup.id}
+                  key={`table-header-row-one-${headerGroup.id}`}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                    key={`is-not-loading-table-cell-${cell.id}`}
-                    // key={cell.id}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        // key={header.id}                    
+                        key={`table-head-${header.id}`}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        {/* <LoadingButton
+              ))}
+            </TableHeader>
+            <TableBody>
+
+              {isLoading ? (
+                // Assume you want to display 4 skeleton rows during loading
+                Array.from({ length: 4 }).map((_, index) => (
+                  <TableRow key={`$skeleton-table-row-${index}-index`}>
+                    {Array.from({ length: columns.length }).map((_, index) => (
+                      <TableCell key={`$skeleton-table-cell-${index}-index`}>
+                        <Skeleton height={35} width="100%" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={`is-not-loading-table-row-${row.id}`}
+                    // key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={`is-not-loading-table-cell-${cell.id}`}
+                      // key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          {/* <LoadingButton
           variant={Object.keys(table.getState().rowSelection).length > 0 ? `ringHover` : `outline`}
           size="sm"
           onClick={() => handleAddSelectionClick()}
@@ -557,26 +556,31 @@ const FileDataTable = ({ type }: FilesProps) => {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div> */}
 
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+          {/* <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div> */}
+
         </div>
 
-      </div>
+      {/* </ScrollArea> */}
+
+
+
     </div>
   )
 };

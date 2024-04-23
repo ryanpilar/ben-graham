@@ -60,6 +60,7 @@ export function countVectorStoreTokens(vectorStores: Store[]) {
 
 export function countMessageTokens(messages: Message[], tokenCost: TokenCost) {
 
+    
     const { tokensPerMessage, tokensPerName } = tokenCost
     let totalTokens = 0;
 
@@ -78,6 +79,7 @@ export function countMessageTokens(messages: Message[], tokenCost: TokenCost) {
 
         totalTokens += 3;  // Add tokens for the assistant's priming in each reply
     });
+    
 
     return totalTokens;
 }
