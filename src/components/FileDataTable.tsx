@@ -75,8 +75,8 @@ interface FilesProps {
 const FileDataTable = ({ type }: FilesProps) => {
 
   const params = useParams()
-  
-  
+
+
 
   const getKey = () => {
     if (type === 'project' && params.projectid) {
@@ -400,20 +400,20 @@ const FileDataTable = ({ type }: FilesProps) => {
     },
   })
 
-  const handleAddSelectionClick = () => {
+  // const handleAddSelectionClick = () => {
 
-    setLoadingSelectedFiles(true)
+  //   setLoadingSelectedFiles(true)
 
-    // Filter the selected rows
-    const selectedRows = table.getSelectedRowModel().rows;
+  //   // Filter the selected rows
+  //   const selectedRows = table.getSelectedRowModel().rows;
 
-    // Extract the desired values from the selected rows 
-    const selectedValues = selectedRows.map(row => row.original.id)
-    addLinkedFiles({ key: key, fileIds: selectedValues, type: type })
+  //   // Extract the desired values from the selected rows 
+  //   const selectedValues = selectedRows.map(row => row.original.id)
+  //   addLinkedFiles({ key: key, fileIds: selectedValues, type: type })
 
-    // Clear checkbox state in data table
-    table.resetRowSelection()
-  };
+  //   // Clear checkbox state in data table
+  //   table.resetRowSelection()
+  // };
   useEffect(() => {
     // const columnVisibility = {
     //   'projects': type === 'project' || type === 'all',
@@ -497,6 +497,7 @@ const FileDataTable = ({ type }: FilesProps) => {
           <TableBody>
 
             {isLoading ? (
+
               // Assume you want to display 4 skeleton rows during loading
               Array.from({ length: 4 }).map((_, index) => (
                 <TableRow key={`$skeleton-table-row-${index}-index`}>
@@ -506,42 +507,32 @@ const FileDataTable = ({ type }: FilesProps) => {
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
-            ) : table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={`is-not-loading-table-row-${row.id}`}
-                  // key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={`is-not-loading-table-cell-${cell.id}`}
-                    // key={cell.id}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+              )))
+
+              : table.getRowModel().rows.length
+
+                ? (table.getRowModel().rows.map((row) => (
+                  <TableRow key={`is-not-loading-table-row-${row.id}`} data-state={row.getIsSelected() && "selected"}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={`is-not-loading-table-cell-${cell.id}`} >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )))
+
+                : (<TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center" >
+                    No results.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+                )}
+                
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        {/* <LoadingButton
+      {/* <div className="flex items-center justify-end space-x-2 py-4"> */}
+      {/* <LoadingButton
           variant={Object.keys(table.getState().rowSelection).length > 0 ? `ringHover` : `outline`}
           size="sm"
           onClick={() => handleAddSelectionClick()}
@@ -556,7 +547,7 @@ const FileDataTable = ({ type }: FilesProps) => {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div> */}
 
-        {/* <div className="space-x-2">
+      {/* <div className="space-x-2">
             <Button
               variant="outline"
               size="sm"
@@ -575,7 +566,7 @@ const FileDataTable = ({ type }: FilesProps) => {
             </Button>
           </div> */}
 
-      </div>
+      {/* </div> */}
 
       {/* </ScrollArea> */}
 

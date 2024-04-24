@@ -52,14 +52,9 @@ const ProjectFiles = ({ subscriptionPlan, projectId }: ProjectFilesProps) => {
                 </h1>
 
                 <Suspense fallback={<Skeleton count={1} />}>
-                    <AddFile isSubscribed={subscriptionPlan.isSubscribed} label='Upload File' skipUpload={true} type={'all'} />
+                    <AddFile isSubscribed={subscriptionPlan.isSubscribed} label='Upload File' skipUpload={true} type={'all'} researchKey={projectId} />
                 </Suspense>
-                {/*
-                    label
-                    skipFileUpload
-
-                              */}
-
+               
             </div>
 
             {/* display all user files */}
