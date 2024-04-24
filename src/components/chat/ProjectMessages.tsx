@@ -109,6 +109,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
                 messageId={message.id}
+                key={`project-message-small-key-${message.id}`}
               />
             )
 
@@ -118,6 +119,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
                 messageId={message.id}
+                key={`project-message-big-key-${message.id}`}
               />
             )
         })
