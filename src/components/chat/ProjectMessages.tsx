@@ -108,7 +108,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
                 ref={ref}
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
-                key={message.id}
+                messageId={message.id}
               />
             )
 
@@ -117,7 +117,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
               <Message
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
-                key={message.id}
+                messageId={message.id}
               />
             )
         })
