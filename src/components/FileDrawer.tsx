@@ -61,10 +61,10 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
             open={isOpen} onOpenChange={onOpenChange}
         >
             <Drawer.Trigger asChild>
-                <Button>Manage Files</Button>
+                <Button aria-label="Manage Files">Manage Files</Button>
             </Drawer.Trigger>
 
-            <Drawer.Overlay className="fixed inset-0 bg-black/60 z-10" />
+            <Drawer.Overlay className="fixed inset-0 bg-black/60 z-10" aria-hidden="true"/>
 
             <Drawer.Portal>
 
@@ -84,7 +84,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
                             <div className='absolute flex w-full justify-between items-center gap-x-2  pt-1.5'>
 
-                                <DrawerClose className='px-4'>
+                                <DrawerClose className='px-4' aria-label="Close drawer" >
                                     <X size={25} strokeWidth={1} absoluteStrokeWidth className='text-foreground-400' />
                                 </DrawerClose>
 
@@ -121,7 +121,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
                                 </DrawerTitle>
 
-                                <AddFile researchKey={key} isSubscribed={isSubscribed} label='Upload File' skipUpload={false} type={type} />
+                                <AddFile researchKey={key} isSubscribed={isSubscribed} skipUpload={false} type={type} label='Upload File'  />
 
                             </DrawerHeader>
 
@@ -129,13 +129,13 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
                             <ScrollArea className="rounded-md">
 
-                                <div className='flex justify-start pt-4 pb-2'>
+                                <div className='flex justify-start pt-4 pb-2 px-1'>
                                     <h3 className="text-left w-full text-xl font-medium">Linked Files </h3>
                                 </div>
 
                                 <LinkedFiles type={type} />
 
-                                <h3 className="text-xl mt-4 font-medium pt-2">
+                                <h3 className="text-xl mt-4 font-medium pt-2 px-1">
                                     <Link href='/files'>
                                         All Files
                                     </Link>

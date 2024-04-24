@@ -45,6 +45,7 @@ import { LoadingButton } from "./ui/loading-button"
 import { tv } from "@nextui-org/theme"
 import Skeleton from "react-loading-skeleton"
 import { ScrollArea } from "./ui/scroll-area"
+import { truncateText } from "@/lib/utils"
 
 // Project Imports
 // 3rd Party Imports
@@ -52,7 +53,7 @@ import { ScrollArea } from "./ui/scroll-area"
 
 
 
-/** ================================|| FileDataTable ||=================================== **/
+/** ================================|| File Data Table ||=================================== **/
 
 export type FileProject = {
   id: string
@@ -150,7 +151,6 @@ const FileDataTable = ({ type }: FilesProps) => {
     defaultSelected: true,
   })
 
-
   // TABLE COLUMN COMPONENTS
   const columns: ColumnDef<FileData>[] = [
 
@@ -196,6 +196,9 @@ const FileDataTable = ({ type }: FilesProps) => {
       accessorKey: "name",
       // header: "Name",
       header: ({ column }) => {
+
+
+
         return (
           <Button
             variant="ghost"
@@ -206,11 +209,32 @@ const FileDataTable = ({ type }: FilesProps) => {
           </Button>
         )
       },
-      cell: ({ row }) => (
-        <Link href={`/files/${row.original.id}`} className={"text-sm"}>
-          {row.getValue("name")}
-        </Link>
-      ),
+      cell: ({ getValue, row, column }) => {
+
+        const text = getValue() as string;
+        console.log('text', text);
+        
+        const { truncatedText, isTruncated } = truncateText(text, 75);
+        console.log('truncatedText', truncatedText);
+
+        return isTruncated ? (
+          <NUITooltip
+            key={`name-cell-${column.id}-${row.id}`}
+            content={text}
+            placement="top-start"
+            radius="sm"
+            showArrow
+          >
+            <Link href={`/files/${row.original.id}`} className="text-sm">
+              {truncatedText}
+            </Link>
+          </NUITooltip>
+        ) : (
+          <Link href={`/files/${row.original.id}`} className="text-sm">
+            {text}
+          </Link>
+        )
+      },
     },
     // COLUMN: PROJECT BADGES
     {
@@ -427,8 +451,8 @@ const FileDataTable = ({ type }: FilesProps) => {
   }, [type, table])
 
   return (
-    <div className="w-full h-full mb-5">
-      <div className="flex items-center pt-2 pb-4">
+    <div className="w-full h-full mb-5 px-1 ">
+      <div className="flex items-center pt-2 pb-4 gap-x-1">
         <Input
           placeholder="Search files..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -527,7 +551,7 @@ const FileDataTable = ({ type }: FilesProps) => {
                   </TableCell>
                 </TableRow>
                 )}
-                
+
           </TableBody>
         </Table>
       </div>

@@ -68,3 +68,12 @@ export function constructMetadata({
     })
   }
 }
+
+/** ================================|| Truncate Text ||=================================== **/
+
+type TextProps = string
+export function truncateText(text: TextProps, maxLength = 40) {
+  const isTruncated = text.length > maxLength;
+  const truncatedText = isTruncated ? `${text.substring(0, maxLength)}...` : text;
+  return { truncatedText, isTruncated };
+}

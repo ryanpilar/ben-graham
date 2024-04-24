@@ -47,6 +47,7 @@ const ContextUsage = ({ type, usageKey }: ContextUsageProps) => {
                             color={getColor(data.usagePercentage)}
                             formatOptions={{ style: "unit", unit: "percent" }}
                             showValueLabel={true}
+                            aria-label={`Loading ${type} context usage`}
                         />
                     </ContextUsagePopover>
                     :

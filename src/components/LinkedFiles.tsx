@@ -13,10 +13,13 @@ import { CheckCheckIcon, Ghost, Loader2, MessageSquare, Plus, Trash, X } from 'l
 
 import { useParams } from 'next/navigation';
 import { Badge, badgeVariants } from './ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, truncateText } from '@/lib/utils';
 
 import { Chip } from '@nextui-org/chip';
 import { CheckCircle } from 'lucide-react';
+
+import { Tooltip as NUITooltip } from "@nextui-org/tooltip"
+
 
 /** =================================|| Linked Files ||==================================== **/
 
@@ -60,7 +63,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
     })
 
     return (
-        <div className="rounded-md w-full ">            
+        <div className="rounded-md w-full ">
 
             {files && files?.length !== 0 ? (
                 <div className='flex flex-wrap gap-2'>
@@ -94,9 +97,37 @@ const LinkedFiles = ({ type }: FilesProps) => {
                         ))
                     } */}
 
-                    {files
-                        .map((file, index) => (
+                    {files.map((file, index) => {
+                        const { truncatedText, isTruncated } = truncateText(file.name, 35);  // Assume max length of 30
 
+                        return isTruncated ? (
+                            // Wrap with tooltip only when truncation happens
+                            <NUITooltip
+                                key={`file-chip-tooltip-${index}`}
+                                content={file.name}
+                                placement="top-start"
+                                radius="sm"
+                                showArrow
+                            >
+                                <Chip
+                                    variant="shadow"
+                                    color="secondary"
+                                    size='lg'
+                                    radius='sm'
+                                    className='text-foreground-500'
+                                    onClose={() => removeLinkedFile({ fileId: file.id, key: key, type: type })}
+                                    startContent={<>{index + 1}.</>}
+                                    endContent={currentlyDeletingFile === file.id ? (
+                                        <Loader2 className='h-4 w-4  ml-3 animate-spin' />
+                                    ) : (
+                                        <X strokeWidth={2} className='h-4 w-4 ml-4 ' />
+                                    )}
+                                >
+                                    <Link href={`/files/${file.id}`} className='ml-1'>{truncatedText}</Link>
+                                </Chip>
+                            </NUITooltip>
+                        ) : (
+                            // Render without tooltip if no truncation is necessary
                             <Chip
                                 key={`file-chip-${index}`}
                                 variant="shadow"
@@ -105,7 +136,6 @@ const LinkedFiles = ({ type }: FilesProps) => {
                                 radius='sm'
                                 className='text-foreground-500'
                                 onClose={() => removeLinkedFile({ fileId: file.id, key: key, type: type })}
-                                // startContent={<CheckCircle strokeWidth={2} absoluteStrokeWidth />}
                                 startContent={<>{index + 1}.</>}
                                 endContent={currentlyDeletingFile === file.id ? (
                                     <Loader2 className='h-4 w-4  ml-3 animate-spin' />
@@ -113,33 +143,11 @@ const LinkedFiles = ({ type }: FilesProps) => {
                                     <X strokeWidth={2} className='h-4 w-4 ml-4 ' />
                                 )}
                             >
-
-                                <Link
-                                    href={`/files/${file.id}`}
-                                    className='ml-1'
-                                >
-                                    {file.name}
-
-                                </Link>
-                                {/* <Button
-                                    onClick={() =>
-                                        removeLinkedFile({ fileId: file.id, key: key, type: type })
-                                    }
-                                    size='sm'
-                                    className='w-full rounded-full bg-white'
-                                    variant='destructive'
-                                    >
-                                    {currentlyDeletingFile === file.id ? (
-                                        <Loader2 className='h-4 w-4 animate-spin'  />
-                                    ) : (
-                                        <Trash className='h-4 w-4' />
-                                        // <X className='h-4 w-4' />
-                                    )}
-                                </Button> */}
+                                <Link href={`/files/${file.id}`} className='ml-1'>{file.name}</Link>
                             </Chip>
+                        );
+                    })}
 
-                        ))
-                    }
 
 
 
