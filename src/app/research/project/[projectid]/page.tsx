@@ -1,18 +1,18 @@
+import React, { Suspense } from 'react'
 
-import React from 'react'
 // Project Imports
 import { db } from '@/db';
 import FileDrawer from '@/components/FileDrawer';
-import { getUserSubscriptionPlan } from '@/lib/stripe';
+import ContextUsage from '@/components/ContextUsage';
+import BadgeFileCounter from '@/components/BadgeFileCounter'
 import ProjectQuestions from '@/components/ProjectQuestions';
 import AddQuestionButton from '@/components/AddQuestionButton';
+import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
+import { getUserSubscriptionPlan } from '@/lib/stripe';
+
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import BadgeFileCounter from '@/components/BadgeFileCounter';
-import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
-import ContextUsage from '@/components/ContextUsage';
-import { trpcServer } from '@/trpc/trpc-caller';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -26,7 +26,7 @@ const Project = async ({ params }: PageProps) => {
 
     const { getUser } = getKindeServerSession()
     const user = await getUser()
-    const { projectid } = params    
+    const { projectid } = params
 
 
     // Redirect users that are not logged in
@@ -49,18 +49,14 @@ const Project = async ({ params }: PageProps) => {
                 {/* Left sidebar & main wrapper */}
                 <div className='flex-1 xl:flex'>
                     <div className='px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6'>
+                        <div className='mx-auto max-w-7xl xl:p-10'>
+                            <div className='lg:mt-4 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
 
-                        {/* <GoBack /> */}
-                        <main className='mx-auto max-w-7xl md:p-10'>
-                            <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
-
-                                <h1 className='mb-3 font-bold text-5xl text-gray-900'>
+                                <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
                                     Project: <span className='text-xl'>{project.name}</span>
                                 </h1>
 
                                 <div className='flex gap-x-3'>
-
-
                                     <ContextUsage type='project' usageKey={projectid} />
 
                                     <BadgeFileCounter type={'project'} >
@@ -68,14 +64,13 @@ const Project = async ({ params }: PageProps) => {
                                     </BadgeFileCounter>
 
                                     <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
-
                                 </div>
 
                             </div>
 
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
 
-                        </main>
+                        </div>
                     </div>
                 </div>
 

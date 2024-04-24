@@ -10,15 +10,16 @@ interface AddFileProps {
     label: string
     skipUpload?: boolean
     type: 'all' | 'project' | 'question'
+    researchKey: string
 }
 
-const AddFile = ({ isSubscribed, label, type }: AddFileProps) => {
+const AddFile = ({ isSubscribed, label, type, researchKey }: AddFileProps) => {
 
     return (
         <>
             <UploadFileDialog isSubscribed={isSubscribed} label={label} type={type} >
 
-                <UploadFileDropzone isSubscribed={isSubscribed} />
+                <UploadFileDropzone researchKey={researchKey} type={type} isSubscribed={isSubscribed} />
 
             </UploadFileDialog>
         </>

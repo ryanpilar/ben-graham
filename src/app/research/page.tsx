@@ -19,7 +19,7 @@ const Research = async () => {
     const user = await getUser()
 
     // Redirect users that are not logged in
-    if (!user || !user.id) redirect('/auth-callback?origin=research') // origin=dashboard so user can be redirected back to dashboard after auth
+    if (!user || !user.id) redirect('/auth-callback?origin=research') // So user can be redirected back to dashboard after auth
 
     const dbUser = await db.user.findFirst({
         where: {

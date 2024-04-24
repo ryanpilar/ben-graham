@@ -37,7 +37,6 @@ export async function getUserSubscriptionPlan() {
 
     // Go into the db to see if we have entries for this user, or if theres no records, return with false and null
     if (!dbUser) {
-        console.log('no dbUser FOUND!');
 
         return {
             ...PLANS[0],

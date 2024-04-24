@@ -86,7 +86,6 @@ export const ProjectChatContextProvider = ({ projectId, children }: Props) => {
             setMessage('')
 
             // Step 1 - cancel any outgoing re-fetches so that they don't overwrite or optimistic update
-            // await utils.getFileMessages.cancel()
             await utils.getProjectMessages.cancel()
 
 
@@ -132,6 +131,7 @@ export const ProjectChatContextProvider = ({ projectId, children }: Props) => {
             )
 
             setIsLoading(true) // We want to add the loading state AFTER adding the user message
+            await utils.getContextUsage.invalidate()
 
             // Be sure to use flatmap so we don't get array array
             return {

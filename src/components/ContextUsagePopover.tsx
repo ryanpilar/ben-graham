@@ -1,8 +1,7 @@
 'use client'
 import React, { ReactNode } from 'react'
 // Project Imports
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+
 import { Label } from "@/components/ui/label"
 import {
     Popover,
@@ -29,7 +28,7 @@ const ContextUsagePopover = ({children, usageData }: ContextUsagePopoverProps) =
             <PopoverTrigger asChild>
                 {children}
             </PopoverTrigger>
-            <PopoverContent className="w-80">
+            <PopoverContent className='w-64'>
                 <div className="grid gap-4">
                     <div className="space-y-2">
                         <h4 className="font-medium leading-none">Context Usage</h4>
@@ -37,16 +36,17 @@ const ContextUsagePopover = ({children, usageData }: ContextUsagePopoverProps) =
                             Monitor the size of your context.
                         </p>
                     </div>
-                    <div className="grid gap-2">
-                        <div className="grid grid-cols-3 items-center gap-4">
+                    <div className="flex flex-wrap">
+                        <div className="flex w-full pr-3.5 justify-between items-center">
                             <Label htmlFor="width">Previous Messages</Label>
-                            {usageData.prevMessageUsage} %
+                            <span>{usageData.prevMessageUsage} %</span>
+                            
                         </div>
-                        <div className="grid grid-cols-3 items-center gap-4">
+                        <div className="flex w-full pr-3.5 justify-between items-center">
                             <Label htmlFor="maxWidth">Files Added</Label>
                             {usageData.vectorStoreUsage} %
                         </div>
-                        <div className="grid grid-cols-3 items-center gap-4">
+                        <div className="flex w-full pr-3.5 justify-between items-center">
                             <Label htmlFor="height">GPT Responses</Label>
                             {usageData.completionUsage} %
                         </div>

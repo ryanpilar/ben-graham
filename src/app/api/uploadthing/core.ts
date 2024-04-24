@@ -24,13 +24,13 @@ const f = createUploadthing();
 
 // Middleware to ensure only authenticated users can upload files
 const middleware = async () => {
+    
     const { getUser } = getKindeServerSession()
     const user = await getUser()
-
     if (!user || !user.id) throw new Error('Unauthorized')
 
-    // Fetch user's subscription plan
     const subscriptionPlan = await getUserSubscriptionPlan()
+
     // Pass user and subscription plan info as metadata
     return { subscriptionPlan, kindeId: user.id }
 }
@@ -83,7 +83,6 @@ const onUploadComplete = async ({ metadata, file }: {
         const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Plus')!.pagesPerPdf
         const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Free')!.pagesPerPdf
 
-
         // Is the user subscribed or not?
         if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
             await db.file.update({
@@ -100,7 +99,6 @@ const onUploadComplete = async ({ metadata, file }: {
         const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
         const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
 
-
         await PineconeStore.fromDocuments(
             pageLevelDocs,
             embeddings,                         //   OpenAi embedding tell langchain how to generate the vectors from the text
@@ -109,7 +107,6 @@ const onUploadComplete = async ({ metadata, file }: {
                 namespace: createdFile.id,      //  We can save a vector to certain namespaces, in this case fileId 
             }
         )
-
 
         // Update upload status to 'SUCCESS'
         await db.file.update({
@@ -138,13 +135,10 @@ const onUploadComplete = async ({ metadata, file }: {
 // Define routers for different plan uploaders
 export const ourFileRouter = {
 
-    pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
+    freePlanUploader: f({ pdf: { maxFileSize: PLANS.find( plan=> plan.slug === 'free')!.pdfCap } })
         .middleware(middleware)
         .onUploadComplete(onUploadComplete),
-    freePlanUploader: f({ pdf: { maxFileSize: '4MB' } })
-        .middleware(middleware)
-        .onUploadComplete(onUploadComplete),
-    plusPlanUploader: f({ pdf: { maxFileSize: '16MB' } })
+    plusPlanUploader: f({ pdf: { maxFileSize: PLANS.find( plan=> plan.slug === 'plus')!.pdfCap } })
         .middleware(middleware)
         .onUploadComplete(onUploadComplete),
 

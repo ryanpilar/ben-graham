@@ -3,10 +3,10 @@ import React from 'react'
 // Project Imports
 // 3rd Party Imports
 import { CircularProgress } from "@nextui-org/progress";
-import ContextUsagePopover from './ContextUsagePopover';
-// import { trpc } from '@/app/_trpc/client';
-import { trpcServer } from '@/trpc/trpc-caller';
+
 import { trpc } from '@/app/_trpc/client';
+import Skeleton from 'react-loading-skeleton';
+import ContextUsagePopover from './ContextUsagePopover';
 
 
 /** ================================|| Context Usage ||=================================== **/
@@ -18,10 +18,10 @@ export interface ContextUsageProps {
 }
 type ColorScheme = 'danger' | 'warning' | 'primary' | 'secondary' | 'default'
 
-const ContextUsage =  ({ type, usageKey }: ContextUsageProps) => {
+const ContextUsage = ({ type, usageKey }: ContextUsageProps) => {
 
     // const { usagePercentage } = await trpcServer.getContextUsage({ type, key })
-    const {data} = trpc.getContextUsage.useQuery({ type: type, key: usageKey })
+    const { data, isLoading } = trpc.getContextUsage.useQuery({ type: type, key: usageKey })
 
     const getColor = (value: number): ColorScheme => {
         switch (true) {
@@ -37,8 +37,23 @@ const ContextUsage =  ({ type, usageKey }: ContextUsageProps) => {
     };
 
     return (
-        <>
-            {data && (<ContextUsagePopover usageData={data} >
+        <div className='flex justify-center items-center'>
+            {
+                (data && !isLoading) ? 
+                    <ContextUsagePopover usageData={data} >
+                        <CircularProgress
+                            size="md"
+                            value={data.usagePercentage}
+                            color={getColor(data.usagePercentage)}
+                            formatOptions={{ style: "unit", unit: "percent" }}
+                            showValueLabel={true}
+                        />
+                    </ContextUsagePopover>
+                    :
+                    <Skeleton height={40} width={40} circle className='py-2 px-1' count={1} />
+            }
+
+            {/* {data && (<ContextUsagePopover usageData={data} >
                 <CircularProgress
                     size="lg"
                     value={data.usagePercentage}
@@ -46,11 +61,8 @@ const ContextUsage =  ({ type, usageKey }: ContextUsageProps) => {
                     formatOptions={{ style: "unit", unit: "percent" }}
                     showValueLabel={true}
                 />
-            </ContextUsagePopover>)}
-
-
-
-        </>
+            </ContextUsagePopover>)} */}
+        </ div>
     );
 };
 

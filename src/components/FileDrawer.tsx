@@ -30,7 +30,6 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
 
     const params = useParams()
     const [snap, setSnap] = useState<number | string | null>(0.95);
-    const [open, setOpen] = useState(false);
 
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -81,8 +80,6 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                     <div className="w-full mx-auto flex flex-col overflow-auto">
                         <div className='relative flex justify-between pb-150'>
 
-                            {/* <GoBack className='pl-2 pt-4 text-foreground-400' /> */}
-
                             <div className="mx-auto w-12 h-[4.5px] flex-shrink-0 rounded-full bg-zinc-300 mt-5 mb-5" />
 
                             <div className='absolute flex w-full justify-between items-center gap-x-2  pt-1.5'>
@@ -104,61 +101,52 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                             </div>
                         </div>
 
-                        <div className={clsx("flex flex-col max-w-4xl mx-auto w-full p-4 pt-3", {
+                        <div className={clsx("flex flex-col max-w-4xl mx-auto w-full px-4", {
                             "overflow-y-auto": snap === 1,
                             "overflow-hidden": snap !== 1,
                         })}
                         >
-                            <DrawerHeader className='flex w-full justify-between items-end px-0 pb-4'>
+                            <DrawerHeader className='flex w-full justify-between items-end px-0 pb-2'>
 
                                 <DrawerTitle className='flex flex-wrap justify-start items-center'>
 
                                     <span className='flex w-full capitalize text-3xl  items-center z-10'>
-                                        {type} <ChevronRight className='text-zinc-400 px-1' />
+                                        <BadgeFileCounter type={type} className='-mr-2.5 mt-1'>{type} Files</BadgeFileCounter> <ChevronRight strokeWidth={1} className='text-zinc-400 ml-2 mr-0.5' />
                                         {type === 'project' ? research?.name : type === 'question' ? research?.name : ''}
                                     </span>
-
-
 
                                     {/* <DrawerDescription className='w-full text-left font-normal'>
                                     Link a file, or several files, to a project, or multiple projects, or even questions.
                                 </DrawerDescription> */}
+
                                 </DrawerTitle>
 
-                                <AddFile isSubscribed={isSubscribed} label='Upload File' skipUpload={false} type={type} />
+                                <AddFile researchKey={key} isSubscribed={isSubscribed} label='Upload File' skipUpload={false} type={type} />
 
                             </DrawerHeader>
 
+                            <Separator className='h-[1.5px] bg-slate-200' />
+
                             <ScrollArea className="rounded-md">
-                                <div className='flex justify-start pt-3 pb-2'>
-                                    <BadgeFileCounter type={type}>
-                                        <h3 className="text-left w-full text-xl font-medium mr-4">Linked Files </h3>
-                                    </BadgeFileCounter>
+
+                                <div className='flex justify-start pt-4 pb-2'>
+                                    <h3 className="text-left w-full text-xl font-medium">Linked Files </h3>
                                 </div>
-
-                                {/* <Separator className='mb-6 h-[1.5px]' /> */}
-
 
                                 <LinkedFiles type={type} />
 
-
-
                                 <h3 className="text-xl mt-4 font-medium pt-2">
                                     <Link href='/files'>
-                                        File Inventory
+                                        All Files
                                     </Link>
                                 </h3>
 
-                                {/* <Separator className='mb-2 h-[0.5px]' /> */}
                                 <FileDataTable type={type} />
 
                             </ScrollArea>
 
-
-
                         </div>
                     </div>
-
 
                 </Drawer.Content>
             </Drawer.Portal>

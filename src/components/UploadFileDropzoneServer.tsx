@@ -21,8 +21,6 @@ const UploadFileDropzoneServer = async ({ isSubscribed }: UploadFileUploadServer
         userQuestions: '',
     }
 
-    console.log('useProjects', userProjects);
-
     return (
         <Suspense fallback={<Skeleton count={2} />}>
             <UploadFileDropzone isSubscribed={isSubscribed} />

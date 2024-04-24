@@ -47,6 +47,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
             utils.getFiles.invalidate()
             utils.getNonLinkedFiles.invalidate()
             utils.getFileCount.invalidate()
+            utils.getContextUsage.invalidate()
 
         },
         onMutate({ fileId }) {
@@ -59,10 +60,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
     })
 
     return (
-        <div className="rounded-md w-full ">
-
-
-            
+        <div className="rounded-md w-full ">            
 
             {files && files?.length !== 0 ? (
                 <div className='flex flex-wrap gap-2'>

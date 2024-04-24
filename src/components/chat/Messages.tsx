@@ -1,15 +1,14 @@
+import { useContext, useEffect, useRef } from 'react'
 
 // Project Imports
-// 3rd Party Imports
-// Styles
-import { trpc } from '@/app/_trpc/client'
-import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
-import { Loader2, MessageSquare } from 'lucide-react'
-import Skeleton from 'react-loading-skeleton'
-import { useContext, useEffect, useRef } from 'react'
-import { ChatContext } from './ChatContext'
 import Message from './Message'
+import { trpc } from '@/app/_trpc/client'
+import { ChatContext } from './ChatContext'
+import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
+// 3rd Party Imports
+import Skeleton from 'react-loading-skeleton'
 import { useIntersection } from '@mantine/hooks'
+import { Loader2, MessageSquare } from 'lucide-react'
 
 interface MessagesProps {
   fileId: string
@@ -28,14 +27,11 @@ interface MessagesProps {
     is rendered on the screen. So we map and cross reference the index to make a 
     conditional check
 
-
 **/
 
 const Messages = ({ fileId }: MessagesProps) => {
 
-
   const { isLoading: isAiThinking } = useContext(ChatContext)  // Very much controls what message is going to be displayed!
-
 
   const { data, isLoading, fetchNextPage } = trpc.getFileMessages.useInfiniteQuery( // Call our TRPC endpoint and destructure the data
     {
@@ -81,7 +77,6 @@ const Messages = ({ fileId }: MessagesProps) => {
     threshold: 1,
   })
 
-
   useEffect(() => {
     // If the ref is intersecting, we need to load more messages!
     if (entry?.isIntersecting) {
@@ -108,6 +103,7 @@ const Messages = ({ fileId }: MessagesProps) => {
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
                 key={message.id}
+                messageId={message.id}
               />
             )
 
@@ -117,6 +113,8 @@ const Messages = ({ fileId }: MessagesProps) => {
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
                 key={message.id}
+                messageId={message.id}
+
               />
             )
         })

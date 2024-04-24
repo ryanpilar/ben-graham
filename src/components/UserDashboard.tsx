@@ -19,7 +19,6 @@ interface PageProps {
 }
 
 const UserDashboard = ({ subscriptionPlan, params }: PageProps) => {
-    console.log('params user-d', params);
 
     return (
         <main className='mx-auto max-w-7xl md:p-10'>

@@ -172,9 +172,6 @@ export const POST = async (req: NextRequest) => {
     }
   })
 
-  console.log('queryCost DOC created', queryCosts);
-
-
   // Create a completion request to OpenAI with the current and previous messages
   const response = await openai.chat.completions.create({
     model: gptModel.name,

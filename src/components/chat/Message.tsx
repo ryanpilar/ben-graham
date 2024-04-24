@@ -12,6 +12,10 @@ import { ExtendedMessage } from '@/types/message'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 // Code Block Styles
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { Pin, PinOff, X } from 'lucide-react'
+import PinMsg from './PinMsg'
+import XMsg from './XMsg'
+import MsgMorePopover from '../MsgMorePopover'
 // import { grayscale } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { nnfxDark, nnfx } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { isblEditorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
@@ -41,10 +45,11 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 interface MessageProps {
     message: ExtendedMessage  // Advanced typescript magic inferring types
     isNextMessageSamePerson: boolean
+    messageId: string
 }
 
 const Message = forwardRef<HTMLDivElement, MessageProps>(
-    ({ message, isNextMessageSamePerson }, ref) => {
+    ({ message, isNextMessageSamePerson, messageId }, ref) => {
 
         type CodeBlockProps = HTMLAttributes<HTMLModElement>;
 
@@ -71,18 +76,21 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
         return (
             <div
                 ref={ref}
-                className={cn('flex items-end', { 'justify-end': message.isUserMessage, })}
+                className={cn('relative flex items-end', { 'justify-end': message.isUserMessage, })}
             >
-                <div
-                    className={cn(
-                        'relative flex h-6 w-6 aspect-square items-center justify-center', {
-                        'order-2 bg-blue-500 rounded-xl': message.isUserMessage,
-                        'order-1 bg-zinc-500 rounded-xl': !message.isUserMessage,
-                        invisible: isNextMessageSamePerson, // Edge case for when there are two user messages back to back
-                    }
-                    )}>
+                    <div className='absolute bottom-10 cursor-pointer'>
+                        <MsgMorePopover messageId={''} isPinned={false} isUserMessage={message.isUserMessage} />
+                    </div>
+
+
+                <div className={cn(
+                    'relative flex h-6 w-6 aspect-square items-center justify-center', {
+                    'order-3 bg-blue-500 rounded-xl': message.isUserMessage,
+                    'order-1 bg-zinc-500 rounded-xl': !message.isUserMessage,
+                    invisible: isNextMessageSamePerson, // Edge case for when there are two user messages back to back
+                })}>
                     {message.isUserMessage ? (
-                        <Icons.user className='fill-zinc-200 text-zinc-200 h-3/4 w-3/4' />
+                        <Icons.user className='fill-zinc-200 text-zinc-200 h-4/6 w-4/6' />
                     ) : (
                         <Icons.logo className='fill-zinc-300 h-3/4 w-3/4' />
                     )}
@@ -92,7 +100,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     'flex flex-col space-y-2 text-base max-w-2xl mx-2',
                     {
                         'order-1 items-end': message.isUserMessage,
-                        'order-2 items-start': !message.isUserMessage,
+                        'order-3 items-start': !message.isUserMessage,
                     }
                 )}>
                     <div
@@ -103,6 +111,17 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             'rounded-bl-none': !isNextMessageSamePerson && !message.isUserMessage,
                         }
                         )}>
+                        {/* <div className='flex justify-end gap-x-2'>
+                            {!message.isUserMessage ? <>
+                                <PinMsg isPinned={false} messageId={messageId} />
+                                <XMsg messageId={messageId} />
+                            </>
+                                : null
+                            }
+                        </div> */}
+
+
+
                         {typeof message.text === 'string' ? (
                             <ReactMarkdown
                                 rehypePlugins={[rehypeRaw]}

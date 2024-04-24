@@ -30,8 +30,6 @@ export async function POST(request: Request) {
 
   if (!session?.metadata?.kindeId) {
 
-    console.log('In stripe webhook - NO STRIPE SESSION KINDE ID FOUND, session:', session);
-    
     return new Response(null, { status: 200, })
   }
 

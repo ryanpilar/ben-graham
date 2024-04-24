@@ -90,8 +90,6 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
 
     const handleProjectSubmit = (data: ProjectFormData) => {
 
-        console.log('handleProjectSubmit, data:', data);
-
         addMongoProject(data)
     }
 

@@ -1,12 +1,10 @@
 "use client"
-import React, { ReactNode, Suspense, useState } from 'react'
+import React, { ReactNode } from 'react'
 // Project Imports
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
-import { useSearchParams, usePathname, useParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { trpc } from '@/app/_trpc/client';
-import BadgeFileCounter from './BadgeFileCounter';
 
 /** =================================|| Upload File Dialog ||==================================== **/
 
@@ -16,7 +14,7 @@ interface UploadFileDialogProps {
     children: ReactNode
     type: 'all' | 'project' | 'question'
 }
-const UploadFileDialog = ({ isSubscribed, label, children, type }: UploadFileDialogProps) => {
+const UploadFileDialog = ({ label, children }: UploadFileDialogProps) => {
 
     const searchParams = useSearchParams();
     const pathname = usePathname();

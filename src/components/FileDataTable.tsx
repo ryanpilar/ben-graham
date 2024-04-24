@@ -45,6 +45,7 @@ import { LoadingButton } from "./ui/loading-button"
 import { tv } from "@nextui-org/theme"
 import Skeleton from "react-loading-skeleton"
 import { ScrollArea } from "./ui/scroll-area"
+
 // Project Imports
 // 3rd Party Imports
 // Styles
@@ -74,6 +75,8 @@ interface FilesProps {
 const FileDataTable = ({ type }: FilesProps) => {
 
   const params = useParams()
+  
+  
 
   const getKey = () => {
     if (type === 'project' && params.projectid) {
@@ -102,6 +105,7 @@ const FileDataTable = ({ type }: FilesProps) => {
       utils.getFiles.invalidate()
       utils.getNonLinkedFiles.invalidate()
       utils.getFileCount.invalidate()
+      utils.getContextUsage.invalidate()
       table.resetRowSelection()
 
     },
@@ -314,10 +318,9 @@ const FileDataTable = ({ type }: FilesProps) => {
     {
       accessorKey: "id",
       header: () => null,
+      // header: 'Add/Del',
       enableHiding: false,
       cell: ({ row }) => {
-
-
 
         const fileIdFromTable = row.getValue("id") as string
         const fileProjects = row.original.projects as FileProject[];
@@ -344,22 +347,17 @@ const FileDataTable = ({ type }: FilesProps) => {
           }
         })
 
-
-
         const styles = checkbox({ isSelected, isFocusVisible })
 
         return (
 
-          <div className="lowercase text-right">
-            {!isAlreadyLinked ? (
+          <div className="lowercase text-center">
 
-
-
-
+            {!isAlreadyLinked ?
               <LoadingButton
                 onClick={() => addLinkedFile({ fileId: fileIdFromTable, key: key, type: type })}
                 size='sm'
-                className='w-full'
+                className='flex justify-center w-full'
                 variant='secondary'
                 disabled={loadingSelectedFiles}
               >
@@ -372,11 +370,9 @@ const FileDataTable = ({ type }: FilesProps) => {
                 )}
 
               </LoadingButton>
-
-            ) : <span className='capitalize'>Added</span>
-
-
+              : <span className='uppercase text-xs'>Added</span>
             }
+
           </div>
         )
       },
@@ -419,18 +415,22 @@ const FileDataTable = ({ type }: FilesProps) => {
     table.resetRowSelection()
   };
   useEffect(() => {
+    // const columnVisibility = {
+    //   'projects': type === 'project' || type === 'all',
+    //   'questions': type === 'question' || type === 'all',
+    // };
     const columnVisibility = {
-      'projects': type === 'project' || type === 'all',
-      'questions': type === 'question' || type === 'all',
+      'projects': false,
+      'questions': false,
     };
     table.setColumnVisibility(columnVisibility);
   }, [type, table])
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full mb-5">
       <div className="flex items-center pt-2 pb-4">
         <Input
-          placeholder="Filter files..."
+          placeholder="Search files..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
@@ -468,80 +468,80 @@ const FileDataTable = ({ type }: FilesProps) => {
 
 
       {/* <ScrollArea className="h-[335px] rounded-md "> */}
-        <div className="rounded-md border">
-          <Table className='w-full '>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow
-                  // key={headerGroup.id}
-                  key={`table-header-row-one-${headerGroup.id}`}
-                >
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead
-                        // key={header.id}                    
-                        key={`table-head-${header.id}`}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      </TableHead>
-                    )
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-
-              {isLoading ? (
-                // Assume you want to display 4 skeleton rows during loading
-                Array.from({ length: 4 }).map((_, index) => (
-                  <TableRow key={`$skeleton-table-row-${index}-index`}>
-                    {Array.from({ length: columns.length }).map((_, index) => (
-                      <TableCell key={`$skeleton-table-cell-${index}-index`}>
-                        <Skeleton height={35} width="100%" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={`is-not-loading-table-row-${row.id}`}
-                    // key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={`is-not-loading-table-cell-${cell.id}`}
-                      // key={cell.id}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+      <div className="rounded-md border">
+        <Table className='w-full '>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow
+                // key={headerGroup.id}
+                key={`table-header-row-one-${headerGroup.id}`}
+              >
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      // key={header.id}                    
+                      key={`table-head-${header.id}`}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
                         )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+
+            {isLoading ? (
+              // Assume you want to display 4 skeleton rows during loading
+              Array.from({ length: 4 }).map((_, index) => (
+                <TableRow key={`$skeleton-table-row-${index}-index`}>
+                  {Array.from({ length: columns.length }).map((_, index) => (
+                    <TableCell key={`$skeleton-table-cell-${index}-index`}>
+                      <Skeleton height={35} width="100%" />
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          {/* <LoadingButton
+              ))
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={`is-not-loading-table-row-${row.id}`}
+                  // key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={`is-not-loading-table-cell-${cell.id}`}
+                    // key={cell.id}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        {/* <LoadingButton
           variant={Object.keys(table.getState().rowSelection).length > 0 ? `ringHover` : `outline`}
           size="sm"
           onClick={() => handleAddSelectionClick()}
@@ -556,7 +556,7 @@ const FileDataTable = ({ type }: FilesProps) => {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div> */}
 
-          {/* <div className="space-x-2">
+        {/* <div className="space-x-2">
             <Button
               variant="outline"
               size="sm"
@@ -575,7 +575,7 @@ const FileDataTable = ({ type }: FilesProps) => {
             </Button>
           </div> */}
 
-        </div>
+      </div>
 
       {/* </ScrollArea> */}
 

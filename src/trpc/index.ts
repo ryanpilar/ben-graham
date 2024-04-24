@@ -19,9 +19,12 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { countMessageTokens } from '@/lib/tiktoken/core'
 
 
+import { PrismaClient, User, File, Project, Question } from '@prisma/client';
+
+
 /** ================================|| TRPC Routes ||=================================== **/
 
-// createCaller method exists on our API endpoint on the core wrapper around the appRouter 
+// NOTE: createCaller method exists on our API endpoint on the core wrapper around the appRouter 
 // which means serverTrpc has access to all the same api endpoints that we can also call 
 // from the client side
 
@@ -109,40 +112,6 @@ export const appRouter = router({
 
             return file
         }),
-    getFileCount: privateProcedure
-        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
-        .query(async ({ input, ctx }) => {
-
-            const { kindeId } = ctx;
-            const { key, type } = input
-
-
-            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
-
-            // Count files filtered by type and key
-            const count = await db.file.count({
-                where: {
-                    kindeId: kindeId,
-                    ...(type !== 'all' && {
-                        [type === 'project' ? 'projectIds' : 'questionIds']: {
-                            has: key
-                        }
-                    })
-                }
-            });
-            return count
-
-        }),
-    getUserFiles: privateProcedure
-        .query(async ({ ctx }) => {
-            const { user, kindeId } = ctx
-
-            return await db.file.findMany({
-                where: {
-                    kindeId: kindeId
-                }
-            })
-        }),
     getFiles: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
         .query(async ({ input, ctx }) => {
@@ -169,6 +138,40 @@ export const appRouter = router({
                     createdAt: true,
                 },
             })
+
+        }),
+    getUserFiles: privateProcedure
+        .query(async ({ ctx }) => {
+            const { user, kindeId } = ctx
+
+            return await db.file.findMany({
+                where: {
+                    kindeId: kindeId
+                }
+            })
+        }),
+    getFileCount: privateProcedure
+        .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
+        .query(async ({ input, ctx }) => {
+
+            const { kindeId } = ctx;
+            const { key, type } = input
+
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            // Count files filtered by type and key
+            const count = await db.file.count({
+                where: {
+                    kindeId: kindeId,
+                    ...(type !== 'all' && {
+                        [type === 'project' ? 'projectIds' : 'questionIds']: {
+                            has: key
+                        }
+                    })
+                }
+            });
+            return count
 
         }),
     getNonLinkedFiles: privateProcedure
@@ -211,7 +214,6 @@ export const appRouter = router({
         }),
     removeLinkedFile: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional(), fileId: z.string() }))
-
         .mutation(async ({ ctx, input }) => {
 
             const { kindeId } = ctx
@@ -863,6 +865,71 @@ export const appRouter = router({
             });
         }),
 
+    // MESSAGES
+    deleteMessage: privateProcedure
+        .input(z.object({ messageId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { messageId } = input;
+
+            // Verify the message belongs to the current user before deletion
+            const message = await db.message.findFirst({
+                where: {
+                    id: messageId,
+                    kindeId: kindeId,
+                },
+            });
+
+            if (!message) throw new TRPCError({ code: 'NOT_FOUND', message: 'Message not found or you do not have permission to delete this message.' });
+
+            // General function to update message arrays for a list of models
+            type ModelProps = {
+                findMany: (args: any) => Promise<any[]>;
+                update: (args: any) => Promise<any>;
+            };
+            type MessageProps = {
+                id: string
+                kindeId: string
+            }
+            async function updateModelMessages(entity: ModelProps) {
+                const models = await entity.findMany({
+                    where: { messages: { some: { id: messageId } } },
+                    select: { id: true, messages: true }
+                });
+
+                const collectionUpdates = models.map(model => {
+                    const updatedMessages = model.messages.filter((msg: MessageProps) => msg.id !== messageId);
+                    return entity.update({
+                        where: { id: model.id },
+                        data: { messages: updatedMessages }
+                    });
+                });
+
+                return Promise.all(collectionUpdates);
+            }
+
+            // Direct DB model instances
+            const dbModels = [db.user, db.file, db.project, db.question];
+            const updatePromises = dbModels.map(updateModelMessages);
+
+            // Update QueryCost records by setting messageId to 'removed'. We don't completely remove it from QueryCost 
+            // b/c we want to continue tracking cost, and messageId: 'removed' still tells us it was a msg, as will projectID and questionId, etc.
+            const updateQueryCostPromise = db.queryCost.updateMany({
+                where: { messageId: messageId },
+                data: { messageId: 'removed' }
+            });
+
+            // Await all updates before deleting the message
+            await Promise.all([...updatePromises, updateQueryCostPromise]);
+
+            // Delete the message itself, ensuring it happens last
+            await db.message.delete({
+                where: { id: messageId }
+            });
+        }),
+
+
+
     // STRIPE
     createStripeSession: privateProcedure.mutation(
         async ({ ctx }) => {
@@ -950,7 +1017,6 @@ export const appRouter = router({
 
             // Retrieve the current user's subscription plan
             const subscription = await getUserSubscriptionPlan();
-            console.log('subscription', subscription);
 
             // Depending on the subscription sub get proper plan details and usage caps
             let subscriptionDetails = subscription.isSubscribed ? PLANS[1] : PLANS[0]
@@ -998,10 +1064,9 @@ export const appRouter = router({
             const contextWindowCap = subscriptionDetails.gptModel.contextWindow
             const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
 
-            const prevMessageUsage = Math.round(( prevMessageTokens / contextWindowCap) * 100)
-            const vectorStoreUsage = Math.round(( approxVectorStoreTokens / contextWindowCap) * 100)
-            const completionUsage = Math.round(( approxCompletionTokens / contextWindowCap) * 100)
-console.log('prevMessageUsage', prevMessageUsage);
+            const prevMessageUsage = Math.round((prevMessageTokens / contextWindowCap) * 100)
+            const vectorStoreUsage = Math.round((approxVectorStoreTokens / contextWindowCap) * 100)
+            const completionUsage = Math.round((approxCompletionTokens / contextWindowCap) * 100)
 
             return {
                 usagePercentage,
