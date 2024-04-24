@@ -10,7 +10,7 @@ interface AddFileProps {
     label: string
     skipUpload?: boolean
     type: 'all' | 'project' | 'question'
-    researchKey: string
+    researchKey?: string
 }
 
 const AddFile = ({ isSubscribed, label, type, researchKey }: AddFileProps) => {
