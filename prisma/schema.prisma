@@ -54,21 +54,21 @@ model File {
 }
 
 model Message {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
   text          String
   isUserMessage Boolean // so we can differenciate between user messages and ai messages
-  updatedAt     DateTime  @updatedAt
-  User          User      @relation(fields: [kindeId], references: [id])
+  updatedAt     DateTime    @updatedAt
+  User          User        @relation(fields: [kindeId], references: [id])
   kindeId       String
-  File          File?     @relation(fields: [fileId], references: [id])
+  File          File?       @relation(fields: [fileId], references: [id])
   fileId        String?
-  Project       Project?  @relation(fields: [projectId], references: [id])
-  projectId     String?   @db.ObjectId
-  Question      Question? @relation(fields: [questionId], references: [id])
-  questionId    String?   @db.ObjectId
-  isPinned      Boolean
-  QueryCost QueryCost[]
-  createdAt DateTime    @default(now())
+  Project       Project?    @relation(fields: [projectId], references: [id])
+  projectId     String?     @db.ObjectId
+  Question      Question?   @relation(fields: [questionId], references: [id])
+  questionId    String?     @db.ObjectId
+  isPinned      Boolean     @default(false)
+  QueryCost     QueryCost[]
+  createdAt     DateTime    @default(now())
 }
 
 model Project {
