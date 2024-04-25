@@ -110,6 +110,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                             id: crypto.randomUUID(),    // A global utility
                             text: message,
                             isUserMessage: true,
+                            isPinned: true,
                         },
                         ...latestPage.messages,
                     ]
@@ -206,6 +207,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                                             id: 'ai-response',                   // Note that this is the hardcoded response from above
                                             text: accResponse,                   // So we always show the latest data
                                             isUserMessage: false,
+                                            isPinned: true,
                                         },
                                         ...page.messages,
                                     ]
