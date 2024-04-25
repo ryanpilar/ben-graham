@@ -546,7 +546,7 @@ export const appRouter = router({
                     isUserMessage: true,
                     createdAt: true,
                     text: true,
-                    isPinned: true
+                    isPinned: true,
                 },
             })
             // Determine the cursor, and pop() it

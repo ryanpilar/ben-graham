@@ -63,6 +63,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
         <Loader2 className='h-4 w-4 animate-spin' />
       </span>
     ),
+    isPinned: false,
   }
 
   // We want to create a combined messages constant, so when we send a message later, we also want to display a loading state

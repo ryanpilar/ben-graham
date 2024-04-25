@@ -66,7 +66,7 @@ model Message {
   projectId     String?   @db.ObjectId
   Question      Question? @relation(fields: [questionId], references: [id])
   questionId    String?   @db.ObjectId
-  isPinned      Boolean?
+  isPinned      Boolean
   QueryCost QueryCost[]
   createdAt DateTime    @default(now())
 }
