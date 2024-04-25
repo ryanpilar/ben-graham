@@ -42,10 +42,10 @@ const ContextUsage = ({ type, usageKey }: ContextUsageProps) => {
                 (data && !isLoading) ? 
                     <ContextUsagePopover usageData={data} >
                         <CircularProgress
-                            size="md"
+                            size="lg"
                             value={data.usagePercentage}
                             color={getColor(data.usagePercentage)}
-                            formatOptions={{ style: "unit", unit: "percent" }}
+                            formatOptions={{ style: "unit", unit: "percent"}}
                             showValueLabel={true}
                             aria-label={`Loading ${type} context usage`}
                         />

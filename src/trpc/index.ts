@@ -19,7 +19,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { countMessageTokens } from '@/lib/tiktoken/core'
 
 
-import { PrismaClient, User, File, Project, Question } from '@prisma/client';
+import { PrismaClient, User, File, Project, Question, Message } from '@prisma/client';
 
 
 /** ================================|| TRPC Routes ||=================================== **/
@@ -546,6 +546,7 @@ export const appRouter = router({
                     isUserMessage: true,
                     createdAt: true,
                     text: true,
+                    isPinned: true
                 },
             })
             // Determine the cursor, and pop() it
@@ -631,6 +632,7 @@ export const appRouter = router({
                     isUserMessage: true,
                     createdAt: true,
                     text: true,
+                    isPinned: true,
                 },
             })
             // Determine the cursor, and pop() it
@@ -869,10 +871,9 @@ export const appRouter = router({
     deleteMessage: privateProcedure
         .input(z.object({ messageId: z.string() }))
         .mutation(async ({ ctx, input }) => {
+
             const { kindeId } = ctx;
             const { messageId } = input;
-
-            // Verify the message belongs to the current user before deletion
             const message = await db.message.findFirst({
                 where: {
                     id: messageId,
@@ -882,53 +883,38 @@ export const appRouter = router({
 
             if (!message) throw new TRPCError({ code: 'NOT_FOUND', message: 'Message not found or you do not have permission to delete this message.' });
 
-            // General function to update message arrays for a list of models
-            type ModelProps = {
-                findMany: (args: any) => Promise<any[]>;
-                update: (args: any) => Promise<any>;
-            };
-            type MessageProps = {
-                id: string
-                kindeId: string
-            }
-            async function updateModelMessages(entity: ModelProps) {
-                const models = await entity.findMany({
-                    where: { messages: { some: { id: messageId } } },
-                    select: { id: true, messages: true }
-                });
-
-                const collectionUpdates = models.map(model => {
-                    const updatedMessages = model.messages.filter((msg: MessageProps) => msg.id !== messageId);
-                    return entity.update({
-                        where: { id: model.id },
-                        data: { messages: updatedMessages }
-                    });
-                });
-
-                return Promise.all(collectionUpdates);
-            }
-
-            // Direct DB model instances
-            const dbModels = [db.user, db.file, db.project, db.question];
-            const updatePromises = dbModels.map(updateModelMessages);
-
-            // Update QueryCost records by setting messageId to 'removed'. We don't completely remove it from QueryCost 
-            // b/c we want to continue tracking cost, and messageId: 'removed' still tells us it was a msg, as will projectID and questionId, etc.
-            const updateQueryCostPromise = db.queryCost.updateMany({
-                where: { messageId: messageId },
-                data: { messageId: 'removed' }
-            });
-
-            // Await all updates before deleting the message
-            await Promise.all([...updatePromises, updateQueryCostPromise]);
-
-            // Delete the message itself, ensuring it happens last
             await db.message.delete({
                 where: { id: messageId }
             });
+
+            // Update QueryCost entries associated with this message
+            // THIS MAY BE ABLE TO BE REMOVED?!?
+            await db.queryCost.updateMany({
+                where: { messageId: messageId },
+                data: { messageId: 'removed' }
+            });
         }),
 
+    toggleMessagePin: privateProcedure
+        .input(z.object({ messageId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
 
+            const { kindeId } = ctx;
+            const { messageId } = input;
+            const message = await db.message.findFirst({
+                where: {
+                    id: messageId,
+                    kindeId: kindeId,
+                },
+            });
+
+            if (!message) throw new TRPCError({ code: 'NOT_FOUND', message: 'Message not found or you do not have permission to delete this message.' });
+
+            await db.message.update({
+                where: { id: messageId },
+                data: { isPinned: !message.isPinned }
+            });
+        }),
 
     // STRIPE
     createStripeSession: privateProcedure.mutation(

@@ -12,9 +12,6 @@ import { ExtendedMessage } from '@/types/message'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 // Code Block Styles
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Pin, PinOff, X } from 'lucide-react'
-import PinMsg from './PinMsg'
-import XMsg from './XMsg'
 import MsgMorePopover from '../MsgMorePopover'
 // import { grayscale } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 // import { nnfxDark, nnfx } from 'react-syntax-highlighter/dist/esm/styles/hljs'
@@ -45,17 +42,15 @@ import MsgMorePopover from '../MsgMorePopover'
 interface MessageProps {
     message: ExtendedMessage  // Advanced typescript magic inferring types
     isNextMessageSamePerson: boolean
-    messageId: string
 }
 
-const Message = forwardRef<HTMLDivElement, MessageProps>(
-    ({ message, isNextMessageSamePerson, messageId }, ref) => {
+const Message = forwardRef<HTMLDivElement, MessageProps>( ({ message, isNextMessageSamePerson }, ref) => {
 
-        type CodeBlockProps = HTMLAttributes<HTMLModElement>;
+        type CodeBlockProps = HTMLAttributes<HTMLModElement>
 
         // Adjusting the type to match expected HTML attributes for a code element
         function renderCodeBlock({ children, className, ...props }: CodeBlockProps) {
-            const match = /language-(\w+)/.exec(className || '');
+            const match = /language-(\w+)/.exec(className || '')
             if (match) {
                 const language = match[1];
                 return (
@@ -69,7 +64,7 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                     </SyntaxHighlighter>
                 );
             } else {
-                return <code {...props} className={className}>{children}</code>;
+                return <code {...props} className={className}>{children}</code>
             }
         }
 
@@ -78,10 +73,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                 ref={ref}
                 className={cn('relative flex items-end', { 'justify-end': message.isUserMessage, })}
             >
-                    <div className='absolute bottom-10 cursor-pointer'>
-                        <MsgMorePopover messageId={''} isPinned={false} isUserMessage={message.isUserMessage} />
-                    </div>
-
 
                 <div className={cn(
                     'relative flex h-6 w-6 aspect-square items-center justify-center', {
@@ -111,16 +102,6 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             'rounded-bl-none': !isNextMessageSamePerson && !message.isUserMessage,
                         }
                         )}>
-                        {/* <div className='flex justify-end gap-x-2'>
-                            {!message.isUserMessage ? <>
-                                <PinMsg isPinned={false} messageId={messageId} />
-                                <XMsg messageId={messageId} />
-                            </>
-                                : null
-                            }
-                        </div> */}
-
-
 
                         {typeof message.text === 'string' ? (
                             <ReactMarkdown
@@ -160,19 +141,26 @@ const Message = forwardRef<HTMLDivElement, MessageProps>(
                             message.text
                         )}
                         {message.id !== 'loading-message' ? (
-                            <div
-                                className={cn(
-                                    'text-xs select-none mt-2 w-full text-right',
-                                    {
-                                        'text-zinc-500': !message.isUserMessage,
-                                        'text-blue-300': message.isUserMessage,
-                                    }
-                                )}>
-                                {format(
-                                    new Date(message.createdAt),
-                                    'HH:mm'
-                                )}
-                            </div>
+                            <div className='flex justify-between items-center gap-x-3 mt-2'>
+
+                                <MsgMorePopover messageId={message.id} isPinned={message.isPinned!} isUserMessage={message.isUserMessage} />
+
+                                <div
+                                    className={cn(
+                                        'text-xs select-none ',
+                                        {
+                                            'text-zinc-500': !message.isUserMessage,
+                                            'text-blue-300': message.isUserMessage,
+                                        }
+                                    )}>
+
+                                    {format(
+                                        new Date(message.createdAt),
+                                        'd/M/y - HH:mm'
+                                    )}
+                                    
+                                </div>
+                            </ div>
                         ) : null}
                     </div>
                 </div>

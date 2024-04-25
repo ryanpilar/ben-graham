@@ -1,18 +1,17 @@
-'use client'
 import React from 'react'
-
 // Project Imports
+import XMsg from './chat/XMsg'
+import PinMsg from './chat/PinMsg'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import PinMsg from './chat/PinMsg'
-import XMsg from './chat/XMsg'
-import { MoreVerticalIcon } from 'lucide-react'
+// 3rd Party Imports
+import { MoreHorizontal, MoreVerticalIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-
-/** ================================|| Msg Ellipsis Popover ||=================================== **/
+/** ================================|| Msg More Popover ||=================================== **/
 
 interface MsgMorePopoverProps {
     messageId: string
@@ -25,7 +24,8 @@ const MsgMorePopover = ({ messageId, isPinned, isUserMessage }: MsgMorePopoverPr
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <MoreVerticalIcon className={isUserMessage ? 'text-blue-500' : 'text-zinc-500'} />
+                <MoreHorizontal size={25} className={cn('cursor-pointer', isUserMessage ? 'text-blue-200' : 'text-zinc-500')} />
+                {/* <MoreVerticalIcon className={isUserMessage ? 'text-blue-500' : 'text-zinc-500'} /> */}
             </PopoverTrigger>
 
             <PopoverContent className="w-25">

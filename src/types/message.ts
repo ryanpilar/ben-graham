@@ -35,3 +35,5 @@ type ExtendedText = {                               // This ExtendedText syntax,
 
 // The result will be everything the original message has, but it will be either string or jsx element instead of just string
 export type ExtendedMessage = OmitText & ExtendedText
+
+

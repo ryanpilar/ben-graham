@@ -5,9 +5,9 @@ import { trpc } from "@/app/_trpc/client";
 import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 
 
-/** ================================|| Chat Context ||===================================
+/** ================================|| Project Chat Context ||===================================
 
-    This is where we process or messages, where we handle loading and error states
+    This is where we process our messages, where we handle loading and error states
 
     onMutate: 
         Gets sent as soon as we send the message, and is where the optimistic update 
@@ -36,7 +36,6 @@ interface ProjectFile {
 
 interface Props {
     projectId: string
-    // projectFiles: ProjectFile[]
     children: ReactNode
 }
 // Wrap chat components in the provider
@@ -117,6 +116,7 @@ export const ProjectChatContextProvider = ({ projectId, children }: Props) => {
                             id: crypto.randomUUID(),    // A global utility
                             text: message,
                             isUserMessage: true,
+                            isPinned: false,
                         },
                         ...latestPage.messages,
                     ]
@@ -214,6 +214,7 @@ export const ProjectChatContextProvider = ({ projectId, children }: Props) => {
                                             id: 'ai-response',                   // Note that this is the hardcoded response from above
                                             text: accResponse,                   // So we always show the latest data
                                             isUserMessage: false,
+                                            isPinned: false,
                                         },
                                         ...page.messages,
                                     ]

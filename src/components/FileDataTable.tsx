@@ -212,10 +212,8 @@ const FileDataTable = ({ type }: FilesProps) => {
       cell: ({ getValue, row, column }) => {
 
         const text = getValue() as string;
-        console.log('text', text);
         
         const { truncatedText, isTruncated } = truncateText(text, 75);
-        console.log('truncatedText', truncatedText);
 
         return isTruncated ? (
           <NUITooltip

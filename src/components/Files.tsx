@@ -44,9 +44,8 @@ const Files = ({ type }: FilesProps) => {
 
     const { mutate: deleteFile } = trpc.deleteFile.useMutation({
         onSuccess() {
-            utils.getUserFiles.invalidate()
             utils.getFileCount.invalidate()
-
+            utils.getUserFiles.invalidate()
         },
         onMutate({ id }) {    // Callback right away when the button is clicked
             setCurrentlyDeletingFile(id)

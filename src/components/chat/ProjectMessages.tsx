@@ -26,8 +26,8 @@ import { useIntersection } from '@mantine/hooks'
     is rendered on the screen. So we map and cross reference the index to make a 
     conditional check
 
-
 **/
+
 interface ProjectMessagesProps {
   projectId: string
 }
@@ -68,6 +68,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
   // We want to create a combined messages constant, so when we send a message later, we also want to display a loading state
   // This is going to combine the loading message to all the other messages in our chat
   const combinedMessages = [
+    
     // Show the loading state only if the AI is thinking
     ...(isAiThinking ? [loadingMessage] : []),
     ...(messages ?? []),
@@ -108,7 +109,6 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
                 ref={ref}
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
-                messageId={message.id}
                 key={`project-message-small-key-${message.id}`}
               />
             )
@@ -118,7 +118,6 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
               <Message
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
-                messageId={message.id}
                 key={`project-message-big-key-${message.id}`}
               />
             )
