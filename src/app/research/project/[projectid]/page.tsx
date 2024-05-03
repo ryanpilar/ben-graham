@@ -13,6 +13,8 @@ import { getUserSubscriptionPlan } from '@/lib/stripe';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import PinnedMessages from '@/components/chat/PinnedMessages';
+import Notes from '@/components/chat/Notes';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -57,6 +59,7 @@ const Project = async ({ params }: PageProps) => {
                                 </h1>
 
                                 <div className='flex items-center gap-x-3'>
+
                                     <ContextUsage type='project' usageKey={projectid} />
 
                                     <BadgeFileCounter type={'project'} >
@@ -64,11 +67,16 @@ const Project = async ({ params }: PageProps) => {
                                     </BadgeFileCounter>
 
                                     <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
+                                    
                                 </div>
 
                             </div>
 
                             <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
+
+                            <PinnedMessages type={'project'} researchKey={projectid} />
+
+                            <Notes type={'project'} researchKey={projectid} />
 
                         </div>
                     </div>

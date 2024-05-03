@@ -77,6 +77,7 @@ const Messages = ({ fileId }: MessagesProps) => {
     root: lastMessageRef.current, // We are keeping track of this exact div, that we are passing as a prop
     threshold: 1,
   })
+  
 
   useEffect(() => {
     // If the ref is intersecting, we need to load more messages!

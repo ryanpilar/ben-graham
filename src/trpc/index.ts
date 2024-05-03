@@ -868,6 +868,43 @@ export const appRouter = router({
         }),
 
     // MESSAGES
+    getPinnedMessages: privateProcedure
+        .input(z.object({
+            type: z.enum(['project', 'question', 'file']),
+            key: z.string()
+        }))
+        .query(async ({ ctx, input }) => {
+
+            const { kindeId } = ctx;
+            const { type, key } = input;
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            // Map the input type to the respective database field
+            const filterKey = type === 'project' ? 'projectId'
+                : type === 'question' ? 'questionId'
+                    : 'fileId';
+
+            const messages = await db.message.findMany({
+                where: {
+                    [filterKey]: key, // Apply the dynamic filter based on type
+                    isPinned: true,
+                    kindeId: kindeId,
+                },
+                select: {
+                    id: true,
+                    text: true,
+                    createdAt: true,
+                    isUserMessage: true,
+                    isPinned: true,
+                    projectId: true,
+                    questionId: true,
+                    fileId: true,
+                },
+            });
+
+            return messages
+        }),
     deleteMessage: privateProcedure
         .input(z.object({ messageId: z.string() }))
         .mutation(async ({ ctx, input }) => {

@@ -69,7 +69,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
   // We want to create a combined messages constant, so when we send a message later, we also want to display a loading state
   // This is going to combine the loading message to all the other messages in our chat
   const combinedMessages = [
-    
+
     // Show the loading state only if the AI is thinking
     ...(isAiThinking ? [loadingMessage] : []),
     ...(messages ?? []),
@@ -83,6 +83,48 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
     root: lastMessageRef.current, // We are keeping track of this exact div, that we are passing as a prop
     threshold: 1,
   })
+
+  
+
+  const renderSkeleton = () => {
+    const skeletonCount = 6;
+
+    // Function to generate random height within a range, with TypeScript annotations
+    // const getRandomHeight = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1) + min );
+    const getAiMsgHeight = () => 300 ;
+    const getUserMsgHeight = () => 100 ;
+
+
+
+    return (
+      Array.from({ length: skeletonCount }).map((_, index) => (
+        <div
+          key={index}
+          className={`flex items-end ${index % 2 === 0 ? "justify-end" : ""} w-full py-2`}
+        >
+          {index % 2 === 0 ? (                // Simulating user message skeleton
+            <>
+              <div className="mx-3 flex-grow">
+                <Skeleton className="px-4 py-2 rounded-2xl" height={getUserMsgHeight()} />
+              </div>
+              <div className="flex items-center justify-center ">
+                <Skeleton circle={true} height={30} width={30} />
+              </div>
+            </>
+          ) : (                              // Simulating AI message skeleton
+            <>
+              <div className="flex items-center justify-center ">
+                <Skeleton circle={true} height={30} width={30} />
+              </div>
+              <div className="mx-3 flex-grow items-start">
+                <Skeleton className="px-4 py-2 rounded-2xl" height={getAiMsgHeight()} />
+              </div>
+            </>
+          )}
+        </div>
+      ))
+    );
+  };
 
 
   useEffect(() => {
@@ -98,6 +140,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
       overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter 
       scrollbar-w-2 scrolling-touch'
     >
+
       {combinedMessages && combinedMessages.length > 0 ? (
         combinedMessages.map((message, i) => {
 
@@ -114,23 +157,23 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
               />
             )
 
-          } else
-            return (
-              <Message
-                message={message}
-                isNextMessageSamePerson={isNextMessageSamePerson}
-                key={`project-message-big-key-${message.id}`}
-              />
-            )
+          } else return (
+            <Message
+              message={message}
+              isNextMessageSamePerson={isNextMessageSamePerson}
+              key={`project-message-big-key-${message.id}`}
+            />
+          )
         })
-      ) : isLoading ? (
+        
+      ) : (isLoading) ? (
+
         <div className='w-full flex flex-col gap-2'>
-          <Skeleton className='h-16' />
-          <Skeleton className='h-16' />
-          <Skeleton className='h-16' />
-          <Skeleton className='h-16' />
+          {renderSkeleton()}
         </div>
+
       ) : (
+
         <div className='flex-1 flex flex-col items-center justify-center gap-2'>
           <MessageSquare className='h-8 w-8 text-blue-500' />
           <h3 className='font-semibold text-xl'>
@@ -140,6 +183,7 @@ const ProjectMessages = ({ projectId }: ProjectMessagesProps) => {
             Ask your first question to get started.
           </p>
         </div>
+
       )}
     </div>
   )

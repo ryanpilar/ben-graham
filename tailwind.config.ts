@@ -82,7 +82,11 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), nextui()],
+  plugins: [
+    require("tailwindcss-animate"), 
+    nextui(),
+    require('@tailwindcss/typography'),
+  ],
   extend: {
     keyframes: {
       "shine": {

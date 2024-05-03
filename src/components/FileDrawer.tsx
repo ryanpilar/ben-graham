@@ -61,7 +61,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
             open={isOpen} onOpenChange={onOpenChange}
         >
             <Drawer.Trigger asChild>
-                <Button aria-label="Manage Files">Manage Files</Button>
+                <Button variant='default' className='inline-block' aria-label="Manage Files">Manage Files</Button>
             </Drawer.Trigger>
 
             <Drawer.Overlay className="fixed inset-0 bg-black/60 z-10" aria-hidden="true"/>

@@ -77,3 +77,5 @@ export function truncateText(text: TextProps, maxLength = 40) {
   const truncatedText = isTruncated ? `${text.substring(0, maxLength)}...` : text;
   return { truncatedText, isTruncated };
 }
+
+

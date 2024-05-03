@@ -35,6 +35,7 @@ const PinMsg = ({ isPinned, messageId }: PinMsgProps) => {
             // Invalidate relevant queries to refetch data
             utils.getProjectMessages.invalidate()
             utils.getFileMessages.invalidate()
+            utils.getPinnedMessages.invalidate()
             setIsPinning(false);
         },
         onError: () => {
@@ -47,9 +48,7 @@ const PinMsg = ({ isPinned, messageId }: PinMsgProps) => {
         }
     });
 
-    const handleTogglePin = () => {
-        console.log(isPinned, messageId);
-        
+    const handleTogglePin = () => {       
         togglePin({ messageId: messageId });
     }
 

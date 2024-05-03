@@ -25,6 +25,7 @@ const XMsg = ({ messageId }: XMsgProps) => {
             })
             utils.getProjectMessages.invalidate()
             utils.getFileMessages.invalidate()
+            utils.getPinnedMessages.invalidate()
             setCurrentlyRemovingMsg(false)
         },
         onError: () => {
