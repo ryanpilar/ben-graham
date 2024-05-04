@@ -3,12 +3,12 @@ import { ChevronDown, ChevronLeft, ChevronUp, Expand, Loader2, RotateCcw, Rotate
 import React, { useState } from 'react'
 // Project Imports
 import PDFFullscreen from './PDFFullscreen';
-import { useToast } from './ui/use-toast';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { useToast } from '../ui/use-toast';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 // 3rd Party Imports
 import SimpleBar from 'simplebar-react'
 import { useForm } from 'react-hook-form'
@@ -21,7 +21,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 
 import { useRouter } from 'next/navigation'
-import GoBack from './GoBack';
+import GoBack from '../GoBack';
 
 
 /** ================================|| Pdf Renderer ||=================================== **/

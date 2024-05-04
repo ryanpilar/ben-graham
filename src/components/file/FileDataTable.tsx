@@ -41,10 +41,10 @@ import { Chip as NUIChip } from "@nextui-org/chip"
 import { Tooltip as NUITooltip } from "@nextui-org/tooltip"
 
 import Link from "next/link"
-import { LoadingButton } from "./ui/loading-button"
+import { LoadingButton } from "../ui/loading-button"
 import { tv } from "@nextui-org/theme"
 import Skeleton from "react-loading-skeleton"
-import { ScrollArea } from "./ui/scroll-area"
+import { ScrollArea } from "../ui/scroll-area"
 import { truncateText } from "@/lib/utils"
 
 // Project Imports

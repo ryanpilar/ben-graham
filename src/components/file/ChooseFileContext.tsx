@@ -4,8 +4,8 @@ import { FileCheck2, HelpCircle } from "lucide-react";
 
 // Project Imports
 import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
-import { buttonVariants } from "./ui/button";
+import { Separator } from "../ui/separator";
+import { buttonVariants } from "../ui/button";
 import { UploadedFileProps } from "./UploadFileDropzone";
 import ChooseFileContextForm from "./ChooseFileContextForm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

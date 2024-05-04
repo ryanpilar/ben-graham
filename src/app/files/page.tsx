@@ -2,7 +2,7 @@ import React from 'react'
 
 // Project Imports
 import { db } from '@/db';
-import UserFiles from '@/components/UserFiles';
+import UserFiles from '@/components/file/UserFiles';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 
 // 3rd Party Imports

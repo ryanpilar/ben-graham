@@ -5,7 +5,7 @@ import AddFile from './AddFile';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 // 3rd Party Imports
 import Files from './Files';
-import GoBack from './GoBack';
+import GoBack from '../GoBack';
 import BadgeFileCounter from './BadgeFileCounter';
 
 /** ================================|| User Files ||=================================== **/

@@ -3,13 +3,13 @@
 import React, { useState } from 'react'
 // Project Imports
 import AddFile from './AddFile';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import LinkedFiles from './LinkedFiles';
-import { Separator } from './ui/separator';
+import { Separator } from '../ui/separator';
 import FileDataTable from './FileDataTable';
 import BadgeFileCounter from './BadgeFileCounter';
 import { trpc } from '@/app/_trpc/client';
-import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from './ui/drawer';
+import { DrawerClose, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '../ui/drawer';
 
 // 3rd Party Imports
 import { clsx } from "clsx";
@@ -17,7 +17,7 @@ import { Drawer } from "vaul";
 import Link from 'next/link';
 import { ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '../ui/scroll-area';
 
 
 /** ================================|| File Drawer ||=================================== **/

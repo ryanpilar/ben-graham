@@ -5,7 +5,7 @@ import { db } from '@/db';
 import { accounts } from "@/app/mail/data";
 import GoBack from '@/components/GoBack';
 
-import PdfRenderer from '@/components/PdfRenderer';
+import PdfRenderer from '@/components/pdf/PdfRenderer';
 import ChatWrapper from '@/components/chat/ChatWrapper';
 import { ResizableLayout } from '../../../components/ResizableLayout';
 

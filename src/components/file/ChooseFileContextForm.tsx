@@ -15,8 +15,8 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { LoadingButton } from '@/components/ui/loading-button';
 import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
-import { Separator } from './ui/separator';
-import { Button, buttonVariants } from './ui/button';
+import { Separator } from '../ui/separator';
+import { Button, buttonVariants } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { UploadedFileProps } from './UploadFileDropzone';

@@ -1053,10 +1053,7 @@ export const appRouter = router({
                     name: true,
                     content: true,
                 },
-            });
-
-            console.log('MONGO DOC', updatedNote);
-            
+            });          
 
             return updatedNote;
         }),

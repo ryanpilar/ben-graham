@@ -53,8 +53,6 @@ export const POST = async (req: NextRequest) => {
       fileId,
     },
   })
-  console.log('MONGO DOC CREATED!', createdDocument.id)
-
 
   // To answer the above message/question we are going to use a language model
   // when we index a pdf file, for each message that we want answered in the chat

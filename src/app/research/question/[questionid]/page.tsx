@@ -7,7 +7,7 @@ import { getUserSubscriptionPlan } from '@/lib/stripe';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import FileDrawer from '@/components/FileDrawer';
+import FileDrawer from '@/components/file/FileDrawer';
 import GoBack from '@/components/GoBack';
 
 /** ================================|| Research Project ||=================================== **/

@@ -7,9 +7,9 @@ import 'simplebar-react/dist/simplebar.min.css'
 
 import { cn, constructMetadata } from "@/lib/utils";
 import { Inter } from "next/font/google";
-import Providers from "@/components/Providers";
+import Providers from "@/components/providers/Providers";
 import { Toaster } from "@/components/ui/toaster";
-import { NUIProvider } from "@/components/NUIProvider";
+import { NUIProvider } from "@/components/providers/NUIProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useState } from 'react'
 
 // Project Imports
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { trpc } from '@/app/_trpc/client';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 

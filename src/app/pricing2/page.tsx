@@ -21,7 +21,7 @@ import {
     Minus,
 } from 'lucide-react'
 import Link from 'next/link'
-import UpgradeButton from '@/components/UpgradeButton'
+import UpgradeSubscription from '@/components/UpgradeSubscription'
 
 const pricingItems = [
     {
@@ -265,7 +265,7 @@ const ActionSection: React.FC<ActionSectionProps> = ({ plan, user }) => (
                 <ArrowRight className='h-5 w-5 ml-1.5' />
             </Link>
         ) : user ? (
-            <UpgradeButton />
+            <UpgradeSubscription />
         ) : (
             <Link
                 href='/sign-in'

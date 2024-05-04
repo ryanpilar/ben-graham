@@ -8,8 +8,7 @@ import { getUserSubscriptionPlan } from '@/lib/stripe'
 import { redirect } from 'next/navigation'
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import UsersResearch from '@/components/UsersResearch';
-import AddProjectButton from '@/components/AddProjectButton';
-import GoBack from '@/components/GoBack';
+import AddProjectButton from '@/components/AddProject';
 
 /** ================================|| Research Projects ||=================================== **/
 

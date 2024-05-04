@@ -1,12 +1,12 @@
 import React, { Suspense } from 'react'
 
 // Project Imports
-import AddFile from './AddFile';
+import AddFile from './file/AddFile';
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 
 // 3rd Party Imports
 import Skeleton from "react-loading-skeleton"
-import Files from './Files';
+import Files from './file/Files';
 import GoBack from './GoBack';
 
 

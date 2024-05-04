@@ -1,7 +1,7 @@
 "use client";
 import React, { Dispatch, ReactNode, SetStateAction, Suspense, useState } from 'react';
-import { Progress } from './ui/progress';
-import { useToast } from './ui/use-toast';
+import { Progress } from '../ui/progress';
+import { useToast } from '../ui/use-toast';
 import { trpc } from '@/app/_trpc/client';
 import { useUploadThing } from '@/lib/uploadthing/clientHelpers';
 import Dropzone from 'react-dropzone';

@@ -2,11 +2,11 @@ import React, { Suspense } from 'react'
 
 // Project Imports
 import { db } from '@/db';
-import FileDrawer from '@/components/FileDrawer';
+import FileDrawer from '@/components/file/FileDrawer';
 import ContextUsage from '@/components/ContextUsage';
-import BadgeFileCounter from '@/components/BadgeFileCounter'
+import BadgeFileCounter from '@/components/file/BadgeFileCounter'
 import ProjectQuestions from '@/components/ProjectQuestions';
-import AddQuestionButton from '@/components/AddQuestionButton';
+import AddQuestionButton from '@/components/AddQuestion';
 import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 
@@ -42,7 +42,7 @@ const Project = async ({ params }: PageProps) => {
             kindeId: user.id
         }
     })
-    
+
     if (!project) notFound()
 
     return (

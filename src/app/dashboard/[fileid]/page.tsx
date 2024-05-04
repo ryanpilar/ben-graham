@@ -2,7 +2,7 @@
 import React from 'react'
 // Project Imports
 import { db } from '@/db';
-import PdfRenderer from '@/components/PdfRenderer';
+import PdfRenderer from '@/components/pdf/PdfRenderer';
 import ChatWrapper from '@/components/chat/ChatWrapper';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';

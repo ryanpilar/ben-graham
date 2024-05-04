@@ -13,7 +13,7 @@ import { trpc } from '@/app/_trpc/client'
 
 **/
 
-const UpgradeButton = () => {
+const UpgradeSubscription = () => {
 
       const {mutate: createStripeSession} = trpc.createStripeSession.useMutation({
         onSuccess: ({url}) => {
@@ -30,4 +30,4 @@ const UpgradeButton = () => {
     )
 }
 
-export default UpgradeButton
+export default UpgradeSubscription

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 
 // Project Imports
-import { Button, buttonVariants } from './ui/button';
+import { Button, buttonVariants } from '../ui/button';
 import { trpc } from '@/app/_trpc/client';
 
 // 3rd Party Imports
@@ -12,7 +12,7 @@ import Skeleton from "react-loading-skeleton"
 import { CheckCheckIcon, Ghost, Loader2, MessageSquare, Plus, Trash, X } from 'lucide-react';
 
 import { useParams } from 'next/navigation';
-import { Badge, badgeVariants } from './ui/badge';
+import { Badge, badgeVariants } from '../ui/badge';
 import { cn, truncateText } from '@/lib/utils';
 
 import { Chip } from '@nextui-org/chip';
