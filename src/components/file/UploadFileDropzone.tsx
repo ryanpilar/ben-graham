@@ -51,6 +51,7 @@ const UploadFileDropzone = ({ isSubscribed, type, researchKey, children }: Uploa
         onSuccess: () => {
             // If the type of research is a 'project' or 'question', then also update the Mongo document
             utils.getFiles.invalidate()
+            utils.getFileCount.invalidate()
         },
 
         onError: () => {

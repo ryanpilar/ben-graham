@@ -43,10 +43,10 @@ const PinnedMessages = ({ researchKey, type }: PinnedMessagesProps) => {
     })
 
     return (
-        <main className='mx-auto max-w-7xl md:p-10'>
+        <main className='mx-auto max-w-7xl'>
 
             <div className='mt-2 sm:mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
-                <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
+                <h1 className='mb-3 font-bold text-2xl lg:text-3xl text-gray-900'>
                     Pinned Messages
                 </h1>
             </div>

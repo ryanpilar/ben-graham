@@ -20,7 +20,6 @@ type ColorScheme = 'danger' | 'warning' | 'primary' | 'secondary' | 'default'
 
 const ContextUsage = ({ type, usageKey }: ContextUsageProps) => {
 
-    // const { usagePercentage } = await trpcServer.getContextUsage({ type, key })
     const { data, isLoading } = trpc.getContextUsage.useQuery({ type: type, key: usageKey })
 
     const getColor = (value: number): ColorScheme => {
@@ -39,13 +38,13 @@ const ContextUsage = ({ type, usageKey }: ContextUsageProps) => {
     return (
         <div className='flex justify-center items-center'>
             {
-                (data && !isLoading) ? 
+                (data && !isLoading) ?
                     <ContextUsagePopover usageData={data} >
                         <CircularProgress
                             size="lg"
                             value={data.usagePercentage}
                             color={getColor(data.usagePercentage)}
-                            formatOptions={{ style: "unit", unit: "percent"}}
+                            formatOptions={{ style: "unit", unit: "percent" }}
                             showValueLabel={true}
                             aria-label={`Loading ${type} context usage`}
                         />

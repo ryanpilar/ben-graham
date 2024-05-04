@@ -17,7 +17,7 @@ const Notes = async ({ researchKey, type }: NotesProps) => {
     const mainNote = notes.find(note => note.name === 'main note') || { id: 'someUUID', name: 'Blank Note', content: 'Nothing noted yet...' }
 
     return (
-        <main className='mx-auto max-w-7xl md:p-10'>
+        <main className='mx-auto max-w-7xl'>
 
             <div className={`
                 flex flex-col items-start justify-between gap-4
@@ -25,7 +25,7 @@ const Notes = async ({ researchKey, type }: NotesProps) => {
                 mt-2 sm:mt-8                  
                 pb-2`}
             >
-                <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
+                <h1 className='mb-3 font-bold text-2xl lg:text-3xl text-gray-900'>
                     Notes
                 </h1>
             </div>

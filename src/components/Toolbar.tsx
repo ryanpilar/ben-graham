@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 // Project Imports
-import { Toggle } from '../ui/toggle'
+import { Toggle } from './ui/toggle'
 // 3rd Party Imports
 import { type Editor } from '@tiptap/react'
 import { Bold, Strikethrough, Italic, List, ListOrdered, Heading2, Redo, Undo, Quote, Underline, LayoutList, AlignLeft, AlignCenter, AlignRight  } from 'lucide-react'
