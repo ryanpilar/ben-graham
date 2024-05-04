@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 // Project Imports
 // 3rd Party Imports
 import { useEditor, EditorContent, JSONContent } from '@tiptap/react'
@@ -88,7 +88,7 @@ const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
             onChange(editor.getHTML())
         },
     })
-
+    const [isFocused, setIsFocused] = useState(false);
     const [debouncedEditor] = useDebounce(editor?.state.doc.content, 2000);
 
     useEffect(() => {
@@ -97,9 +97,35 @@ const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
         }
     }, [debouncedEditor])
 
+    useEffect(() => {
+        const handleBlur = () => {
+            // Delay blur handling to check for refocus within the editor
+            setTimeout(() => {
+                if (!editor?.isFocused) {
+                    setIsFocused(false);
+                }
+            }, 300); // 300 ms delay to allow checking if the new focus is within the editor
+        };
+
+        if (editor) {
+            editor.on('focus', () => setIsFocused(true));
+            editor.on('blur', handleBlur);
+        }
+
+        // Cleanup function to remove event listeners
+        return () => {
+            if (editor) {
+                editor.off('focus');
+                editor.off('blur', handleBlur);
+            }
+        };
+    }, [editor]);
+
     return (
         <div className='flex h-full w-full border-input rounded-none flex-col justify-stretch'>
-            <Toolbar editor={editor} />
+
+            {isFocused && <Toolbar editor={editor} />}
+
             <EditorContent editor={editor} />
         </div>
     );

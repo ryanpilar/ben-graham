@@ -1,72 +1,65 @@
 'use client'
-import React, { useState } from 'react'
+
+import React from 'react'
 // Project Imports
+import Tiptap from './Tiptap';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 // 3rd Party Imports
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoadingButton } from '../ui/loading-button';
-import { Input } from '../ui/input';
-import Tiptap from './Tiptap';
+import { trpc } from '@/app/_trpc/client';
 
-// Styles
 
 /** ================================|| Notes Form ||=================================== **/
 export const notesFormSchema = z.object({
     notes: z.string().trim(),
 })
 
-const NotesForm = () => {
+interface NotesFormProps {
+    researchKey: string
+    type: 'project' | 'question' | 'file'
+    notes: {
+        id: string,
+        name: string,
+        content: string | null
+    }
+}
 
-    // const [isSaving, setIsSaving] = useState(false)
+const NotesForm = ({ researchKey, type, notes }: NotesFormProps) => {
 
+    const { mutate: updateNotes, isLoading } = trpc.updateNotes.useMutation()
 
     const form = useForm<z.infer<typeof notesFormSchema>>({
         resolver: zodResolver(notesFormSchema),
         mode: 'onChange',
         defaultValues: {
-            notes: '',
-
+            notes: notes.content || '',
         }
     })
 
-    // function onSubmit(values: z.infer<typeof notesFormSchema>) {
-        function onSubmit(values: any) {
-
-        // Should I be considering dompurify when saving to a db???
-
-        // setIsSaving(true)
-
-
-        console.log('onSubmit', values);
-
-
-
-
-
-        // setIsSaving(false)
+    function onSubmit(values: z.infer<typeof notesFormSchema>) {
+        if (notes || !isLoading) {
+            updateNotes({ noteId: notes.id, content: values.notes })
+        }
     }
 
     return (
-        <div className=''>
-
+        <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <FormField control={form.control} name='notes' render={({ field }) => (
                         <FormItem>
                             <FormLabel className="sr-only">Notes</FormLabel>
                             <FormControl>
-                                <Tiptap notes={field.name} onChange={field.onChange} onFormSubmit={form.handleSubmit(onSubmit)} />
+                                <Tiptap notes={field.value} onChange={field.onChange} onFormSubmit={form.handleSubmit(onSubmit)} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )} />
-                    {/* <div className='text-right mt-2'><LoadingButton type='submit' loading={isSaving}>Save</LoadingButton></div> */}
                 </form>
             </Form>
-
-        </div>
+        </>
     );
 };
 

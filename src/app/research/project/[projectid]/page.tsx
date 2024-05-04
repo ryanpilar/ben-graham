@@ -42,6 +42,7 @@ const Project = async ({ params }: PageProps) => {
             kindeId: user.id
         }
     })
+    
     if (!project) notFound()
 
     return (
@@ -67,7 +68,7 @@ const Project = async ({ params }: PageProps) => {
                                     </BadgeFileCounter>
 
                                     <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
-                                    
+
                                 </div>
 
                             </div>
@@ -76,7 +77,9 @@ const Project = async ({ params }: PageProps) => {
 
                             <PinnedMessages type={'project'} researchKey={projectid} />
 
-                            <Notes type={'project'} researchKey={projectid} />
+                            <Suspense fallback={<>Loading</>}>
+                                <Notes type={'project'} researchKey={projectid} />
+                            </Suspense>
 
                         </div>
                     </div>

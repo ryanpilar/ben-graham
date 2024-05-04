@@ -661,6 +661,14 @@ export const appRouter = router({
                 },
             });
 
+            const note = await db.note.create({
+                data: {
+                    name: 'main note',
+                    kindeId,
+                    projectId: project.id,
+                },
+            });
+
             return project;
         }),
     getUserProjects: privateProcedure
@@ -696,9 +704,12 @@ export const appRouter = router({
                 where: { projectId: projectId },
             });
 
-            // Each question being deleted also needs its messages deleted
+            // Each question being deleted also needs its notes & messages deleted
             for (const question of questions) {
                 await db.message.deleteMany({
+                    where: { questionId: question.id },
+                });
+                await db.note.deleteMany({
                     where: { questionId: question.id },
                 });
             }
@@ -708,8 +719,13 @@ export const appRouter = router({
                 where: { projectId: projectId },
             });
 
-            // Delete all messages directly associated with the project
+            // Delete all messages 
             await db.message.deleteMany({
+                where: { projectId: projectId },
+            });
+
+            // Delete all project notes 
+            await db.note.deleteMany({
                 where: { projectId: projectId },
             });
 
@@ -740,7 +756,6 @@ export const appRouter = router({
 
             return project;
         }),
-
     getResearchDetails: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
 
@@ -822,6 +837,14 @@ export const appRouter = router({
                 },
             });
 
+            const note = await db.note.create({
+                data: {
+                    name: 'main note',
+                    kindeId,
+                    questionId: question.id,
+                },
+            });
+
             return { question };
         }),
     getProjectQuestions: privateProcedure
@@ -861,6 +884,12 @@ export const appRouter = router({
                     where: { questionId: questionId },
                 })
             ])
+
+            // Delete all notes associated with the project
+            await db.note.deleteMany({
+                where: { questionId: questionId },
+            });
+
             // Delete the question and return the deleted question details
             return await db.question.delete({
                 where: { id: questionId },
@@ -951,6 +980,85 @@ export const appRouter = router({
                 where: { id: messageId },
                 data: { isPinned: !message.isPinned }
             });
+        }),
+
+    // NOTES
+    getNotes: privateProcedure
+        .input(z.object({ type: z.enum(['file', 'project', 'question']), key: z.string().optional() }))
+        .query(async ({ input, ctx }) => {
+
+            const { kindeId } = ctx;
+            const { key, type } = input
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            // Determine the filter key based on the type
+            let filterKey;
+            if (type === 'project') {
+                filterKey = 'projectId';
+            } else if (type === 'question') {
+                filterKey = 'questionId';
+            } else if (type === 'file') {
+                filterKey = 'fileId';
+            }
+
+            // Dynamically build the query based on the input
+            const notes = await db.note.findMany({
+                where: {
+                    ...(key && filterKey ? { [filterKey]: key } : {}),  // Apply the filter only if key is provided
+                    kindeId: kindeId,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    content: true,
+                },
+            });
+
+            return notes
+        }),
+    updateNotes: privateProcedure
+        .input(z.object({
+            noteId: z.string(),
+            name: z.string().optional(),
+            content: z.string().optional()
+        }))
+        .mutation(async ({ input, ctx }) => {
+            const { kindeId } = ctx;
+            const { noteId, name, content } = input;
+
+            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            // Check if there's anything to update
+            if (!name && !content) {
+                throw new Error("No update information provided");
+            }
+
+            // Define the type for updatePayload
+            type UpdatePayloadType = {
+                name?: string;
+                content?: string | null
+            };
+
+            // Prepare the update payload dynamically
+            const updatePayload: UpdatePayloadType = {};
+            if (name) updatePayload.name = name;
+            if (content) updatePayload.content = content;
+
+            const updatedNote = await db.note.update({
+                where: { id: noteId, kindeId: kindeId },
+                data: updatePayload,
+                select: {
+                    id: true,
+                    name: true,
+                    content: true,
+                },
+            });
+
+            console.log('MONGO DOC', updatedNote);
+            
+
+            return updatedNote;
         }),
 
     // STRIPE
