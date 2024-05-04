@@ -847,15 +847,32 @@ export const appRouter = router({
 
             return { question };
         }),
-    getProjectQuestions: privateProcedure
-        .input(z.object({ projectId: z.string() }))
-        .query(async ({ input, ctx }) => {
+    getQuestions: privateProcedure
+        .input(z.object({
+            type: z.enum(['project', 'question']),
+            key: z.string()
+        }))
+        .query(async ({ ctx, input }) => {
+
             const { kindeId } = ctx;
-            if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+            const { type, key } = input;
+
+            const user = await db.user.findUnique({
+                where: {
+                    id: kindeId,
+                },
+            })
+            if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
+
+            const fieldMapping = {
+                project: 'projectId',
+                question: 'questionId'
+            };
+            const dynamicField = fieldMapping[type]
 
             const questions = await db.question.findMany({
                 where: {
-                    projectId: input.projectId,
+                    [dynamicField]: key,
                     kindeId: kindeId,
                 }
             })
@@ -863,6 +880,22 @@ export const appRouter = router({
 
             return questions;
         }),
+    // getProjectQuestions: privateProcedure
+    //     .input(z.object({ projectId: z.string() }))
+    //     .query(async ({ input, ctx }) => {
+    //         const { kindeId } = ctx;
+    //         if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+    //         const questions = await db.question.findMany({
+    //             where: {
+    //                 projectId: input.projectId,
+    //                 kindeId: kindeId,
+    //             }
+    //         })
+    //         if (!questions) throw new TRPCError({ code: 'NOT_FOUND' })
+
+    //         return questions;
+    //     }),
     deleteQuestion: privateProcedure
         .input(z.object({ questionId: z.string() }))
         .mutation(async ({ ctx, input }) => {
@@ -1053,7 +1086,7 @@ export const appRouter = router({
                     name: true,
                     content: true,
                 },
-            });          
+            });
 
             return updatedNote;
         }),

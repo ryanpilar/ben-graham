@@ -16,6 +16,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import PinnedMessages from '@/components/chat/PinnedMessages';
 import Notes from '@/components/Notes';
 import SplitLayout from '@/components/SplitLayout';
+import Questions from '@/components/Questions';
 
 /** ================================|| Research Project ||=================================== **/
 
@@ -61,8 +62,9 @@ const Project = async ({ params }: PageProps) => {
                     <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
                 </div>
             </div>
-            
-            <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} />
+
+            {/* <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} /> */}
+            <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
             <PinnedMessages type={'project'} researchKey={projectid} />
             <Suspense fallback={<>Loading...</>}>
                 <Notes type={'project'} researchKey={projectid} />

@@ -87,7 +87,7 @@ const AddQuestion = ({ isSubscribed, projectId, setIsOpen }: AddQuestionProps) =
                 variant: 'default',
             });
 
-            utils.getProjectQuestions.invalidate()
+            utils.getQuestions.invalidate()
             setIsOpen(false)
 
         },

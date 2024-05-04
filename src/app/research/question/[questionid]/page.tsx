@@ -12,6 +12,7 @@ import SplitLayout from '@/components/SplitLayout';
 import AddQuestionButton from '@/components/AddQuestion';
 import ContextUsage from '@/components/ContextUsage';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter';
+import Questions from '@/components/Questions';
 
 /** ================================|| Research Question ||=================================== **/
 
@@ -58,9 +59,7 @@ const Question = async ({ params }: PageProps) => {
 
             </div>
 
-
-
-
+            <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
 
         </>)
     }

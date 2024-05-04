@@ -17,26 +17,28 @@ import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
 
 interface QuestionProps {
     subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
-    projectId: string
+    researchKey: string
+    type: 'project' | 'question'     
   }
   
-const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
+const Questions = ({subscriptionPlan, researchKey, type}: QuestionProps) => {
 
     // We need to know exactly what file is currently being deleted
     const [currentlyDeletingQuestion, setCurrentlyDeletingQuestion] = useState<string | null>(null)
 
-    // If we invalidate the data, we force an automatic refresh
     const utils = trpc.useUtils()          
 
-    // automatically gets queried on page load
-    const { data: questions, isLoading } = trpc.getQuestions.useQuery({ type:'project', key: projectId })     
+    // Automatically gets queried on page load
+    const { data: questions, isLoading } = trpc.getQuestions.useQuery({ type: type, key: researchKey })     
 
     const { mutate: deleteQuestion } = trpc.deleteQuestion.useMutation({       
         onSuccess() {
+            // utils.getProjectQuestions.invalidate()
             utils.getQuestions.invalidate()
+
         },
         onMutate({ questionId }) {    
-            setCurrentlyDeletingQuestion(questionId)
+            setCurrentlyDeletingQuestion(researchKey)
         },
         onSettled() {
             // Whether there is an error or not, the loading state should stop
@@ -45,7 +47,7 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
     })
 
     return (
-        <main className='mx-auto max-w-7xl '>
+        <main className='mx-auto max-w-7xl'>
             <div className='mt-2 sm:mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
                 <h1 className='mb-3 font-bold text-2xl lg:text-3xl text-gray-900'>
                     Project Questions
@@ -124,4 +126,4 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
     );
 };
 
-export default ProjectQuestions;
+export default Questions;
