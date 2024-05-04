@@ -819,25 +819,41 @@ export const appRouter = router({
     addQuestion: privateProcedure
         .input(z.object({
             name: z.string(),
-            projectId: z.string().optional().nullable(),
-            parentQuestionId: z.string().optional().nullable(),
-        }).refine(data => data.projectId || data.parentQuestionId, {
-            message: "Must specify either a projectId or a parentQuestionId",
-        }))
+            type: z.enum(['project', 'question']),
+            key: z.string(),
+
+            // projectId: z.string().optional().nullable(),
+            // parentQuestionId: z.string().optional().nullable(),
+
+        })
+            // .refine(data => data.projectId || data.parentQuestionId, {
+            //     message: "Must specify either a projectId or a parentQuestionId",
+            // })
+        )
         .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx;
             if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+                const {type, key} = input
+
+                const fieldMapping = {
+                    project: 'projectId',
+                    question: 'parentQuestionId'
+                };
+                const dynamicField = fieldMapping[type]
 
             const question = await db.question.create({
                 data: {
                     name: input.name,
                     kindeId: ctx.kindeId,
-                    ...input.projectId && { projectId: input.projectId },
-                    ...input.parentQuestionId && { parentQuestionId: input.parentQuestionId },
+                    [dynamicField]: key,
                 },
             });
 
-            const note = await db.note.create({
+            console.log('endpoint local', question);
+            
+
+            await db.note.create({
                 data: {
                     name: 'main note',
                     kindeId,
@@ -847,6 +863,37 @@ export const appRouter = router({
 
             return { question };
         }),
+    // addQuestion: privateProcedure
+    //     .input(z.object({
+    //         name: z.string(),
+    //         projectId: z.string().optional().nullable(),
+    //         parentQuestionId: z.string().optional().nullable(),
+    //     }).refine(data => data.projectId || data.parentQuestionId, {
+    //         message: "Must specify either a projectId or a parentQuestionId",
+    //     }))
+    //     .mutation(async ({ ctx, input }) => {
+    //         const { kindeId } = ctx;
+    //         if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+    //         const question = await db.question.create({
+    //             data: {
+    //                 name: input.name,
+    //                 kindeId: ctx.kindeId,
+    //                 ...input.projectId && { projectId: input.projectId },
+    //                 ...input.parentQuestionId && { parentQuestionId: input.parentQuestionId },
+    //             },
+    //         });
+
+    //         const note = await db.note.create({
+    //             data: {
+    //                 name: 'main note',
+    //                 kindeId,
+    //                 questionId: question.id,
+    //             },
+    //         });
+
+    //         return { question };
+    //     }),
     getQuestions: privateProcedure
         .input(z.object({
             type: z.enum(['project', 'question']),
@@ -866,7 +913,7 @@ export const appRouter = router({
 
             const fieldMapping = {
                 project: 'projectId',
-                question: 'questionId'
+                question: 'parentQuestionId'
             };
             const dynamicField = fieldMapping[type]
 

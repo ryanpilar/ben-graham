@@ -59,7 +59,7 @@ const Project = async ({ params }: PageProps) => {
                     <BadgeFileCounter type={'project'} >
                         <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
                     </BadgeFileCounter>
-                    <AddQuestionButton projectId={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
+                    <AddQuestionButton type='project' researchKey={projectid}  isSubscribed={subscriptionPlan.isSubscribed} />
                 </div>
             </div>
 

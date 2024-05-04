@@ -21,9 +21,11 @@ import { PLANS } from '@/config/stripe';
 
 interface AddQuestionButtonProps {
     isSubscribed: boolean
-    projectId: string
+    // projectId: string
+    researchKey: string
+    type: 'project' | 'question'
 }
-const AddQuestionButton = ({ isSubscribed, projectId }: AddQuestionButtonProps) => {
+const AddQuestionButton = ({ isSubscribed, researchKey, type }: AddQuestionButtonProps) => {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
@@ -44,7 +46,7 @@ const AddQuestionButton = ({ isSubscribed, projectId }: AddQuestionButtonProps) 
             </DialogTrigger>
 
             <DialogContent>
-                <AddQuestion setIsOpen={setIsOpen} projectId={projectId} isSubscribed={isSubscribed} />
+                <AddQuestion setIsOpen={setIsOpen} isSubscribed={isSubscribed} type={type} researchKey={researchKey} />
             </DialogContent>
 
         </Dialog>
@@ -55,37 +57,36 @@ const AddQuestionButton = ({ isSubscribed, projectId }: AddQuestionButtonProps) 
 
 interface AddQuestionProps {
     isSubscribed: boolean
-    projectId: string
+    // projectId: string
+    researchKey: string
+    type: 'project' | 'question'
     setIsOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const AddQuestion = ({ isSubscribed, projectId, setIsOpen }: AddQuestionProps) => {
+const AddQuestion = ({ isSubscribed, setIsOpen, researchKey, type }: AddQuestionProps) => {
 
     const router = useRouter()
-
     const { toast } = useToast()
-
+    
     const questionSchema = z.object({ name: z.string().min(1, "Project question is required"), })
-
     type QuestionFormData = z.infer<typeof questionSchema>;
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<QuestionFormData>({
+    const { register, handleSubmit, formState: { errors }, } = useForm<QuestionFormData>({
         defaultValues: { name: '', },
         resolver: zodResolver(questionSchema),
     });
 
     const utils = trpc.useUtils()
 
-    const { mutate: addMongoQuestion } = trpc.addQuestion.useMutation({
-        onSuccess: () => {
+    const { mutate: addQuestion } = trpc.addQuestion.useMutation({
+        onSuccess: ({question}) => {
             toast({
                 title: 'Question added successfully',
                 variant: 'default',
             });
+
+            console.log('onsuccess', question);
+            
 
             utils.getQuestions.invalidate()
             setIsOpen(false)
@@ -102,9 +103,11 @@ const AddQuestion = ({ isSubscribed, projectId, setIsOpen }: AddQuestionProps) =
 
     const handleQuestionSubmit = (data: QuestionFormData) => {
 
-        addMongoQuestion({
+        addQuestion({
             ...data,
-            projectId: projectId
+            // projectId: projectId,
+            key: researchKey,
+            type: type
         })
     }
 

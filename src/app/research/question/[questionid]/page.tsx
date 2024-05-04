@@ -13,6 +13,7 @@ import AddQuestionButton from '@/components/AddQuestion';
 import ContextUsage from '@/components/ContextUsage';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter';
 import Questions from '@/components/Questions';
+import AddQuestion from '@/components/AddQuestion';
 
 /** ================================|| Research Question ||=================================== **/
 
@@ -54,7 +55,7 @@ const Question = async ({ params }: PageProps) => {
                     <BadgeFileCounter type={'question'} >
                         <FileDrawer type={'question'} isSubscribed={subscriptionPlan.isSubscribed} />
                     </BadgeFileCounter>
-                    {/* <AddQuestionButton questionid={questionid} isSubscribed={subscriptionPlan.isSubscribed} /> */}
+                    <AddQuestion type='question' researchKey={questionid} isSubscribed={subscriptionPlan.isSubscribed} />
                 </div>
 
             </div>
