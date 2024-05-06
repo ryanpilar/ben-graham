@@ -15,13 +15,11 @@ interface UserFiles {
     params: any
 }
 
-const UserFiles = ({ subscriptionPlan, params }: UserFiles) => {
+const UserFiles = ({ subscriptionPlan }: UserFiles) => {
 
     return (
 
-        <main className='mx-auto max-w-7xl px-3 md:p-10'>
-
-            {/* <GoBack /> */}
+        <div className='mx-auto max-w-7xl px-3 md:p-10'>
 
             <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
 
@@ -31,14 +29,13 @@ const UserFiles = ({ subscriptionPlan, params }: UserFiles) => {
                     </h1>
                 </BadgeFileCounter>
 
-
                 <AddFile isSubscribed={subscriptionPlan.isSubscribed} label='Upload File' skipUpload={false} type={'all'} />
 
             </div>
 
             <Files type={'all'} />
 
-        </main>
+        </div>
     );
 };
 

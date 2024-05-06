@@ -8,8 +8,9 @@ import Skeleton from 'react-loading-skeleton';
 import { Ghost } from 'lucide-react';
 
 /** ================================|| Notes ||=================================== 
-    -   Fetches note data, initializes a Tiptap editor instance, and handles form 
-        submissions into the db, autosaving and throttling via de-bouncer.
+    -   Fetches appropriate note data, initializes a Tiptap editor instance, and 
+        handles form submissions into the db, autosaving and throttling via 
+        de-bouncer.
 **/
 
 interface NotesProps {
@@ -28,7 +29,7 @@ const Notes =  ({ researchKey, type }: NotesProps) => {
     const mainNote = notes?.find(note => note.name === 'main note')
 
     return (
-        <main className='mx-auto max-w-7xl'>
+        <div className='mx-auto max-w-7xl'>
 
             <div className={`
                 flex flex-col items-start justify-between gap-4
@@ -56,7 +57,7 @@ const Notes =  ({ researchKey, type }: NotesProps) => {
                 </div>
             )}
 
-        </main>
+        </div>
     );
 };
 
