@@ -16,7 +16,9 @@ import { ChatContextProvider } from './ChatContext'
 /** ================================|| Chat Wrapper ||=================================== 
     Its really import for this chat wrapper to handle loading states.
     When we create a new file in uploadthing, we are creating it with a status of 'PROCESSING'.  
-    This is essentially a loading state. In the onuploadComplete in /api/uploadthing will take
+    This is essentially a loading state. 
+    
+    In the onuploadComplete in /api/uploadthing will take
     a bit as its doing its thang as its indexing itself into a vector database. 
     
     FAILED -  tried to upload more pages than you are suppose to. Free users cannot upload more
@@ -33,11 +35,9 @@ const ChatWrapper = ({
   // isSubscribed,
 }: ChatWrapperProps) => {
   // Anything we return back from the api will be available here in data
-  const { data, isLoading } =           // isLoading is super important for our ChatWrapper loading states
-    trpc.getFileUploadStatus.useQuery({ fileId, }, {
+  const { data, isLoading } = trpc.getFileUploadStatus.useQuery({ fileId, }, {
 
-      // POLLING - This refetch interval passes in the data, so whatever we 
-      // return from the api route will be accessible in the data, status in our case.
+      // POLLING - This refetch interval passes in the data, so whatever we return from the api route will be accessible in the data, or status in our case.
       refetchInterval: (data) =>
         data?.status === 'SUCCESS' ||
           data?.status === 'FAILED'

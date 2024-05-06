@@ -29,7 +29,6 @@ const Question = async ({ params }: PageProps) => {
     const { questionid } = params
 
     if (!user || !user.id) redirect(`/auth-callback?origin=research/question/${questionid}`)
-
     const subscriptionPlan = await getUserSubscriptionPlan()
 
     const question = await db.question.findFirst({
@@ -42,26 +41,27 @@ const Question = async ({ params }: PageProps) => {
     if (!question) notFound()
 
     const QuestionContents = () => {
-        return (<>
-            <div className='lg:mt-4 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
-                <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
-                    Question: <span className='text-xl'>{question.name}</span>
-                </h1>
+        return (
+            <>
+                <div className='lg:mt-4 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
+                    <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
+                        Question: <span className='text-xl'>{question.name}</span>
+                    </h1>
 
-                <div className='flex items-center gap-x-3'>
-                    <ContextUsage type='question' usageKey={questionid} />
-                    <BadgeFileCounter type={'question'} >
-                        <FileDrawer type={'question'} isSubscribed={subscriptionPlan.isSubscribed} />
-                    </BadgeFileCounter>
-                    <AddQuestion type='question' researchKey={questionid} isSubscribed={subscriptionPlan.isSubscribed} />
+                    <div className='flex items-center gap-x-3'>
+                        <ContextUsage type='question' usageKey={questionid} />
+                        <BadgeFileCounter type={'question'} >
+                            <FileDrawer type={'question'} isSubscribed={subscriptionPlan.isSubscribed} />
+                        </BadgeFileCounter>
+                        <AddQuestion type='question' researchKey={questionid} isSubscribed={subscriptionPlan.isSubscribed} />
+                    </div>
+
                 </div>
 
-            </div>
-
-            <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
-            <Notes type='question' researchKey={questionid} />
-
-        </>)
+                <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
+                <Notes type='question' researchKey={questionid} />
+            </>
+        )
     }
 
     return (
