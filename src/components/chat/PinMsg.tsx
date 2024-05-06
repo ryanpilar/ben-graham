@@ -34,7 +34,7 @@ const PinMsg = ({ isPinned, messageId }: PinMsgProps) => {
 
             // Invalidate relevant queries to refetch data
             utils.getProjectMessages.invalidate()
-            utils.getFileMessages.invalidate()
+            utils.getMessages.invalidate()
             utils.getPinnedMessages.invalidate()
             setIsPinning(false);
         },

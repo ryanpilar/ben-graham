@@ -918,6 +918,88 @@ export const appRouter = router({
         }),
 
     // MESSAGES
+    getMessages: privateProcedure
+        .input(
+            z.object({
+                limit: z.number().min(1).max(100).nullish(),
+                cursor: z.string().nullish(),                // In the infinite query, this determines what the next amount to be shown is
+                type: z.enum(['file', 'project', 'question']),
+                key: z.string(),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+
+            const { kindeId } = ctx
+            const { type, key, cursor } = input
+            const limit = input.limit ?? INFINITE_QUERY_LIMIT
+
+            const fieldMapping = {
+                file: 'fileId',
+                project: 'projectId',
+                question: 'questionId'
+            };
+            const dynamicField = fieldMapping[type]
+
+            const getDocument = async (type: string) => {
+                switch (type) {
+                    case ('file'):
+                        return await db.file.findFirst({
+                            where: {
+                                id: key,
+                                kindeId: kindeId,
+                            },
+                        })
+                    case ('project'):
+                        return await db.project.findFirst({
+                            where: {
+                                id: key,
+                                kindeId: kindeId,
+                            },
+                        })
+                    case ('question'):
+                        return await db.question.findFirst({
+                            where: {
+                                id: key,
+                                kindeId: kindeId,
+                            },
+                        })
+                }
+            }
+            const document = await getDocument(type)
+            if (!document) throw new TRPCError({ code: 'NOT_FOUND' })
+
+            const messages = await db.message.findMany({
+                // +1 helps us determine if we need to scroll up, from where we want to fetch the next messages
+                take: limit + 1,
+                // We take from the db, +1, because we use that +1 as the cursor. So when we scroll up, with the cursor in place, we now know the next messages we need to fetch
+                where: {
+                    [dynamicField]: key,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                cursor: cursor ? { id: cursor } : undefined,
+                select: {
+                    id: true,
+                    isUserMessage: true,
+                    createdAt: true,
+                    text: true,
+                    isPinned: true,
+                },
+            })
+            // Determine the cursor, and pop() it
+            let nextCursor: typeof cursor | undefined = undefined
+
+            // If we also have additional messages in the database, lets grab more messages! But, grab that +1 that we intentionally brought in 
+            if (messages.length > limit) {
+                const nextItem = messages.pop()
+                nextCursor = nextItem?.id
+            }
+            return {
+                messages,
+                nextCursor,                                 // nextCursor tells us where to start fetching if we start scrolling through the messages
+            }
+        }),
     getPinnedMessages: privateProcedure
         .input(z.object({
             type: z.enum(['project', 'question', 'file']),
@@ -1053,7 +1135,7 @@ export const appRouter = router({
             // Check if there's anything to update
             if (!name && !content) {
                 console.log('No name nor content to update...');
-                return null               
+                return null
             }
 
             // Define the type for updatePayload

@@ -6,7 +6,7 @@ import FileDrawer from '@/components/file/FileDrawer';
 import ContextUsage from '@/components/ContextUsage';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter'
 import AddQuestion from '@/components/AddQuestion';
-import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
+// import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 
 // 3rd Party Imports
@@ -16,6 +16,7 @@ import PinnedMessages from '@/components/chat/PinnedMessages';
 import Notes from '@/components/Notes';
 import SplitLayout from '@/components/SplitLayout';
 import Questions from '@/components/Questions';
+import ChatWrapper from '@/components/chat/ChatWrapper';
 
 /** ================================|| Research Project - Page ||=================================== **/
 
@@ -67,7 +68,7 @@ const Project = async ({ params }: PageProps) => {
     return (
         <SplitLayout
             leftChildren={<ProjectContents />}
-            rightChildren={<ProjectChatWrapper projectId={project.id} />}
+            rightChildren={<ChatWrapper type='project' researchKey={project.id} />}
         />
     );
 };

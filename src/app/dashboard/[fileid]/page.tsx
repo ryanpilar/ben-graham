@@ -3,7 +3,7 @@ import React from 'react'
 // Project Imports
 import { db } from '@/db';
 import PdfRenderer from '@/components/pdf/PdfRenderer';
-import ChatWrapper from '@/components/chat/ChatWrapper';
+import ChatWrapper from '@/components/chat/FileChatWrapper';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';

@@ -3,15 +3,16 @@ import { useContext, useEffect, useRef } from 'react'
 // Project Imports
 import Message from './Message'
 import { trpc } from '@/app/_trpc/client'
+import { ChatContext } from './ChatContext'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
-
 // 3rd Party Imports
 import Skeleton from 'react-loading-skeleton'
 import { useIntersection } from '@mantine/hooks'
 import { Loader2, MessageSquare } from 'lucide-react'
-import { ChatContext } from './ChatContext'
 
-
+interface MessagesProps {
+  fileId: string
+}
 
 /** ==================================|| Messages ||===================================== 
  
@@ -28,19 +29,13 @@ import { ChatContext } from './ChatContext'
 
 **/
 
-interface MessagesProps {
-  type: 'file' | 'project' | 'question'
-  researchKey: string
-}
-
-const Messages = ({ type, researchKey }: MessagesProps) => {
+const Messages = ({ fileId }: MessagesProps) => {
 
   const { isLoading: isAiThinking } = useContext(ChatContext)  // Very much controls what message is going to be displayed!
 
-  const { data, isLoading, fetchNextPage } = trpc.getMessages.useInfiniteQuery( // Call our TRPC endpoint and destructure the data
+  const { data, isLoading, fetchNextPage } = trpc.getFileMessages.useInfiniteQuery( // Call our TRPC endpoint and destructure the data
     {
-      type: type,
-      key: researchKey,
+      fileId,
       limit: INFINITE_QUERY_LIMIT,
     },
     // By using getNextPageParam we get access to the 'lastPage'. And trpc knows where to start fetching
@@ -82,47 +77,7 @@ const Messages = ({ type, researchKey }: MessagesProps) => {
     root: lastMessageRef.current, // We are keeping track of this exact div, that we are passing as a prop
     threshold: 1,
   })
-
-
-  const renderSkeleton = () => {
-    const skeletonCount = 6;
-
-    // Function to generate random height within a range, with TypeScript annotations
-    // const getRandomHeight = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1) + min );
-    const getAiMsgHeight = () => 300;
-    const getUserMsgHeight = () => 100;
-
-
-
-    return (
-      Array.from({ length: skeletonCount }).map((_, index) => (
-        <div
-          key={index}
-          className={`flex items-end ${index % 2 === 0 ? "justify-end" : ""} w-full py-2`}
-        >
-          {index % 2 === 0 ? (                // Simulating user message skeleton
-            <>
-              <div className="mx-3 flex-grow">
-                <Skeleton className="px-4 py-2 rounded-2xl" height={getUserMsgHeight()} />
-              </div>
-              <div className="flex items-center justify-center ">
-                <Skeleton circle={true} height={30} width={30} />
-              </div>
-            </>
-          ) : (                              // Simulating AI message skeleton
-            <>
-              <div className="flex items-center justify-center ">
-                <Skeleton circle={true} height={30} width={30} />
-              </div>
-              <div className="mx-3 flex-grow items-start">
-                <Skeleton className="px-4 py-2 rounded-2xl" height={getAiMsgHeight()} />
-              </div>
-            </>
-          )}
-        </div>
-      ))
-    );
-  };
+  
 
   useEffect(() => {
     // If the ref is intersecting, we need to load more messages!
@@ -149,8 +104,7 @@ const Messages = ({ type, researchKey }: MessagesProps) => {
                 ref={ref}
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
-                key={`${type}-message-small-key-${message.id}`}
-
+                key={message.id}
               />
             )
 
@@ -159,16 +113,17 @@ const Messages = ({ type, researchKey }: MessagesProps) => {
               <Message
                 message={message}
                 isNextMessageSamePerson={isNextMessageSamePerson}
-                key={`${type}-message-big-key-${message.id}`}
+                key={message.id}
               />
             )
         })
       ) : isLoading ? (
-
         <div className='w-full flex flex-col gap-2'>
-          {renderSkeleton()}
+          <Skeleton className='h-16' />
+          <Skeleton className='h-16' />
+          <Skeleton className='h-16' />
+          <Skeleton className='h-16' />
         </div>
-
       ) : (
         <div className='flex-1 flex flex-col items-center justify-center gap-2'>
           <MessageSquare className='h-8 w-8 text-blue-500' />

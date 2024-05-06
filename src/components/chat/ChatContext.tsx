@@ -17,7 +17,6 @@ import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 type StreamResponse = {
     addMessage: () => void
     message: string
-
     handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void   // Whenever an event gets triggered in our chat input this comes out
     isLoading: boolean
 }
@@ -31,18 +30,17 @@ export const ChatContext = createContext<StreamResponse>({
 })
 
 interface Props {
-    fileId: string
+    type: 'file' | 'project' | 'question'
+    researchKey: string
     children: ReactNode
 }
 // Wrap chat components in the provider
-export const ChatContextProvider = ({ fileId, children }: Props) => {
+export const ChatContextProvider = ({ type, researchKey, children }: Props) => {
     const [message, setMessage] = useState('')
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
     // 1st we need access to the TRPC utils, where we can gain access to all the api routes, and with this we can create the optimistic updates
     const utils = trpc.useContext()
-
-
 
     const { toast } = useToast()
 
@@ -54,17 +52,35 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     // trpc only works for json
     // so we use react-query:
 
+
+
     const { mutate: sendMessage } = useMutation({
         mutationFn: async ({ message }: { message: string }) => {
-            const response = await fetch('/api/message', {
-                method: 'POST',
-                body: JSON.stringify({
-                    fileId,
-                    message,
-                })
-            })
 
-            if (!response.ok) {
+            const chooseEndpointAndPost = async () => {
+                switch (type) {
+                    case ('file'):
+                        return await fetch('/api/message', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                fileId: researchKey,
+                                message,
+                            })
+                        })
+                    case ('project'):
+                        return await fetch('/api/message/project', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                projectId: researchKey,
+                                message,
+                            })
+                        })
+                }
+            }
+
+            const response = await chooseEndpointAndPost()
+
+            if (!response?.ok) {
                 throw new Error('Failed to send message')
             }
             return response.body
@@ -80,14 +96,14 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
             setMessage('')
 
             // Step 1 - cancel any outgoing re-fetches so that they don't overwrite or optimistic update
-            await utils.getFileMessages.cancel()
+            await utils.getMessages.cancel()
 
             // Step 2 - snapshot the previous value we have. This is an api call to get the data we need. So we can revert it later if we need to
-            const previousMessages = utils.getFileMessages.getInfiniteData()
+            const previousMessages = utils.getMessages.getInfiniteData()
 
             // Step 3 - optimistically insert the new value. This is the endpoint we want to optimistically change the data for
-            utils.getFileMessages.setInfiniteData(
-                { fileId, limit: INFINITE_QUERY_LIMIT },
+            utils.getMessages.setInfiniteData(
+                { type: type, key: researchKey, limit: INFINITE_QUERY_LIMIT },
                 // Receive old data in this callback, and then add the new optimistic message to it
                 (old) => {
                     if (!old) {
@@ -170,8 +186,8 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                 // We want to add the data that we can see in the chat window
                 // For things to be streamed in and updated in real time, we need to create a new reference each time we update this infinite data 
                 // with the chunked value for react to know to display it. If it was the same reference react wouldn't no any difference
-                utils.getFileMessages.setInfiniteData(
-                    { fileId, limit: INFINITE_QUERY_LIMIT },
+                utils.getMessages.setInfiniteData(
+                    { type: type, key: researchKey, limit: INFINITE_QUERY_LIMIT },
                     // Receive the old data
                     (old) => {
                         if (!old) return { pages: [], pageParams: [] }
@@ -196,7 +212,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                                 // We need to pay attention so this is all immutable. We want to create basically new references for each entry
                                 // so when we stream in chunks, this happens really fast and for the react diffing algorithm to see that we want 
                                 // to re-render for each chunk else it would look really weird.
-                                
+
                                 if (!isAiResponseCreated) {
                                     // So we create a new reference. This is a really important for React to pick up
                                     // the change later, so we can actually see it on the screen
@@ -246,8 +262,8 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         onError: (_, __, context) => {
             // We want to put in the text that we already optimistically put in the chat window, back into the text box.
             setMessage(backupMessage.current)   //  We strategically saved this backup message in a previous step
-            utils.getFileMessages.setData(      //  Rollback to previous messages
-                { fileId },
+            utils.getMessages.setData(      //  Rollback to previous messages
+                { type: type, key: researchKey },
                 { messages: context?.previousMessages ?? [] }
             )
         },
@@ -256,7 +272,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         onSettled: async () => {
             setIsLoading(false)
 
-            await utils.getFileMessages.invalidate({ fileId })
+            await utils.getMessages.invalidate({ type: type, key: researchKey })
         },
     })
 

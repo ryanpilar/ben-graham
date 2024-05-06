@@ -7,7 +7,7 @@ import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 
 /** ================================|| Project Chat Context ||===================================
 
-    This is where we process our messages, where we handle loading and error states
+    This is where we process our project messages, where we handle loading and error states
 
     onMutate: 
         Gets sent as soon as we send the message, and is where the optimistic update 
@@ -17,7 +17,6 @@ import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 type StreamResponse = {
     addMessage: () => void
     message: string
-
     handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void   // Whenever an event gets triggered in our chat input this comes out
     isLoading: boolean
 }
@@ -262,7 +261,6 @@ export const ProjectChatContextProvider = ({ projectId, children }: Props) => {
         // has been sent. We send the message, we get an answer and then we restore the integrity of the entire page
         onSettled: async () => {
             setIsLoading(false)
-
             await utils.getProjectMessages.invalidate({ projectId })
         },
     })
@@ -283,5 +281,4 @@ export const ProjectChatContextProvider = ({ projectId, children }: Props) => {
             {children}
         </ProjectChatContext.Provider>
     )
-
 }

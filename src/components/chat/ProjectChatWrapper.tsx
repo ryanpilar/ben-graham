@@ -1,9 +1,9 @@
 'use client'
 
 // 3rd Party Imports
-import ProjectMessages from './ProjectMessages'
-import ProjectChatInput from './ProjectChatInput'
-import { ProjectChatContextProvider } from './ProjectChatContext'
+import ChatInput from './ChatInput'
+import Messages from './Messages'
+import { ChatContextProvider } from './ChatContext'
 
 /** ================================|| Project Chat Wrapper ||===================================  **/
 
@@ -16,17 +16,19 @@ const ProjectChatWrapper = ({
   projectId,
   // isSubscribed,
 }: ChatWrapperProps) => {
-  
+
   return (
-    <ProjectChatContextProvider projectId={projectId} >
+    <ChatContextProvider type='project' researchKey={projectId}>
+
       <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
         <div className='flex-1 justify-between flex flex-col mb-28'>
-          <ProjectMessages projectId={projectId} />
+          <Messages type='project' researchKey={projectId} />
         </div>
-
-        <ProjectChatInput />
+        <ChatInput />
       </div>
-    </ProjectChatContextProvider>
+
+    </ChatContextProvider>
+
   )
 }
 
