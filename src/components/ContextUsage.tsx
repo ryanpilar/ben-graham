@@ -52,16 +52,6 @@ const ContextUsage = ({ type, usageKey }: ContextUsageProps) => {
                     :
                     <Skeleton height={40} width={40} circle className='py-2 px-1' count={1} />
             }
-
-            {/* {data && (<ContextUsagePopover usageData={data} >
-                <CircularProgress
-                    size="lg"
-                    value={data.usagePercentage}
-                    color={getColor(data.usagePercentage)}
-                    formatOptions={{ style: "unit", unit: "percent" }}
-                    showValueLabel={true}
-                />
-            </ContextUsagePopover>)} */}
         </ div>
     );
 };

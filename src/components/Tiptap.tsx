@@ -1,8 +1,8 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 // Project Imports
 // 3rd Party Imports
-import { useEditor, EditorContent, JSONContent } from '@tiptap/react'
+import { useEditor, EditorContent, Editor } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
 import Toolbar from './Toolbar'
 import Heading from '@tiptap/extension-heading'
@@ -19,18 +19,18 @@ import TaskItem from "@tiptap/extension-task-item";
 import TextAlign from '@tiptap/extension-text-align'
 import Typography from '@tiptap/extension-typography'
 import { useDebounce } from 'use-debounce'
-
-
-// Styles
+import { trpc } from '@/app/_trpc/client'
 
 /** ================================|| Tip Tap ||=================================== **/
 
 interface TiptapProps {
     notes: string
     onChange: (richText: string) => void
-    onFormSubmit:  () => void
+    onFormSubmit: () => void
 }
 const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
+    const editorRef = useRef<Editor | null>(null);
+    const utils = trpc.useUtils()
 
     // Initialize the Tiptap editor
     const editor = useEditor({
@@ -75,7 +75,6 @@ const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
             }),
             Typography,
         ],
-
         content: notes,
         editorProps: {
             attributes: {
@@ -83,49 +82,26 @@ const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
                     "border focus:outline-none focus:border-2 focus:ring-1 focus:border-primary rounded-none  min-h-[150px] border-input text-slate-800 text-default px-4 py-3 mt-0.5 disabled:cursor-not-allowed disabled:opacity-50",
             }
         },
+        
         onUpdate({ editor }) {
             // convert it to what you need, getHTML()?, getTEXT(), getJSON()?
-            onChange(editor.getHTML())
+            const html = editor.getHTML()
+            onChange(html)            
         },
     })
-    const [isFocused, setIsFocused] = useState(false);
-    const [debouncedEditor] = useDebounce(editor?.state.doc.content, 2000);
+
+    const [debouncedEditor] = useDebounce(editor?.state.doc.content, 750);
 
     useEffect(() => {
-        if (debouncedEditor && onFormSubmit) {
+        if (debouncedEditor && onFormSubmit) {           
             onFormSubmit()
-        }
-    }, [debouncedEditor])
+        }      
 
-    useEffect(() => {
-        const handleBlur = () => {
-            // Delay blur handling to check for refocus within the editor
-            setTimeout(() => {
-                if (!editor?.isFocused) {
-                    setIsFocused(false);
-                }
-            }, 300); // 300 ms delay to allow checking if the new focus is within the editor
-        };
-
-        if (editor) {
-            editor.on('focus', () => setIsFocused(true));
-            editor.on('blur', handleBlur);
-        }
-
-        // Cleanup function to remove event listeners
-        return () => {
-            if (editor) {
-                editor.off('focus');
-                editor.off('blur', handleBlur);
-            }
-        };
-    }, [editor]);
+    }, [debouncedEditor])  
 
     return (
         <div className='flex h-full w-full border-input rounded-none flex-col justify-stretch'>
-
-            {isFocused && <Toolbar editor={editor} />}
-
+            <Toolbar editor={editor} />
             <EditorContent editor={editor} />
         </div>
     );

@@ -66,9 +66,9 @@ const Project = async ({ params }: PageProps) => {
             {/* <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} /> */}
             <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
             <PinnedMessages type={'project'} researchKey={projectid} />
-            <Suspense fallback={<>Loading...</>}>
-                <Notes type={'project'} researchKey={projectid} />
-            </Suspense>
+            {/* <Suspense fallback={<>Loading...</>}> */}
+                <Notes type='project' researchKey={projectid} />
+            {/* </Suspense> */}
 
         </>)
     }

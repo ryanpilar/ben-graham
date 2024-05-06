@@ -1,5 +1,5 @@
 
-import React from 'react'
+import React, { Suspense } from 'react'
 // Project Imports
 import { db } from '@/db';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
@@ -14,6 +14,7 @@ import ContextUsage from '@/components/ContextUsage';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter';
 import Questions from '@/components/Questions';
 import AddQuestion from '@/components/AddQuestion';
+import Notes from '@/components/Notes';
 
 /** ================================|| Research Question ||=================================== **/
 
@@ -61,6 +62,9 @@ const Question = async ({ params }: PageProps) => {
             </div>
 
             <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
+            {/* <Suspense fallback={<>Loading...</>}> */}
+                <Notes type='question' researchKey={questionid} />
+            {/* </Suspense> */}
 
         </>)
     }

@@ -9,9 +9,10 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { trpc } from '@/app/_trpc/client';
-
+import { toast } from './ui/use-toast';
 
 /** ================================|| Notes Form ||=================================== **/
+
 export const notesFormSchema = z.object({
     notes: z.string().trim(),
 })
@@ -28,7 +29,15 @@ interface NotesFormProps {
 
 const NotesForm = ({ researchKey, type, notes }: NotesFormProps) => {
 
-    const { mutate: updateNotes, isLoading } = trpc.updateNotes.useMutation()
+    const { mutate: updateNotes, isLoading } = trpc.updateNotes.useMutation({        
+        onError: () => {
+            toast({
+                title: 'Error updating notes',
+                description: 'Please try again',
+                variant: 'destructive',
+            });
+        },
+    })
 
     const form = useForm<z.infer<typeof notesFormSchema>>({
         resolver: zodResolver(notesFormSchema),
@@ -39,15 +48,15 @@ const NotesForm = ({ researchKey, type, notes }: NotesFormProps) => {
     })
 
     function onSubmit(values: z.infer<typeof notesFormSchema>) {
-        if (notes || !isLoading) {
-            updateNotes({ noteId: notes.id, content: values.notes })
+        if (notes) {
+            updateNotes({ noteId: notes.id, content: values.notes || '' })
         }
     }
 
     return (
         <>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form key={`key-${type}-${researchKey}`} id={`id-${type}-${researchKey}`} onSubmit={form.handleSubmit(onSubmit)}>
                     <FormField control={form.control} name='notes' render={({ field }) => (
                         <FormItem>
                             <FormLabel className="sr-only">Notes</FormLabel>
