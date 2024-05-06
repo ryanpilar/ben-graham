@@ -885,22 +885,6 @@ export const appRouter = router({
 
             return questions;
         }),
-    // getProjectQuestions: privateProcedure
-    //     .input(z.object({ projectId: z.string() }))
-    //     .query(async ({ input, ctx }) => {
-    //         const { kindeId } = ctx;
-    //         if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
-
-    //         const questions = await db.question.findMany({
-    //             where: {
-    //                 projectId: input.projectId,
-    //                 kindeId: kindeId,
-    //             }
-    //         })
-    //         if (!questions) throw new TRPCError({ code: 'NOT_FOUND' })
-
-    //         return questions;
-    //     }),
     deleteQuestion: privateProcedure
         .input(z.object({ questionId: z.string() }))
         .mutation(async ({ ctx, input }) => {

@@ -31,7 +31,7 @@ const PinnedMessages = ({ researchKey, type }: PinnedMessagesProps) => {
 
     const { mutate: togglePin } = trpc.toggleMessagePin.useMutation({
         onSuccess() {
-            utils.getProjectQuestions.invalidate()
+            utils.getQuestions.invalidate()
         },
         onMutate({ messageId }) {
             setCurrentlyPinningMessage(messageId)
