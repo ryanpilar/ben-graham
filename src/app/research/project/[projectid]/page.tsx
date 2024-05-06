@@ -1,12 +1,11 @@
-import React, { Suspense } from 'react'
+import React from 'react'
 
 // Project Imports
 import { db } from '@/db';
 import FileDrawer from '@/components/file/FileDrawer';
 import ContextUsage from '@/components/ContextUsage';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter'
-import ProjectQuestions from '@/components/ProjectQuestions';
-import AddQuestionButton from '@/components/AddQuestion';
+import AddQuestion from '@/components/AddQuestion';
 import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 
@@ -18,14 +17,13 @@ import Notes from '@/components/Notes';
 import SplitLayout from '@/components/SplitLayout';
 import Questions from '@/components/Questions';
 
-/** ================================|| Research Project ||=================================== **/
+/** ================================|| Research Project - Page ||=================================== **/
 
 interface PageProps {
     params: {
         projectid: string
     }
 }
-
 const Project = async ({ params }: PageProps) => {
 
     const { getUser } = getKindeServerSession()
@@ -49,27 +47,20 @@ const Project = async ({ params }: PageProps) => {
     const ProjectContents = () => {
         return (<>
             <div className='lg:mt-4 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
-                
                 <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
                     Project: <span className='text-xl'>{project.name}</span>
                 </h1>
-
                 <div className='flex items-center gap-x-3'>
                     <ContextUsage type='project' usageKey={projectid} />
                     <BadgeFileCounter type={'project'} >
                         <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
                     </BadgeFileCounter>
-                    <AddQuestionButton type='project' researchKey={projectid}  isSubscribed={subscriptionPlan.isSubscribed} />
+                    <AddQuestion type='project' researchKey={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
                 </div>
             </div>
-
-            {/* <ProjectQuestions projectId={projectid} subscriptionPlan={subscriptionPlan} /> */}
             <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
             <PinnedMessages type={'project'} researchKey={projectid} />
-            {/* <Suspense fallback={<>Loading...</>}> */}
-                <Notes type='project' researchKey={projectid} />
-            {/* </Suspense> */}
-
+            <Notes type='project' researchKey={projectid} />
         </>)
     }
 

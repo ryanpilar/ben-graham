@@ -29,7 +29,7 @@ interface NotesFormProps {
 
 const NotesForm = ({ researchKey, type, notes }: NotesFormProps) => {
 
-    const { mutate: updateNotes, isLoading } = trpc.updateNotes.useMutation({        
+    const { mutate: updateNotes } = trpc.updateNotes.useMutation({        
         onError: () => {
             toast({
                 title: 'Error updating notes',

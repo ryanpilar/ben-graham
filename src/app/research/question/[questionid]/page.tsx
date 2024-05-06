@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react'
+import React from 'react'
 // Project Imports
 import { db } from '@/db';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
@@ -9,28 +9,25 @@ import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import FileDrawer from '@/components/file/FileDrawer';
 import SplitLayout from '@/components/SplitLayout';
-import AddQuestionButton from '@/components/AddQuestion';
 import ContextUsage from '@/components/ContextUsage';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter';
 import Questions from '@/components/Questions';
 import AddQuestion from '@/components/AddQuestion';
 import Notes from '@/components/Notes';
 
-/** ================================|| Research Question ||=================================== **/
+/** ================================|| Research Question - Page  ||=================================== **/
 
 interface PageProps {
     params: {
         questionid: string
     }
 }
-
 const Question = async ({ params }: PageProps) => {
 
     const { getUser } = getKindeServerSession()
     const user = await getUser()
     const { questionid } = params
 
-    // Redirect users that are not logged in
     if (!user || !user.id) redirect(`/auth-callback?origin=research/question/${questionid}`)
 
     const subscriptionPlan = await getUserSubscriptionPlan()
@@ -62,9 +59,7 @@ const Question = async ({ params }: PageProps) => {
             </div>
 
             <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
-            {/* <Suspense fallback={<>Loading...</>}> */}
-                <Notes type='question' researchKey={questionid} />
-            {/* </Suspense> */}
+            <Notes type='question' researchKey={questionid} />
 
         </>)
     }
@@ -72,7 +67,7 @@ const Question = async ({ params }: PageProps) => {
     return (
         <SplitLayout
             leftChildren={<QuestionContents />}
-            rightChildren={<>'waaaaaaa'</>}
+            rightChildren={<>waaaaaaa</>}
         />
     );
 };

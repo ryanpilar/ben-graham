@@ -1,8 +1,9 @@
 'use client'
-import React, { useEffect, useRef } from 'react'
+
+import React, { useEffect } from 'react'
 // Project Imports
 // 3rd Party Imports
-import { useEditor, EditorContent, Editor } from '@tiptap/react'
+import { useEditor, EditorContent } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
 import Toolbar from './Toolbar'
 import Heading from '@tiptap/extension-heading'
@@ -19,7 +20,6 @@ import TaskItem from "@tiptap/extension-task-item";
 import TextAlign from '@tiptap/extension-text-align'
 import Typography from '@tiptap/extension-typography'
 import { useDebounce } from 'use-debounce'
-import { trpc } from '@/app/_trpc/client'
 
 /** ================================|| Tip Tap ||=================================== **/
 
@@ -29,8 +29,6 @@ interface TiptapProps {
     onFormSubmit: () => void
 }
 const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
-    const editorRef = useRef<Editor | null>(null);
-    const utils = trpc.useUtils()
 
     // Initialize the Tiptap editor
     const editor = useEditor({
@@ -90,13 +88,12 @@ const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
         },
     })
 
-    const [debouncedEditor] = useDebounce(editor?.state.doc.content, 750);
+    const [debouncedEditor] = useDebounce(editor?.state.doc.content, 1000);
 
     useEffect(() => {
         if (debouncedEditor && onFormSubmit) {           
             onFormSubmit()
-        }      
-
+        }
     }, [debouncedEditor])  
 
     return (

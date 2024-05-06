@@ -1,14 +1,16 @@
 'use client'
-import React, { useEffect } from 'react'
 
+import React from 'react'
 // 3rd Party Imports
 import NotesForm from './NotesForm';
-// import { trpcServer } from '@/trpc/trpc-caller';
 import { trpc } from '@/app/_trpc/client';
 import Skeleton from 'react-loading-skeleton';
 import { Ghost } from 'lucide-react';
 
-/** ================================|| Notes ||=================================== **/
+/** ================================|| Notes ||=================================== 
+    -   Fetches note data, initializes a Tiptap editor instance, and handles form 
+        submissions into the db, autosaving and throttling via de-bouncer.
+**/
 
 interface NotesProps {
     researchKey: string
@@ -17,16 +19,10 @@ interface NotesProps {
 
 const Notes =  ({ researchKey, type }: NotesProps) => {
 
-    // const notes = await trpcServer.getNotes({ type: type, key: researchKey })
-    // const mainNote = notes.find(note => note.name === 'main note') || { id: 'someUUID', name: 'Blank Note', content: 'Nothing noted yet...' }
-    const utils = trpc.useUtils()
-    const { data: notes, isLoading } = trpc.getNotes.useQuery({ type: type, key: researchKey }, {
-        // Setting the staleTime to 0 will ensure data is not considered fresh immediately after fetching.
-        staleTime: 0,
-        // Setting the cacheTime to 0 ensures the data does not remain in the cache after unmount.
-        cacheTime: 0,
-        // Using 'network-only' to always fetch data directly from the server and bypass cache.
-        refetchOnMount: 'always',
+    const { data: notes, isLoading } = trpc.getNotes.useQuery({ type: type, key: researchKey }, {        
+        staleTime: 0, // StaleTime to 0 will ensure data is not considered fresh immediately after fetching.
+        cacheTime: 0, // CacheTime to 0 ensures the data does not remain in the cache after unmount.        
+        refetchOnMount: 'always',   // Using 'network-only' to always fetch data directly from the server and bypass cache.
         refetchOnWindowFocus: 'always'
     })
     const mainNote = notes?.find(note => note.name === 'main note')
@@ -44,8 +40,6 @@ const Notes =  ({ researchKey, type }: NotesProps) => {
                     Notes
                 </h1>
             </div>
-
-            {/* <NotesForm researchKey={researchKey} type={type} notes={mainNote} /> */}
 
             {notes && mainNote ? (
                 <NotesForm researchKey={researchKey} type={type} notes={mainNote} />
