@@ -9,7 +9,7 @@ import { NextRequest } from "next/server"
 import { PineconeStore } from "@langchain/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { SendProjectMessageValidator } from "@/lib/validators/SendMessageValidator"
+import { SendProjectMessageValidator, SendQuestionMessageValidator } from "@/lib/validators/SendMessageValidator"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { GPT_MODELS } from "@/config/open-ai"
 import { ContextType } from '@prisma/client';
@@ -19,7 +19,7 @@ import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/li
 
 
 
-/** ===================================|| ROUTE - /api/message/project ||======================================  
+/** ===================================|| ROUTE - /api/message/question ||======================================  
  
     To answer a message/question we are going to use a language model. When we index a pdf file, for each 
     message that we want answered in the chat we are going to index the entire pdf, first. And then based 
@@ -30,11 +30,11 @@ import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/li
 
     Overview:
       -   Authenticating users and validating the incoming JSON payload against predefined schemas 
-      -   Retrieves project-specific file IDs from a server-side trpc call, verifying project file existence 
+      -   Retrieves question-specific file IDs from a server-side trpc call, verifying question file existence 
           before proceeding
-      -   Messages are logged in MongoDB with relevant project and user identifiers
+      -   Messages are logged in MongoDB with relevant question and user identifiers
       -   OpenAI's embeddings API and Pinecone's vector database to generate and search for text embeddings, 
-          aiming to find content within project files that best matches the user's query.
+          aiming to find content within question files that best matches the user's query.
       -   Formatting and combining previous messages and relevant document content, which is fed into OpenAI's 
           chat model
       -   Implements real-time response streaming back to the client, using OpenAI's streaming      
@@ -42,6 +42,8 @@ import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/li
 **/
 
 export const POST = async (req: NextRequest) => {
+
+
 
   // Parse the JSON body from the request
   const body = await req.json()
@@ -59,10 +61,11 @@ export const POST = async (req: NextRequest) => {
   const { id: userId } = user
 
   // Validate the incoming request body using Zod to ensure it contains the expected fields
-  const { projectId, message: queryMessage } = SendProjectMessageValidator.parse(body)
-  const projectFileIds = await trpcServer.getFiles({ type: 'project', key: projectId })
+  const { questionId, message: queryMessage } = SendQuestionMessageValidator.parse(body)
+  const questionFileIds = await trpcServer.getFiles({ type: 'question', key: questionId })
 
-  if (!projectFileIds) {
+  if (!questionFileIds) {
+    console.log('FILES DONT EXIST IN MONGO!')
     return new Response('Not found', { status: 404 })
   }
 
@@ -72,7 +75,7 @@ export const POST = async (req: NextRequest) => {
       text: queryMessage,
       isUserMessage: true,
       kindeId: userId,
-      projectId,
+      questionId,
     },
   })
 
@@ -81,7 +84,7 @@ export const POST = async (req: NextRequest) => {
   const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
 
   // Create a Pinecone Store for the message embeddings
-  const vectorStores = await Promise.all(projectFileIds.map(async (file) => {
+  const vectorStores = await Promise.all(questionFileIds.map(async (file) => {
 
     const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex, namespace: file.id });
 
@@ -144,7 +147,7 @@ export const POST = async (req: NextRequest) => {
   // Retrieve previous messages related to the PROJECT
   const prevMessages = await db.message.findMany({
     where: {
-      projectId,
+      questionId,
     },
     orderBy: {
       createdAt: 'asc',
@@ -165,7 +168,7 @@ export const POST = async (req: NextRequest) => {
   const queryCosts = await db.queryCost.create({
     data: {
       kindeId: userId,                            // Note: this is the kinde id
-      projectId: projectId
+      questionId: questionId
     }
   })
 
@@ -173,8 +176,8 @@ export const POST = async (req: NextRequest) => {
   const response = await openai.chat.completions.create({
     model: gptModel.name,
     temperature: 0,
-    
-    stream: true,   // We plan to stream the responses back to the front end in real time
+    // We plan to stream the responses back to the front end in real time
+    stream: true,
     // These msgs serve one purpose: we want the previous messages that were exchanged in this chat, so if you are referencing something from a couple messages ago, the ai will know what you mean
     messages: [
       {
@@ -249,7 +252,7 @@ export const POST = async (req: NextRequest) => {
         data: {
           text: completion,
           isUserMessage: false,
-          projectId,
+          questionId,
           kindeId: userId,
         },
       })

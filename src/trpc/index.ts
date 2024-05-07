@@ -120,7 +120,7 @@ export const appRouter = router({
 
             if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-            return await db.file.findMany({
+            const files = await db.file.findMany({
                 where: {
                     ...(type !== 'all' && {
                         [type === 'project' ? 'projectIds' : 'questionIds']: {
@@ -137,6 +137,11 @@ export const appRouter = router({
                     createdAt: true,
                 },
             })
+
+            if (!files) {
+                throw new TRPCError({ code: 'NOT_FOUND', message: 'No files found for the specified project' });
+            }
+            return files
 
         }),
     getUserFiles: privateProcedure
@@ -155,7 +160,6 @@ export const appRouter = router({
 
             const { kindeId } = ctx;
             const { key, type } = input
-
 
             if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
@@ -757,7 +761,6 @@ export const appRouter = router({
         }),
     getResearchDetails: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
-
         // .input(z.object({ projectId: z.string() }))
         .query(async ({ ctx, input }) => {
             const { kindeId } = ctx;
@@ -1063,7 +1066,6 @@ export const appRouter = router({
                 data: { messageId: 'removed' }
             });
         }),
-
     toggleMessagePin: privateProcedure
         .input(z.object({ messageId: z.string() }))
         .mutation(async ({ ctx, input }) => {

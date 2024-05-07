@@ -14,6 +14,7 @@ import BadgeFileCounter from '@/components/file/BadgeFileCounter';
 import Questions from '@/components/Questions';
 import AddQuestion from '@/components/AddQuestion';
 import Notes from '@/components/Notes';
+import ChatWrapper from '@/components/chat/ChatWrapper';
 
 /** ================================|| Research Question - Page  ||=================================== **/
 
@@ -55,7 +56,6 @@ const Question = async ({ params }: PageProps) => {
                         </BadgeFileCounter>
                         <AddQuestion type='question' researchKey={questionid} isSubscribed={subscriptionPlan.isSubscribed} />
                     </div>
-
                 </div>
 
                 <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
@@ -67,7 +67,7 @@ const Question = async ({ params }: PageProps) => {
     return (
         <SplitLayout
             leftChildren={<QuestionContents />}
-            rightChildren={<>waaaaaaa</>}
+            rightChildren={<ChatWrapper type='question' researchKey={questionid} />}
         />
     );
 };

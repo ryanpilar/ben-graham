@@ -60,7 +60,7 @@ export const ChatContextProvider = ({ type, researchKey, children }: Props) => {
             const chooseEndpointAndPost = async () => {
                 switch (type) {
                     case ('file'):
-                        return await fetch('/api/message', {
+                        return await fetch('/api/message/file', {
                             method: 'POST',
                             body: JSON.stringify({
                                 fileId: researchKey,
@@ -72,6 +72,14 @@ export const ChatContextProvider = ({ type, researchKey, children }: Props) => {
                             method: 'POST',
                             body: JSON.stringify({
                                 projectId: researchKey,
+                                message,
+                            })
+                        })
+                    case ('question'):
+                        return await fetch('/api/message/question', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                questionId: researchKey,
                                 message,
                             })
                         })
@@ -257,6 +265,9 @@ export const ChatContextProvider = ({ type, researchKey, children }: Props) => {
                     }
                 )
             }
+
+            utils.getContextUsage.invalidate()
+
         },
         // THe only thing that we want to receive here, is not the first argument, not even the second, we just want the context
         onError: (_, __, context) => {

@@ -1,5 +1,7 @@
 import { db } from "@/db"
 import { pinecone } from "@/lib/pinecone/core"
+import { trpcServer } from '@/trpc/trpc-caller'
+
 import { SendMessageValidator } from "@/lib/validators/SendMessageValidator"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { NextRequest } from "next/server"
@@ -8,28 +10,31 @@ import { PineconeStore } from "@langchain/pinecone";
 import { openai } from "@/lib/openai"
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 
+import { ContextType } from '@prisma/client';
+import { PLANS } from "@/config/stripe"
+import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/lib/tiktoken/core"
+
 
 export const POST = async (req: NextRequest) => {
-  // Endpoint for asking a question about the pdf file
 
-  // 1st we need access to the body
-  const body = await req.json() 
+  // Parse the JSON body from the request
+  const body = await req.json()
+
+  // Get user session from Kinde authentication
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
-  // const { id: userId } = user
-  // if (!userId) return new Response('Unauthorized', { status: 401 })
-  if (!user?.id) return new Response('Unauthorized', { status: 401 })
+  ///////////////////////////////////////////////////////////////////
+  // WE NEED AN IS SUBSCRIBED SO WE CAN DECIDE ON THE STRIPE PLAN! //
+  ///////////////////////////////////////////////////////////////////
 
+
+  // If no user ID is found, return an unauthorized response
+  if (!user?.id) return new Response('Unauthorized', { status: 401 })
   const { id: userId } = user
 
-  // To make sure we always have the expected data coming to this api route, we use zot
-  // We want to parse the body
-  // And because we are running this through zod, when it is successfull we know the data types to be true!
-  // Will automatically throw an error for us
-  // the body can technically be anything, typescript knows that. So typescript says anyone can make a request 
-  // with any data to this endpoint
-  const { fileId, message } = SendMessageValidator.parse(body)
+  // Validate the incoming request body using Zod to ensure it contains the expected fields
+  const { fileId, message: queryMessage } = SendMessageValidator.parse(body)
 
   // Now we use the fileId to find the pdf we are looking for
   const file = await db.file.findFirst({
@@ -40,38 +45,21 @@ export const POST = async (req: NextRequest) => {
   })
 
   if (!file) {
-    console.log('FILE DOESNT EXIST IN MONGO!')
     return new Response('Not found', { status: 404 })
   }
-  // Which page of the pdf is most relevent to the question that the user is asking, retrieve that page for context and send it to the large language model together
-  // If there is a file that the users owns that they want to add a message too:
-  const createdDocument = await db.message.create({
+
+  // Which page of the pdf is most relevant to the question that the user is asking, retrieve that page for context and send it to the llm together
+  await db.message.create({
     data: {
-      text: message,
+      text: queryMessage,
       isUserMessage: true,
       kindeId: userId,
       fileId,
     },
   })
 
-  // To answer the above message/question we are going to use a language model
-  // when we index a pdf file, for each message that we want answered in the chat
-  // we are going to index the entire pdf, first. And then based on the question,
-  // we can find the parts of the pdf, in text, that are most relevent to the
-  // message/question by their similarity. Cosine products calculates the closest 
-  // vectors to one another
-
-  // 1: vectorize/embedding message
-  const embeddings = new OpenAIEmbeddings({
-    openAIApiKey: process.env.OPENAI_API_KEY,
-  })
-
-  console.log('LANGCHAIN EMBEDDINGS CREATED')
-
-
-  // const pinecone = await getPineconeClient()
-  // const pineconeIndex = pinecone.Index('quill')
-
+  const gptModel = PLANS[1].gptModel
+  const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
   const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
 
   // vector store the most relevant pdf page to this message
@@ -83,23 +71,59 @@ export const POST = async (req: NextRequest) => {
     }
   )
 
-  console.log('EMBEDDINGS STORED IN PINECONE')
-
-
-  // get the results from pinecone
-  const results = await vectorStore.similaritySearch(
-    message,
-    // How many results, or pdf pages we want back. So this is the 4 closest matches to our question
-    // In later stages we can add more pages for paying users for better contextual results.
-    4
+  // Perform a similarity search in Pinecone to find relevant PDF pages
+  const vectorStoreResults = await vectorStore.similaritySearch(
+    queryMessage,
+    PLANS[1].vectorStoreCap      // How many results, or pdf pages we want back. So this is the closest matches to our question.
   )
 
-  console.log('VECTOR STORE SIMILARITY SEARCH DONE')
+  /**
+      MMR HERE! - Maximum Marginal Relevance? 
+      https://medium.com/@onkarmishra/using-langchain-for-question-answering-on-own-data-3af0a82789ed
+  
+      The idea behind MMR is we first query the vector store and choose the “fetch_k” most similar responses. 
+      Now, we work on this smaller set of “fetch_k” documents and optimize to achieve both relevance to the 
+      query and diversity among the results. Finally, we choose the “k” most diverse response within these 
+      “fetch_k” responses.
+  
+      Here, we were able to diverse results by using MMR search. Now, we can compare the results for 
+      similarity search and maximum marginal relevance search results.
+     */
 
+  /**
+    METADATA HERE!  
+    
+    Used to address specificity in the search. Earlier, we found that the answer to the query “What 
+    did they say about regression in the third lecture?” returned results not just from the third 
+    lecture but also from the first and second lectures. To address this, we will specify a metadata 
+    filter to solve the above. So th epoint being is to provide context for each embedded chunk.
+  */
 
-  // to pass these messages into the large language model itself would be good
-  // But what also makes a lot of sense is a chat history. We want to see the previous messages of the user
-  // This is the way we can search for previous messages:
+  /**
+    SELF QUERY HERE!  
+    
+    Self Query is an important tool when we want to infer metadata from the query itself. We can use 
+    SelfQueryRetriever, which uses an LLM to extract:
+      - The query string to use for vector search
+      - A metadata filter to pass in as well
+    
+    This method is used when we have a query not solely about the content that we want to look up 
+    semantically but also includes some metadata that we want to apply a filter on.
+  */
+
+  /**
+    CONTEXTUAL COMPRESSION!  
+    
+    Since passing the full document through the application can lead to more expensive LLM calls and 
+    poorer response, it is useful to pull out only the most relevant bits of the retrieved passages.
+
+    With compression, we run all our documents through a language model and extract the most relevant 
+    segments and then pass only the most relevant segments into a final language model call. This 
+    comes at the cost of making more calls to the LM, but it’s also good to focus the final answer 
+    on only the most important things. And so it’s a bit of a tradeoff.
+*/
+
+  // Retrieve previous messages related to the PROJECT
   const prevMessages = await db.message.findMany({
     where: {
       fileId,
@@ -107,11 +131,8 @@ export const POST = async (req: NextRequest) => {
     orderBy: {
       createdAt: 'asc',
     },
-    take: 6
+    take: PLANS[1].prevMessagesCap
   })
-
-  console.log('FIND ALL MESSAGES TO FILE')
-
 
   // Now send this to open ai to answer your questions, and open ai requires very specific formatting
   const formattedPrevMessages = prevMessages.map((msg) => ({
@@ -121,21 +142,20 @@ export const POST = async (req: NextRequest) => {
     content: msg.text,
   }))
 
-  console.log('FORMAT MESSAGE TO PREP FOR OPENAI')
+  // Create a QueryCost document so we can start adding various token counts to it
+  const queryCost = await db.queryCost.create({
+    data: {
+      kindeId: userId,
+      fileId: fileId
+    }
+  })
 
-
+  // Create a completion request to OpenAI with the current and previous messages
   const response = await openai.chat.completions.create({
-    // model: 'gpt-3.5-turbo',
-    // model: 'gpt-4',
-    // model: 'gpt-4-0613',
-    // model: 'gpt-4-32k',
-    model: 'gpt-4-0125-preview',
-
+    model: gptModel.name,
     temperature: 0,
-    stream: true,               // We plan to stream the responses back to the front end in real time
-    // These msgs serve one purpose: we want the previous messages that were exchanged
-    // in this chat, so if you are referencing something from a couple messages ago,
-    // the ai will know what you mean
+    stream: true,   // We plan to stream the responses back to the front end in real time
+    // These msgs serve one purpose: we want the previous messages that were exchanged in this chat, so if you are referencing something from a couple messages ago, the ai will know what you mean
     messages: [
       {
         role: 'system',
@@ -158,28 +178,50 @@ export const POST = async (req: NextRequest) => {
   \n----------------\n
   
   CONTEXT:
-  ${results.map((r) => r.pageContent).join('\n\n')}
+  ${vectorStoreResults.map((r) => r.pageContent).join('\n\n')}
   
-  USER INPUT: ${message}`,
+  USER INPUT: ${queryMessage}`,
       },
     ],
   })
 
 
-  console.log('ABOUT TO ENTER STREAM')
-  console.log('THE RESPONSE', response)
-
-
-  // Here is the main reason we had to make that custom route earier, beacuse trpc can't handle streaming!
-  // vercel ai sdk: making streaming results in real time a lot easier
-  // when the stream is complete we get an onCompletion callback, which we use to create that new message and put it in our database
-  // It takes the fully done thing from the response, 'completion'
-  // Its essentially one long message string that we will want to put into our database 
+  // Stream OpenAI response and handle completion
   const stream = OpenAIStream(response, {
+
+    async onStart() {
+
+      // Calculate token counts for various contexts
+      const queryMessageTokens = countTikTokens(queryMessage).length
+      const vectorStoreTokens = countVectorStoreTokens([vectorStoreResults])
+      const prevMessageTokens = countMessageTokens(formattedPrevMessages, gptModel.extraTokenCosts)
+
+      // Context types and their respective token counts
+      const contextTypes = [
+        { type: ContextType.QUERY_MESSAGE, tokens: queryMessageTokens },
+        { type: ContextType.PREV_MESSAGES, tokens: prevMessageTokens },
+        { type: ContextType.VECTOR_STORES, tokens: vectorStoreTokens },
+      ]
+
+      // Add TokenCost documents to db 
+      await Promise.all(
+        contextTypes.map(({ type, tokens }) =>
+          db.tokenCost.create({
+            data: {
+              kindeId: userId,
+              contextType: type,
+              gptModel: gptModel.name,
+              totalTokens: tokens,
+              queryCostId: queryCost.id
+            }
+          })
+        )
+      )
+    },
+
     async onCompletion(completion) {
-      console.log('OPENAI STREAM COMPLETE');
-      
-      const createdDoc = await db.message.create({
+
+      await db.message.create({
         data: {
           text: completion,
           isUserMessage: false,
@@ -187,14 +229,21 @@ export const POST = async (req: NextRequest) => {
           kindeId: userId,
         },
       })
-      console.log('createdMessage', createdDoc);
 
+      // Calculate token counts for GPT completion
+      const completionTokens = countTikTokens(completion).length
+      // Add TokenCost document to Mongo 
+      await db.tokenCost.create({
+        data: {
+          kindeId: userId,
+          contextType: ContextType.GPT_COMPLETION,
+          gptModel: gptModel.name,
+          totalTokens: completionTokens,
+          queryCostId: queryCost.id
+        }
+      })
     },
   })
-
-  console.log('ABOUT TO RETURN STREAM')
-  console.log('THE STREAM', stream)
-
 
   // Pass in the stream here so we can stream a response to the client in real time
   return new StreamingTextResponse(stream)

@@ -130,6 +130,7 @@ model QueryCost {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   kindeId    String
   messageId  String?     @db.ObjectId
+  fileId     String?     @db.ObjectId
   questionId String?     @db.ObjectId
   projectId  String?     @db.ObjectId
   noteId     String?     @db.ObjectId

@@ -47,7 +47,7 @@ const LinkedFiles = ({ type }: FilesProps) => {
 
     const { mutate: removeLinkedFile } = trpc.removeLinkedFile.useMutation({
         onSuccess() {
-            utils.getFiles.invalidate()
+            utils.getFiles.invalidate({ type: type, key: key })
             utils.getNonLinkedFiles.invalidate()
             utils.getFileCount.invalidate()
             utils.getContextUsage.invalidate()
@@ -67,35 +67,6 @@ const LinkedFiles = ({ type }: FilesProps) => {
 
             {files && files?.length !== 0 ? (
                 <div className='flex flex-wrap gap-2'>
-
-                    {/* {files
-                        .map((file) => (
-
-                            <Badge variant='outline' className='flex gap-x-8 justify-between  shadow-md rounded-xl hover:scale-105 border-primary/50'>
-                                <Link
-                                    href={`/dashboard/${file.id}`}
-                                    className={cn(buttonVariants({ variant: 'none', size: 'sm' }), 'ml-2 text-black/65 hover:text-black/90')}>
-                                    {file.name}
-
-                                </Link>
-                                <Button
-                                    onClick={() =>
-                                        removeLinkedFile({ fileId: file.id, key: key, type: type })
-                                    }
-                                    size='sm'
-                                    className='w-full rounded-full bg-white'
-                                    variant='destructive'>
-                                    {currentlyDeletingFile === file.id ? (
-                                        <Loader2 className='h-4 w-4 animate-spin' />
-                                    ) : (
-                                        <Trash className='h-4 w-4' />
-                                        // <X className='h-4 w-4' />
-                                    )}
-                                </Button>
-                            </Badge>
-
-                        ))
-                    } */}
 
                     {files.map((file, index) => {
                         const { truncatedText, isTruncated } = truncateText(file.name, 35);  // Assume max length of 30
@@ -147,9 +118,6 @@ const LinkedFiles = ({ type }: FilesProps) => {
                             </Chip>
                         );
                     })}
-
-
-
 
                 </div>
             ) : isLoading ? (

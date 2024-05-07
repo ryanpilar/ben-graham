@@ -11,7 +11,6 @@ export const SendProjectMessageValidator = z.object({
 })
 
 export const SendQuestionMessageValidator = z.object({
-    projectId: z.string(),
-    fileIds: z.array(z.string()),
+    questionId: z.string(),
     message: z.string()
 })
