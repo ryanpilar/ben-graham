@@ -2,6 +2,7 @@
 import { db } from '@/db'
 import { PLANS } from '@/config/stripe'
 import { absoluteUrl } from '@/lib/utils'
+import { countMessageTokens } from '@/lib/tiktoken/core'
 import { deletePineconeNamespace } from '@/lib/pinecone/core'
 import { deleteUploadthingFile } from '@/lib/uploadthing/core'
 import { getUserSubscriptionPlan, stripe } from '@/lib/stripe'
@@ -16,12 +17,11 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { countMessageTokens } from '@/lib/tiktoken/core'
 
 /** ================================|| TRPC Routes ||=================================== 
     NOTE: createCaller method exists on our API endpoint on the core wrapper around the appRouter 
     which means serverTrpc has access to all the same api endpoints that we can also call 
-    from the client side 
+    from the client side
  **/
 
 export const appRouter = router({
@@ -757,7 +757,6 @@ export const appRouter = router({
         }),
     getResearchDetails: privateProcedure
         .input(z.object({ type: z.enum(['all', 'project', 'question']), key: z.string().optional() }))
-        // .input(z.object({ projectId: z.string() }))
         .query(async ({ ctx, input }) => {
             const { kindeId } = ctx;
             const { type, key } = input;

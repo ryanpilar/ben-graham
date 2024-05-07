@@ -9,7 +9,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 
 
 
-/** ================================|| Single File ||=================================== **/
+/** ================================|| Single File Page ||=================================== **/
 
 
 interface PageProps {

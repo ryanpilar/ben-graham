@@ -10,7 +10,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import UsersResearch from '@/components/UsersResearch';
 import AddProjectButton from '@/components/AddProject';
 
-/** ================================|| Research Projects ||=================================== **/
+/** ================================|| Research Projects - Page ||=================================== **/
 
 const Research = async () => {
 

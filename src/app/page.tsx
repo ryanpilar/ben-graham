@@ -10,7 +10,7 @@ import { ArrowRight } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button';
 
 
-/** ================================|| Home ||=================================== **/
+/** ================================|| Home Page ||=================================== **/
 
 export default function Home() {
   return (
@@ -40,7 +40,6 @@ export default function Home() {
           asking questions right away.
         </p>
 
-        {/* NOTE: /dashboard is a protected route, and will redirect to a login page if the user is not signed in */}
         <Link
           className={buttonVariants({
             size: 'lg',

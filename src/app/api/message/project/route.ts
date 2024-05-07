@@ -135,7 +135,6 @@ export const POST = async (req: NextRequest) => {
     on only the most important things. And so it’s a bit of a tradeoff.
 */
 
-
   const prevMessages = await db.message.findMany({           // Retrieve previous messages related to the file
     where: {
       projectId,

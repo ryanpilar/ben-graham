@@ -15,21 +15,19 @@ import { useRouter } from 'next/navigation';
 // Styles
 
 /** ================================|| Providers ||=================================== 
- *
     -   trcp is a thin wrapper around react-query 
     -   first we make a trpc instance, _trpc (in the app folder) tells next that 
         its not navigable  **/
 
 
-// Note: use PropsWithChildren when bring in props, theres a unique prop for it!
+// Use PropsWithChildren when bringing in props
 const Providers = ({ children }: PropsWithChildren) => {
     const [queryClient] = useState(() => new QueryClient())
 
-    // Once we have a trpc client spun up (/src/trpc/trpc.ts & index.ts) we call createClient off that server instance
+    // Once we have a trpc client spun up (/src/trpc/trpc.ts & index.ts) we call createClient from that server instance
     const [trpcClient] = useState(() => trpc.createClient({
         links: [
             httpBatchLink({
-                // url: 'http://localhost:3000/api/trpc'
                 url: absoluteUrl('/api/trpc')
             })
         ]
@@ -49,13 +47,12 @@ const Providers = ({ children }: PropsWithChildren) => {
             <QueryClientProvider client={queryClient}>
                 {/* <LoadingProvider> */}
                 {/* <NextUIProvider navigate={router.push}> */}
-                    {/* <OriginTrackerProvider> */}
+                {/* <OriginTrackerProvider> */}
 
-                        {children}
-                    {/* </OriginTrackerProvider> */}
+                {children}
 
+                {/* </OriginTrackerProvider> */}
                 {/* </NextUIProvider > */}
-
                 {/* </LoadingProvider> */}
             </QueryClientProvider>
         </trpc.Provider>

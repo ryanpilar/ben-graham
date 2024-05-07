@@ -5,18 +5,18 @@ import { inferRouterOutputs } from '@trpc/server'
 /** ================================|| TRPC Message Type ||=================================== 
 
     TRPC advanced magic...
-    First infer the type of data we get back from trpc, do this their 'type RouterOutput'
+    First infer the type of data we get back from trpc, do this via 'type RouterOutput'
 
     The type of Messages that are returned from getFileMessages, that is the type we need to
     infer.
 
     We also have a loading message inside of our messages, and this does not render out a string
-    as its text, but rather a jsx element, so we need to accomodate. And first we omit the 
+    as its text, but rather a jsx element, so we need to accommodate. And first we omit the 
     original message property.
 
     Import ExtendedText type wherever we render out a message
 
-    By doing this, we can keep in line will full typescript benefits inside components where 
+    By doing this, we can keep in line with full typescript benefits inside components where 
     this inferring is happening.
 
 **/

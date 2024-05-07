@@ -5,20 +5,19 @@ import { trpc } from '../_trpc/client';
 // 3rd Party Imports
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react';
-// Styles
 
-/** ================================|| AuthCallback ||=================================== 
-    - sync the logged in user and make sure they are also in the database 
-    - worse thing about trpc is the setup  **/
+/** ================================|| Auth Callback Page ||=================================== 
+    - Sync the logged in user and make sure they are also in the database 
+    - Worse thing about trpc is the setup  **/
 
 const AuthCallback = () => {
+    
     const router = useRouter()
     const searchParams = useSearchParams()
     const origin = searchParams.get('origin')  // Format reminder: '/auth-callback?origin=dashboard'
 
-    // this data is now type safe with trpc, isLoading helps us deal with undefined states 
-    // we don't expect any data, like we don't expect something like a post request body,
-    // this query runs on page load
+    // This data is now type safe with trpc, isLoading helps us deal with undefined states 
+    // This query runs on page load...
     const { data, isLoading, error } = trpc.authCallback.useQuery(undefined, {
         retry: true,
         retryDelay: 500,

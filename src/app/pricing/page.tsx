@@ -23,7 +23,7 @@ import {
 import Link from 'next/link'
 import UpgradeSubscription from '@/components/UpgradeSubscription'
 
-/** ================================|| page ||=================================== **/
+/** ================================|| Pricing Page ||=================================== **/
 
 const PricingPage = async () => {
   const { getUser } = getKindeServerSession()

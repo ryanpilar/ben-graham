@@ -3,7 +3,7 @@ import React from 'react'
 import BillingForm from "@/components/BillingForm"
 import { getUserSubscriptionPlan } from "@/lib/stripe"
 
-/** ================================|| Billing ||=================================== **/
+/** ================================|| Billing Page ||=================================== **/
 
 const BillingPage = async () => {
     

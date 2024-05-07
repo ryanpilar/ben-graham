@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation'
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 
-/** ================================|| Files ||=================================== **/
+/** ================================|| Files Page ||=================================== **/
 
 const Files = async ({ params }: any ) => {
 

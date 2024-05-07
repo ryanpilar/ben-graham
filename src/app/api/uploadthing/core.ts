@@ -101,7 +101,7 @@ const onUploadComplete = async ({ metadata, file }: {
 
         await PineconeStore.fromDocuments(
             pageLevelDocs,
-            embeddings,                         //   OpenAi embedding tell langchain how to generate the vectors from the text
+            embeddings,                         //  OpenAi embedding tell langchain how to generate the vectors from the text
             {
                 pineconeIndex,
                 namespace: createdFile.id,      //  We can save a vector to certain namespaces, in this case fileId 

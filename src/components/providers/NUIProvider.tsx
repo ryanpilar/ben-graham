@@ -4,7 +4,7 @@ import React from 'react'
 import { NextUIProvider } from '@nextui-org/system';
 import { useRouter } from 'next/navigation';
 
-/** ================================|| NUIProvider ||=================================== **/
+/** ================================|| NUI Provider ||=================================== **/
 
 export function NUIProvider({ children }: { children: React.ReactNode }) {
 

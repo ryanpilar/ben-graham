@@ -5,12 +5,11 @@ import { TRPCError, initTRPC } from '@trpc/server'
 const t = initTRPC.create();
 const middleware = t.middleware
 
-// Custom authentication middleware
+// Custom authentication middleware:
 const isAuth = middleware(async (options) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    // Verify user
     if (!user || !user.id) {
         throw new TRPCError({ code: 'UNAUTHORIZED' })
     }
@@ -27,6 +26,7 @@ const isAuth = middleware(async (options) => {
 
 // Router & procedure helpers that can be used throughout the router
 export const router = t.router
+
 // This allows us to create an api endpoint that anyone regardless of their authentication can call, its public
 export const publicProcedure = t.procedure
 
