@@ -18,10 +18,6 @@ import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { countMessageTokens } from '@/lib/tiktoken/core'
 
-
-import { PrismaClient, User, File, Project, Question, Message } from '@prisma/client';
-
-
 /** ================================|| TRPC Routes ||=================================== 
     NOTE: createCaller method exists on our API endpoint on the core wrapper around the appRouter 
     which means serverTrpc has access to all the same api endpoints that we can also call 

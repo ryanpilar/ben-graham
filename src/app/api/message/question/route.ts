@@ -1,41 +1,37 @@
 // Project Imports
 import { db } from "@/db"
 import { openai } from "@/lib/openai"
+import { PLANS } from "@/config/stripe"
 import { pinecone } from "@/lib/pinecone/core"
 import { trpcServer } from '@/trpc/trpc-caller'
+import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/lib/tiktoken/core"
 
 // 3rd Party
 import { NextRequest } from "next/server"
+import { ContextType } from '@prisma/client';
 import { PineconeStore } from "@langchain/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { SendProjectMessageValidator, SendQuestionMessageValidator } from "@/lib/validators/SendMessageValidator"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
-import { GPT_MODELS } from "@/config/open-ai"
-import { ContextType } from '@prisma/client';
-import { PLANS } from "@/config/stripe"
-
-import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/lib/tiktoken/core"
-
-
+import { SendQuestionMessageValidator } from "@/lib/validators/SendMessageValidator"
 
 /** ===================================|| ROUTE - /api/message/question ||======================================  
  
-    To answer a message/question we are going to use a language model. When we index a pdf file, for each 
-    message that we want answered in the chat we are going to index the entire pdf, first. And then based 
-    on the question, we can find the parts of the pdf, in text, that are most relevant to the message/question 
-    by their similarity. Cosine products calculates the closest vectors to one another.
+    When we index a pdf file, for each message that we want answered in the chat we are going to index the 
+    entire pdf, first. And then based on the question, we can find the parts of the pdf, in text, that are 
+    most relevant to the question by their similarity. Cosine products calculates the closest vectors to one 
+    another.
 
     We made custom route here instead of a TRPC route because trpc can't handle streaming!
 
     Overview:
       -   Authenticating users and validating the incoming JSON payload against predefined schemas 
-      -   Retrieves question-specific file IDs from a server-side trpc call, verifying question file existence 
+      -   Retrieves project-specific file IDs from a server-side trpc call, verifying project file existence 
           before proceeding
-      -   Messages are logged in MongoDB with relevant question and user identifiers
-      -   OpenAI's embeddings API and Pinecone's vector database to generate and search for text embeddings, 
-          aiming to find content within question files that best matches the user's query.
-      -   Formatting and combining previous messages and relevant document content, which is fed into OpenAI's 
+      -   Messages are logged in MongoDB with relevant project and user identifiers
+      -   Uses OpenAI's embeddings API and Pinecone's vector database to generate and search for text embeddings, 
+          aiming to find content within project files that best matches the user's query.
+      -   Formats and combines previous messages and relevant document content, which is fed into OpenAI's 
           chat model
       -   Implements real-time response streaming back to the client, using OpenAI's streaming      
 
@@ -43,25 +39,19 @@ import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/li
 
 export const POST = async (req: NextRequest) => {
 
-
-
-  // Parse the JSON body from the request
-  const body = await req.json()
-
-  // Get user session from Kinde authentication
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
-  ///////////////////////////////////////////////////////////////////
-  // WE NEED AN IS SUBSCRIBED SO WE CAN DECIDE ON THE STRIPE PLAN! //
-  ///////////////////////////////////////////////////////////////////
-
-  // If no user ID is found, return an unauthorized response
   if (!user?.id) return new Response('Unauthorized', { status: 401 })
   const { id: userId } = user
 
-  // Validate the incoming request body using Zod to ensure it contains the expected fields
-  const { questionId, message: queryMessage } = SendQuestionMessageValidator.parse(body)
+  const body = await req.json()                       // Parse the JSON body from the incoming request
+
+  const {
+    questionId,
+    message: queryMessage
+  } = SendQuestionMessageValidator.parse(body)        // Validate the incoming request body with Zod 
+
   const questionFileIds = await trpcServer.getFiles({ type: 'question', key: questionId })
 
   if (!questionFileIds) {
@@ -69,8 +59,7 @@ export const POST = async (req: NextRequest) => {
     return new Response('Not found', { status: 404 })
   }
 
-  // Which page of the pdf is most relevant to the question that the user is asking, retrieve that page for context and send it to the llm together
-  await db.message.create({
+  await db.message.create({                           // Take the queryMessage and create a new message document
     data: {
       text: queryMessage,
       isUserMessage: true,
@@ -79,19 +68,20 @@ export const POST = async (req: NextRequest) => {
     },
   })
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //                             WE NEED AN IS SUBSCRIBED SO WE CAN DECIDE ON THE STRIPE PLAN! //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   const gptModel = PLANS[1].gptModel
   const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
   const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
 
-  // Create a Pinecone Store for the message embeddings
-  const vectorStores = await Promise.all(questionFileIds.map(async (file) => {
-
+  const vectorStores = await Promise.all(questionFileIds.map(async (file) => {  // Create a Pinecone Store for the message embeddings
     const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex, namespace: file.id });
 
-    // Perform a similarity search in Pinecone to find relevant PDF pages
-    const results = await vectorStore.similaritySearch(
+    const results = await vectorStore.similaritySearch(      // Perform a similarity search in Pinecone to find relevant PDF pages
       queryMessage,
-      PLANS[1].vectorStoreCap      // How many results, or pdf pages we want back. So this is the closest matches to our question.
+      PLANS[1].vectorStoreCap                                // How many results, or pdf pages we want the search to return back. 
     )
     return results
   }));
@@ -143,9 +133,7 @@ export const POST = async (req: NextRequest) => {
     on only the most important things. And so it’s a bit of a tradeoff.
 */
 
-
-  // Retrieve previous messages related to the PROJECT
-  const prevMessages = await db.message.findMany({
+  const prevMessages = await db.message.findMany({           // Retrieve previous messages related to the file
     where: {
       questionId,
     },
@@ -156,29 +144,25 @@ export const POST = async (req: NextRequest) => {
   })
 
 
-  // Now send this to open ai to answer your questions, and open ai requires very specific formatting. Se we format previous messages for OpenAI completion
-  const formattedPrevMessages = prevMessages.map((msg) => ({
+  const formattedPrevMessages = prevMessages.map((msg) => ({ // Open ai requires very specific formatting for its messages
+
     role: msg.isUserMessage
-      ? ('user' as const)
-      : ('assistant' as const),     // we use const because if we don't we will get a typescript error
+      ? ('user' as const)                                    // we use const because if we don't we will get a typescript error
+      : ('assistant' as const),
     content: msg.text,
   }))
 
-  // Create a QueryCost document so we can start adding various token counts to it
-  const queryCosts = await db.queryCost.create({
+  const queryCost = await db.queryCost.create({              // Create a QueryCost document so we can monitor query costs
     data: {
-      kindeId: userId,                            // Note: this is the kinde id
+      kindeId: userId,
       questionId: questionId
     }
   })
 
-  // Create a completion request to OpenAI with the current and previous messages
-  const response = await openai.chat.completions.create({
+  const response = await openai.chat.completions.create({    // Create a completion request to OpenAI 
     model: gptModel.name,
     temperature: 0,
-    // We plan to stream the responses back to the front end in real time
-    stream: true,
-    // These msgs serve one purpose: we want the previous messages that were exchanged in this chat, so if you are referencing something from a couple messages ago, the ai will know what you mean
+    stream: true,                                            // Stream the responses back to the front end in real time   
     messages: [
       {
         role: 'system',
@@ -212,7 +196,6 @@ export const POST = async (req: NextRequest) => {
     ],
   })
 
-
   // Stream OpenAI response and handle completion
   const stream = OpenAIStream(response, {
 
@@ -239,7 +222,7 @@ export const POST = async (req: NextRequest) => {
               contextType: type,
               gptModel: gptModel.name,
               totalTokens: tokens,
-              queryCostId: queryCosts.id
+              queryCostId: queryCost.id
             }
           })
         )
@@ -266,13 +249,11 @@ export const POST = async (req: NextRequest) => {
           contextType: ContextType.GPT_COMPLETION,
           gptModel: gptModel.name,
           totalTokens: completionTokens,
-          queryCostId: queryCosts.id
+          queryCostId: queryCost.id
         }
       })
     },
   })
 
   // Pass in the stream here so we can stream a response to the client in real time
-  return new StreamingTextResponse(stream)
-
-}
+  return new StreamingTextResponse(stream)}

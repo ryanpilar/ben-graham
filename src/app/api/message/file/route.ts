@@ -1,43 +1,54 @@
 import { db } from "@/db"
+import { openai } from "@/lib/openai"
+import { PLANS } from "@/config/stripe"
+// Project Imports
 import { pinecone } from "@/lib/pinecone/core"
-import { trpcServer } from '@/trpc/trpc-caller'
-
 import { SendMessageValidator } from "@/lib/validators/SendMessageValidator"
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
+import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/lib/tiktoken/core"
+// 3rd Party Imports
 import { NextRequest } from "next/server"
+import { ContextType } from '@prisma/client';
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { PineconeStore } from "@langchain/pinecone";
-import { openai } from "@/lib/openai"
 import { OpenAIStream, StreamingTextResponse } from 'ai'
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 
-import { ContextType } from '@prisma/client';
-import { PLANS } from "@/config/stripe"
-import { countMessageTokens, countTikTokens, countVectorStoreTokens } from "@/lib/tiktoken/core"
+/** ===================================|| ROUTE - /api/message/file ||======================================  
+ 
+    When we index a pdf file, for each message that we want answered in the chat we are going to index the 
+    entire pdf, first. And then based on the question, we can find the parts of the pdf, in text, that are 
+    most relevant to the question by their similarity. Cosine products calculates the closest vectors to one 
+    another.
 
+    We made custom route here instead of a TRPC route because trpc can't handle streaming!
+
+    Overview:
+      -   Authenticating users and validating the incoming JSON payload against predefined schemas 
+      -   Retrieves fileID from a server-side trpc call, verifying file existence before proceeding
+      -   Messages are logged in MongoDB with relevant fileId and user identifiers
+      -   Uses OpenAI's embeddings API and Pinecone's vector database to generate and search for text embeddings, 
+          aiming to find content within question files that best matches the user's query.
+      -   Formatting and combining previous messages and relevant document content, which is fed into OpenAI's 
+          chat model
+      -   Implements real-time response streaming back to the client, using OpenAI's streaming      
+
+**/
 
 export const POST = async (req: NextRequest) => {
 
-  // Parse the JSON body from the request
-  const body = await req.json()
-
-  // Get user session from Kinde authentication
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
-  ///////////////////////////////////////////////////////////////////
-  // WE NEED AN IS SUBSCRIBED SO WE CAN DECIDE ON THE STRIPE PLAN! //
-  ///////////////////////////////////////////////////////////////////
-
-
-  // If no user ID is found, return an unauthorized response
   if (!user?.id) return new Response('Unauthorized', { status: 401 })
+
   const { id: userId } = user
 
-  // Validate the incoming request body using Zod to ensure it contains the expected fields
-  const { fileId, message: queryMessage } = SendMessageValidator.parse(body)
+  const body = await req.json()                                 // Parse the JSON body from the incoming request
+  const {
+    fileId,
+    message: queryMessage } = SendMessageValidator.parse(body)  // Validate the incoming request body with Zod 
 
-  // Now we use the fileId to find the pdf we are looking for
-  const file = await db.file.findFirst({
+  const file = await db.file.findFirst({                        // Use the fileId to find the pdf document
     where: {
       id: fileId,
       kindeId: userId,
@@ -48,22 +59,24 @@ export const POST = async (req: NextRequest) => {
     return new Response('Not found', { status: 404 })
   }
 
-  // Which page of the pdf is most relevant to the question that the user is asking, retrieve that page for context and send it to the llm together
-  await db.message.create({
+  await db.message.create({                                     // Take the queryMessage and create a new message document
     data: {
       text: queryMessage,
       isUserMessage: true,
       kindeId: userId,
-      fileId,
+      fileId: file.id,
     },
   })
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //                             WE NEED AN IS SUBSCRIBED SO WE CAN DECIDE ON THE STRIPE PLAN! //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   const gptModel = PLANS[1].gptModel
   const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY, })
   const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!)
 
-  // vector store the most relevant pdf page to this message
-  const vectorStore = await PineconeStore.fromExistingIndex(
+  const vectorStore = await PineconeStore.fromExistingIndex(     // Create a Pinecone Store for the message embeddings
     embeddings,
     {
       pineconeIndex,
@@ -71,10 +84,9 @@ export const POST = async (req: NextRequest) => {
     }
   )
 
-  // Perform a similarity search in Pinecone to find relevant PDF pages
-  const vectorStoreResults = await vectorStore.similaritySearch(
+  const vectorStoreResults = await vectorStore.similaritySearch( // Perform a similarity search to find relevant PDF pages
     queryMessage,
-    PLANS[1].vectorStoreCap      // How many results, or pdf pages we want back. So this is the closest matches to our question.
+    PLANS[1].vectorStoreCap                                      // How many results, or pdf pages we want the search to return back. 
   )
 
   /**
@@ -123,10 +135,9 @@ export const POST = async (req: NextRequest) => {
     on only the most important things. And so it’s a bit of a tradeoff.
 */
 
-  // Retrieve previous messages related to the PROJECT
-  const prevMessages = await db.message.findMany({
+  const prevMessages = await db.message.findMany({            // Retrieve previous messages related to the file
     where: {
-      fileId,
+      fileId: file.id,
     },
     orderBy: {
       createdAt: 'asc',
@@ -134,28 +145,24 @@ export const POST = async (req: NextRequest) => {
     take: PLANS[1].prevMessagesCap
   })
 
-  // Now send this to open ai to answer your questions, and open ai requires very specific formatting
-  const formattedPrevMessages = prevMessages.map((msg) => ({
+  const formattedPrevMessages = prevMessages.map((msg) => ({  // Open ai requires very specific formatting for its messages
     role: msg.isUserMessage
-      ? ('user' as const)
-      : ('assistant' as const), // we use const because if we don't we will get a typescript error
+      ? ('user' as const)                                     // We use const because if we don't we will get a typescript error
+      : ('assistant' as const),
     content: msg.text,
   }))
 
-  // Create a QueryCost document so we can start adding various token counts to it
-  const queryCost = await db.queryCost.create({
+  const queryCost = await db.queryCost.create({               // Create a QueryCost document so we can monitor query costs
     data: {
       kindeId: userId,
-      fileId: fileId
+      fileId: file.id
     }
   })
 
-  // Create a completion request to OpenAI with the current and previous messages
-  const response = await openai.chat.completions.create({
+  const response = await openai.chat.completions.create({     // Create a completion request to OpenAI 
     model: gptModel.name,
     temperature: 0,
-    stream: true,   // We plan to stream the responses back to the front end in real time
-    // These msgs serve one purpose: we want the previous messages that were exchanged in this chat, so if you are referencing something from a couple messages ago, the ai will know what you mean
+    stream: true,                                             // Stream the responses back to the front end in real time   
     messages: [
       {
         role: 'system',
@@ -185,26 +192,20 @@ export const POST = async (req: NextRequest) => {
     ],
   })
 
-
-  // Stream OpenAI response and handle completion
-  const stream = OpenAIStream(response, {
+  const stream = OpenAIStream(response, {                             // Stream OpenAI response and handle completion
 
     async onStart() {
-
-      // Calculate token counts for various contexts
-      const queryMessageTokens = countTikTokens(queryMessage).length
+      const queryMessageTokens = countTikTokens(queryMessage).length  // Calculate token counts for the included contexts
       const vectorStoreTokens = countVectorStoreTokens([vectorStoreResults])
       const prevMessageTokens = countMessageTokens(formattedPrevMessages, gptModel.extraTokenCosts)
 
-      // Context types and their respective token counts
-      const contextTypes = [
+      const contextTypes = [                                          // Context types and their respective token counts
         { type: ContextType.QUERY_MESSAGE, tokens: queryMessageTokens },
         { type: ContextType.PREV_MESSAGES, tokens: prevMessageTokens },
         { type: ContextType.VECTOR_STORES, tokens: vectorStoreTokens },
       ]
 
-      // Add TokenCost documents to db 
-      await Promise.all(
+      await Promise.all(                                              // Add TokenCost documents to db 
         contextTypes.map(({ type, tokens }) =>
           db.tokenCost.create({
             data: {
@@ -220,20 +221,18 @@ export const POST = async (req: NextRequest) => {
     },
 
     async onCompletion(completion) {
-
-      await db.message.create({
+      await db.message.create({                                       // Add a new message that includes the gpt completion text
         data: {
           text: completion,
           isUserMessage: false,
-          fileId,
+          fileId: file.id,
           kindeId: userId,
         },
       })
 
-      // Calculate token counts for GPT completion
-      const completionTokens = countTikTokens(completion).length
-      // Add TokenCost document to Mongo 
-      await db.tokenCost.create({
+      const completionTokens = countTikTokens(completion).length      // Calculate token counts for GPT completion
+
+      await db.tokenCost.create({                                     // Add TokenCost document to db 
         data: {
           kindeId: userId,
           contextType: ContextType.GPT_COMPLETION,
@@ -245,7 +244,6 @@ export const POST = async (req: NextRequest) => {
     },
   })
 
-  // Pass in the stream here so we can stream a response to the client in real time
-  return new StreamingTextResponse(stream)
+  return new StreamingTextResponse(stream)                            // Pass in the stream here so we can stream a response to the client in real time
 
 }
