@@ -16,6 +16,9 @@ import { useForm } from 'react-hook-form'
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
 import { PLANS } from '@/config/stripe';
+import SearchTickers from './SearchTickers';
+// import {SearchTickers2} from './SearchTickers2';
+
 
 /** =================================|| Add Project Button ||==================================== **/
 
@@ -53,10 +56,10 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
 
     const router = useRouter()
 
-    const { toast } = useToast()    
+    const { toast } = useToast()
 
-    const projectSchema = z.object({ name: z.string().min(1, "Project name is required"), })
-    
+    const projectSchema = z.object({ name: z.string().min(1, "Project name is required"), }) 
+
     type ProjectFormData = z.infer<typeof projectSchema>;
 
     const {
@@ -77,7 +80,7 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
                 variant: 'default',
             });
             router.push(`/research/project/${project.id}`)
-                        
+
         },
         onError: () => {
             toast({
@@ -101,7 +104,8 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
     }
 
     return (
-        <form onSubmit={handleSubmit(handleProjectSubmit)} className='border h-64 m-4 border-dashed border-gray-300 rounded-lg'>
+        <>
+        <form onSubmit={handleSubmit(handleProjectSubmit)} className='border m-4 border-dashed border-gray-300 rounded-lg'>
             <div className='flex items-center justify-center h-full w-full'>
 
                 <div className='flex flex-col items-center justify-center w-full h-full px-4 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100'>
@@ -117,8 +121,11 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
                         </p>
                     </div>
 
+                    {/* <div className='flex w-full justify-between gap-x-2 p-3 bg-white rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200'> */}
                     <div className='flex w-full justify-between gap-x-2 p-3 bg-white rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200'>
+
                         <div className='w-full h-full'>
+
                             <Input
                                 {...register('name')}
                                 placeholder='Project Name'
@@ -134,12 +141,15 @@ const AddProject = ({ isSubscribed, }: { isSubscribed: boolean }) => {
                         <Button type="submit">Add Project</Button>
 
                     </div>
-
-
-
                 </div>
             </div>
         </form>
+        {/* <SearchTickers /> */}
+        <SearchTickers />
+
+
+        </>
+        
     )
 }
 

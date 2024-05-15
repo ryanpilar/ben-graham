@@ -3,13 +3,12 @@
 import React, { useState } from 'react'
 
 // Project Imports
+import PinMsg from './PinMsg';
 import { trpc } from '@/app/_trpc/client';
 
 // 3rd Party Imports
-
-import Skeleton from "react-loading-skeleton"
 import { Ghost } from 'lucide-react';
-import PinMsg from './PinMsg';
+import Skeleton from "react-loading-skeleton"
 
 /** ================================|| Pinned Messages ||=================================== **/
 
@@ -25,22 +24,8 @@ const PinnedMessages = ({ researchKey, type }: PinnedMessagesProps) => {
 
     // If we invalidate the data, we force an automatic refresh
     const utils = trpc.useUtils()
-
-    // automatically gets queried on page load
-    const { data: messages, isLoading } = trpc.getPinnedMessages.useQuery({ type: type, key: researchKey })
-
-    const { mutate: togglePin } = trpc.toggleMessagePin.useMutation({
-        onSuccess() {
-            utils.getQuestions.invalidate()
-        },
-        onMutate({ messageId }) {
-            setCurrentlyPinningMessage(messageId)
-        },
-        onSettled() {
-            // Whether there is an error or not, the loading state should stop
-            setCurrentlyPinningMessage(null)
-        }
-    })
+   
+    const { data: messages, isLoading } = trpc.getPinnedMessages.useQuery({ type: type, key: researchKey })  // Automatically gets queried on page load
 
     return (
         <div className='mx-auto max-w-7xl'>

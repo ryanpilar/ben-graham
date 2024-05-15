@@ -1017,7 +1017,7 @@ export const appRouter = router({
 
             const messages = await db.message.findMany({
                 where: {
-                    [filterKey]: key, // Apply the dynamic filter based on type
+                    [filterKey]: key,
                     isPinned: true,
                     kindeId: kindeId,
                 },
@@ -1159,6 +1159,67 @@ export const appRouter = router({
             return updatedNote;
         }),
 
+
+    // FMP STOCK DATA 
+    searchTickers: privateProcedure
+        .input(z.object({
+            searchString: z.string(),
+        })).mutation(
+            async ({ input, ctx }) => {
+
+                const { kindeId } = ctx
+                const { searchString } = input
+
+                console.log('searchstring in endpoint', searchString);
+
+
+                // Ensure the user is authenticated
+                if (!kindeId) {
+                    throw new TRPCError({ code: 'UNAUTHORIZED' })
+                }
+
+
+                const subscriptionPlan = await getUserSubscriptionPlan()
+
+                const controller = new AbortController()        // Create an instance of AbortController
+                const { signal } = controller                   // Extract the 'signal' from the controller
+                const apiKey = 'bU6RdulhBywBZGkuoYmEOiLLlfMiipD8'
+                const limit = 10
+
+                try {
+
+                    // Construct the URL with the search query and API key
+                    let res = await fetch(
+                        `https://financialmodelingprep.com/api/v3/search-ticker?query=${searchString}&limit=${limit}&apikey=${apiKey}`,
+                        // { signal },
+                    );
+
+                    if (!res.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+
+                    let json = await res.json();
+
+                } catch (error: unknown) {                      // Explicitly specifying that error is of type unknown
+                    if (error instanceof Error) {               // Type guard to check if error is an instance of Error
+                        if (error.name === "AbortError") {
+                            console.log("Fetch aborted");
+                        } else {
+                            console.error("There was an error with the fetch operation:", error.message);
+                        }
+                    } else {
+                        // Handle cases where the error is not an instance of Error
+                        console.error("An unexpected error occurred:", error);
+                    }
+                } finally {
+                    
+                    
+                }
+        
+
+    return [{ label: searchString + '-*&', value: 'hua' }, { label: searchString + '-()', value: 'peen' }, { label: searchString + '-%%', value: 'noice' }]
+}),
+
     // STRIPE
     createStripeSession: privateProcedure.mutation(
         async ({ ctx }) => {
@@ -1184,7 +1245,6 @@ export const appRouter = router({
             }
 
             const subscriptionPlan = await getUserSubscriptionPlan()
-
 
             // Check if the user is subscribed and has a Stripe customer ID
             if (subscriptionPlan.isSubscribed && mongoUser.stripeCustomerId) {
@@ -1227,83 +1287,83 @@ export const appRouter = router({
         }
     ),
 
-    // CONTEXT USAGE
-    getContextUsage: privateProcedure
-        .input(z.object({
-            type: z.enum(['project', 'question']), key: z.string()
-        }))
-        .query(async ({ ctx, input }) => {
-            const { kindeId } = ctx;
-            const { type, key } = input;
+        // CONTEXT USAGE
+        getContextUsage: privateProcedure
+            .input(z.object({
+                type: z.enum(['project', 'question']), key: z.string()
+            }))
+            .query(async ({ ctx, input }) => {
+                const { kindeId } = ctx;
+                const { type, key } = input;
 
-            // Make sure the user exists
-            const user = await db.user.findUnique({
-                where: {
-                    id: kindeId,
-                },
-            })
-            if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
+                // Make sure the user exists
+                const user = await db.user.findUnique({
+                    where: {
+                        id: kindeId,
+                    },
+                })
+                if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
 
-            // Retrieve the current user's subscription plan
-            const subscription = await getUserSubscriptionPlan();
+                // Retrieve the current user's subscription plan
+                const subscription = await getUserSubscriptionPlan();
 
-            // Depending on the subscription sub get proper plan details and usage caps
-            let subscriptionDetails = subscription.isSubscribed ? PLANS[1] : PLANS[0]
+                // Depending on the subscription sub get proper plan details and usage caps
+                let subscriptionDetails = subscription.isSubscribed ? PLANS[1] : PLANS[0]
 
-            // Filter for the incoming type and key
-            const fileFieldMapping = {
-                project: 'projectIds',
-                question: 'questionIds'
-            };
-            const fileField = fileFieldMapping[type]
+                // Filter for the incoming type and key
+                const fileFieldMapping = {
+                    project: 'projectIds',
+                    question: 'questionIds'
+                };
+                const fileField = fileFieldMapping[type]
 
-            // Count files linked to the specified project or question
-            const fileCount = await db.file.count({
-                where: {
-                    kindeId: kindeId,
-                    [fileField]: {
-                        has: key
+                // Count files linked to the specified project or question
+                const fileCount = await db.file.count({
+                    where: {
+                        kindeId: kindeId,
+                        [fileField]: {
+                            has: key
+                        }
                     }
+                })
+
+                // Fetch the key's # of previous messages, but consider the the plan's usage cap
+                const prevMessages = await db.message.findMany({
+                    where: { [`${type}Id`]: key },
+                    orderBy: { createdAt: 'asc' },
+                    take: subscription.prevMessagesCap
+                });
+
+                // Formatting is needed b/c it happens during prompt submission and adds tokens, so we do it here too
+                const formattedPrevMessages = prevMessages.map(msg => ({
+                    role: msg.isUserMessage ? 'user' : 'assistant',
+                    content: msg.text,
+                }))
+
+                // Calculate tokens used for previous messages
+                const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);
+
+                const approxVectorStoreTokens = fileCount * 500     // Assuming 500 tokens per page/file
+                const approxCompletionTokens = 4000;                // Another assumption that will change over time
+
+                // Total tokens used
+                const totalTokensUsed = prevMessageTokens + approxVectorStoreTokens + approxCompletionTokens
+
+                // Compute the usage percentage relative to the context window
+                const contextWindowCap = subscriptionDetails.gptModel.contextWindow
+                const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
+
+                const prevMessageUsage = Math.round((prevMessageTokens / contextWindowCap) * 100)
+                const vectorStoreUsage = Math.round((approxVectorStoreTokens / contextWindowCap) * 100)
+                const completionUsage = Math.round((approxCompletionTokens / contextWindowCap) * 100)
+
+                return {
+                    usagePercentage,
+                    prevMessageUsage: prevMessageUsage,
+                    vectorStoreUsage: vectorStoreUsage,
+                    completionUsage: completionUsage,
                 }
             })
-
-            // Fetch the key's # of previous messages, but consider the the plan's usage cap
-            const prevMessages = await db.message.findMany({
-                where: { [`${type}Id`]: key },
-                orderBy: { createdAt: 'asc' },
-                take: subscription.prevMessagesCap
-            });
-
-            // Formatting is needed b/c it happens during prompt submission and adds tokens, so we do it here too
-            const formattedPrevMessages = prevMessages.map(msg => ({
-                role: msg.isUserMessage ? 'user' : 'assistant',
-                content: msg.text,
-            }))
-
-            // Calculate tokens used for previous messages
-            const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);
-
-            const approxVectorStoreTokens = fileCount * 500     // Assuming 500 tokens per page/file
-            const approxCompletionTokens = 4000;                // Another assumption that will change over time
-
-            // Total tokens used
-            const totalTokensUsed = prevMessageTokens + approxVectorStoreTokens + approxCompletionTokens
-
-            // Compute the usage percentage relative to the context window
-            const contextWindowCap = subscriptionDetails.gptModel.contextWindow
-            const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
-
-            const prevMessageUsage = Math.round((prevMessageTokens / contextWindowCap) * 100)
-            const vectorStoreUsage = Math.round((approxVectorStoreTokens / contextWindowCap) * 100)
-            const completionUsage = Math.round((approxCompletionTokens / contextWindowCap) * 100)
-
-            return {
-                usagePercentage,
-                prevMessageUsage: prevMessageUsage,
-                vectorStoreUsage: vectorStoreUsage,
-                completionUsage: completionUsage,
-            }
-        })
 })
 
 export type AppRouter = typeof appRouter

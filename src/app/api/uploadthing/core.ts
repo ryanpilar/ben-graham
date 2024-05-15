@@ -1,12 +1,14 @@
 import { db } from "@/db";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { OpenAIEmbeddings } from "@langchain/openai";
-import { pinecone } from '@/lib/pinecone/core'
-import { PineconeStore } from "@langchain/pinecone";
-import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
-import { getUserSubscriptionPlan } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
+import { pinecone } from '@/lib/pinecone/core'
+import { getUserSubscriptionPlan } from "@/lib/stripe";
+
+import { PineconeStore } from "@langchain/pinecone";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
+import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+
 
 /** ======================================|| Core ||========================================= 
  

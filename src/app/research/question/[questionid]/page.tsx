@@ -1,20 +1,22 @@
 
 import React from 'react'
+
 // Project Imports
 import { db } from '@/db';
+import Notes from '@/components/Notes';
+import Questions from '@/components/Questions';
+import AddQuestion from '@/components/AddQuestion';
+import SplitLayout from '@/components/SplitLayout';
+import ContextUsage from '@/components/ContextUsage';
+import FileDrawer from '@/components/file/FileDrawer';
+import ChatWrapper from '@/components/chat/ChatWrapper';
+import PinnedMessages from '@/components/chat/PinnedMessages';
+import BadgeFileCounter from '@/components/file/BadgeFileCounter';
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import FileDrawer from '@/components/file/FileDrawer';
-import SplitLayout from '@/components/SplitLayout';
-import ContextUsage from '@/components/ContextUsage';
-import BadgeFileCounter from '@/components/file/BadgeFileCounter';
-import Questions from '@/components/Questions';
-import AddQuestion from '@/components/AddQuestion';
-import Notes from '@/components/Notes';
-import ChatWrapper from '@/components/chat/ChatWrapper';
 
 /** ================================|| Research Question - Page  ||=================================== **/
 
@@ -58,7 +60,8 @@ const Question = async ({ params }: PageProps) => {
                     </div>
                 </div>
 
-                <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />
+                <Questions type='question' researchKey={questionid} subscriptionPlan={subscriptionPlan} />                
+                <PinnedMessages type={'question'} researchKey={questionid} />
                 <Notes type='question' researchKey={questionid} />
             </>
         )
