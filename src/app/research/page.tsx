@@ -6,9 +6,9 @@ import { getUserSubscriptionPlan } from '@/lib/stripe'
 
 // 3rd Party Imports
 import { redirect } from 'next/navigation'
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import UsersResearch from '@/components/UsersResearch';
 import AddProjectButton from '@/components/AddProject';
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 /** ================================|| Research Projects - Page ||=================================== **/
 
@@ -18,7 +18,7 @@ const Research = async () => {
     const user = await getUser()
 
     // Redirect users that are not logged in
-    if (!user || !user.id) redirect('/auth-callback?origin=research') // So user can be redirected back to dashboard after auth
+    if (!user || !user.id) redirect('/auth-callback?origin=research') 
 
     const dbUser = await db.user.findFirst({
         where: {
@@ -40,6 +40,7 @@ const Research = async () => {
                 </div>
 
                 <UsersResearch subscriptionPlan={subscriptionPlan} />
+
             </div>
         </>
     );
