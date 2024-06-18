@@ -6,9 +6,11 @@ interface SplitLayoutProps {
     leftChildren: React.ReactNode
     rightChildren: React.ReactNode
 }
-const SplitLayout = ({leftChildren, rightChildren}: SplitLayoutProps) => {
+const SplitLayout = ({ leftChildren, rightChildren }: SplitLayoutProps) => {
     return (
         <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'>
+        {/* <div className='flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]'> */}
+
             <div className='mx-auto w-full max-w-8xl grow lg:flex xl:px-2'>
 
                 {/* LEFT SIDE */}

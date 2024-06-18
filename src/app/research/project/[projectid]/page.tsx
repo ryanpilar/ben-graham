@@ -2,21 +2,22 @@ import React from 'react'
 
 // Project Imports
 import { db } from '@/db';
-import FileDrawer from '@/components/file/FileDrawer';
-import ContextUsage from '@/components/ContextUsage';
-import BadgeFileCounter from '@/components/file/BadgeFileCounter'
+import Notes from '@/components/Notes';
+import Questions from '@/components/Questions';
 import AddQuestion from '@/components/AddQuestion';
-// import ProjectChatWrapper from '@/components/chat/ProjectChatWrapper';
+import SplitLayout from '@/components/SplitLayout';
+import ContextUsage from '@/components/ContextUsage';
+import FileDrawer from '@/components/file/FileDrawer';
+import BadgeFileCounter from '@/components/file/BadgeFileCounter'
+import AdvancedRealTimeWidgetTW from '@/components/chart/AdvancedRealTimeWidgetTW'
+import ChatWrapper from '@/components/chat/ChatWrapper';
+import PinnedMessages from '@/components/chat/PinnedMessages';
+
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import PinnedMessages from '@/components/chat/PinnedMessages';
-import Notes from '@/components/Notes';
-import SplitLayout from '@/components/SplitLayout';
-import Questions from '@/components/Questions';
-import ChatWrapper from '@/components/chat/ChatWrapper';
 
 /** ================================|| Research Project - Page ||=================================== **/
 
@@ -59,6 +60,7 @@ const Project = async ({ params }: PageProps) => {
                     <AddQuestion type='project' researchKey={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
                 </div>
             </div>
+            <AdvancedRealTimeWidgetTW  symbol={project.symbol} exchange={project.exchange} />
             <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
             <PinnedMessages type={'project'} researchKey={projectid} />
             <Notes type='project' researchKey={projectid} />

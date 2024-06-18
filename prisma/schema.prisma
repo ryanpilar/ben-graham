@@ -75,6 +75,8 @@ model Message {
 model Project {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId
   name      String
+  symbol    String
+  exchange  String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   kindeId   String
@@ -130,7 +132,7 @@ model QueryCost {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   kindeId    String
   messageId  String?     @db.ObjectId
-  fileId     String?     
+  fileId     String?
   questionId String?     @db.ObjectId
   projectId  String?     @db.ObjectId
   noteId     String?     @db.ObjectId

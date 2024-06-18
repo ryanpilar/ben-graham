@@ -648,7 +648,7 @@ export const appRouter = router({
             }
         }),
     addProject: privateProcedure
-        .input(z.object({ name: z.string() }))
+        .input(z.object({ name: z.string(), symbol: z.string(), exchange: z.string() }))
         .mutation(async ({ ctx, input }) => {
             const { kindeId } = ctx;
             if (!kindeId) throw new TRPCError({ code: 'UNAUTHORIZED' });
@@ -656,11 +656,13 @@ export const appRouter = router({
             const project = await db.project.create({
                 data: {
                     name: input.name,
+                    symbol: input.symbol,
+                    exchange: input.exchange,
                     kindeId,
                 },
             });
 
-            const note = await db.note.create({
+            await db.note.create({
                 data: {
                     name: 'main note',
                     kindeId,
@@ -713,12 +715,12 @@ export const appRouter = router({
                 });
             }
 
-            // Now delete the question
+            // Delete the questions
             await db.question.deleteMany({
                 where: { projectId: projectId },
             });
 
-            // Delete all messages 
+            // Delete all project messages 
             await db.message.deleteMany({
                 where: { projectId: projectId },
             });
@@ -771,7 +773,9 @@ export const appRouter = router({
                         kindeId
                     },
                     select: {
-                        name: true
+                        name: true,
+                        symbol: true,
+                        exchange: true
                     }
                 });
                 if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
@@ -889,27 +893,48 @@ export const appRouter = router({
             const { questionId } = input;
 
             // Verify the question belongs to the current user before deletion
-            const question = await db.question.findFirst({
+            const parentQuestion = await db.question.findFirst({
                 where: {
                     id: questionId,
                     kindeId: kindeId,
                 },
             });
 
-            if (!question) throw new TRPCError({ code: 'NOT_FOUND', message: 'Question not found or you do not have permission to delete this question.' });
+            if (!parentQuestion) throw new TRPCError({ code: 'NOT_FOUND', message: 'Question not found or you do not have permission to delete this question.' });
 
+            // Find all questions associated with the parent question
+            const questions = await db.question.findMany({
+                where: { parentQuestionId: questionId },
+            });
+
+            // Each question being deleted also needs its notes & messages deleted
+            for (const question of questions) {
+                await db.message.deleteMany({
+                    where: { questionId: question.id },
+                });
+                await db.note.deleteMany({
+                    where: { questionId: question.id },
+                });
+            }
+
+            // Delete all questions shelved under the parent question
+            await db.question.deleteMany({
+                where: { parentQuestionId: questionId },
+            });
+
+            // Delete all messages associated with the parent question
             await Promise.all([
                 db.message.deleteMany({
                     where: { questionId: questionId },
                 })
             ])
 
-            // Delete all notes associated with the project
+            // Delete all notes associated with the parent question
             await db.note.deleteMany({
                 where: { questionId: questionId },
             });
 
-            // Delete the question and return the deleted question details
+            // Delete the parent question and return the deleted question details
             return await db.question.delete({
                 where: { id: questionId },
             });
@@ -1212,13 +1237,13 @@ export const appRouter = router({
                         console.error("An unexpected error occurred:", error);
                     }
                 } finally {
-                    
-                    
-                }
-        
 
-    return [{ label: searchString + '-*&', value: 'hua' }, { label: searchString + '-()', value: 'peen' }, { label: searchString + '-%%', value: 'noice' }]
-}),
+
+                }
+
+
+                return [{ label: searchString + '-*&', value: 'hua' }, { label: searchString + '-()', value: 'peen' }, { label: searchString + '-%%', value: 'noice' }]
+            }),
 
     // STRIPE
     createStripeSession: privateProcedure.mutation(
@@ -1287,83 +1312,83 @@ export const appRouter = router({
         }
     ),
 
-        // CONTEXT USAGE
-        getContextUsage: privateProcedure
-            .input(z.object({
-                type: z.enum(['project', 'question']), key: z.string()
-            }))
-            .query(async ({ ctx, input }) => {
-                const { kindeId } = ctx;
-                const { type, key } = input;
+    // CONTEXT USAGE
+    getContextUsage: privateProcedure
+        .input(z.object({
+            type: z.enum(['project', 'question']), key: z.string()
+        }))
+        .query(async ({ ctx, input }) => {
+            const { kindeId } = ctx;
+            const { type, key } = input;
 
-                // Make sure the user exists
-                const user = await db.user.findUnique({
-                    where: {
-                        id: kindeId,
-                    },
-                })
-                if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
+            // Make sure the user exists
+            const user = await db.user.findUnique({
+                where: {
+                    id: kindeId,
+                },
+            })
+            if (!user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found or you do not have permission to count TikTokens.' });
 
-                // Retrieve the current user's subscription plan
-                const subscription = await getUserSubscriptionPlan();
+            // Retrieve the current user's subscription plan
+            const subscription = await getUserSubscriptionPlan();
 
-                // Depending on the subscription sub get proper plan details and usage caps
-                let subscriptionDetails = subscription.isSubscribed ? PLANS[1] : PLANS[0]
+            // Depending on the subscription sub get proper plan details and usage caps
+            let subscriptionDetails = subscription.isSubscribed ? PLANS[1] : PLANS[0]
 
-                // Filter for the incoming type and key
-                const fileFieldMapping = {
-                    project: 'projectIds',
-                    question: 'questionIds'
-                };
-                const fileField = fileFieldMapping[type]
+            // Filter for the incoming type and key
+            const fileFieldMapping = {
+                project: 'projectIds',
+                question: 'questionIds'
+            };
+            const fileField = fileFieldMapping[type]
 
-                // Count files linked to the specified project or question
-                const fileCount = await db.file.count({
-                    where: {
-                        kindeId: kindeId,
-                        [fileField]: {
-                            has: key
-                        }
+            // Count files linked to the specified project or question
+            const fileCount = await db.file.count({
+                where: {
+                    kindeId: kindeId,
+                    [fileField]: {
+                        has: key
                     }
-                })
-
-                // Fetch the key's # of previous messages, but consider the the plan's usage cap
-                const prevMessages = await db.message.findMany({
-                    where: { [`${type}Id`]: key },
-                    orderBy: { createdAt: 'asc' },
-                    take: subscription.prevMessagesCap
-                });
-
-                // Formatting is needed b/c it happens during prompt submission and adds tokens, so we do it here too
-                const formattedPrevMessages = prevMessages.map(msg => ({
-                    role: msg.isUserMessage ? 'user' : 'assistant',
-                    content: msg.text,
-                }))
-
-                // Calculate tokens used for previous messages
-                const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);
-
-                const approxVectorStoreTokens = fileCount * 500     // Assuming 500 tokens per page/file
-                const approxCompletionTokens = 4000;                // Another assumption that will change over time
-
-                // Total tokens used
-                const totalTokensUsed = prevMessageTokens + approxVectorStoreTokens + approxCompletionTokens
-
-                // Compute the usage percentage relative to the context window
-                const contextWindowCap = subscriptionDetails.gptModel.contextWindow
-                const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
-
-                const prevMessageUsage = Math.round((prevMessageTokens / contextWindowCap) * 100)
-                const vectorStoreUsage = Math.round((approxVectorStoreTokens / contextWindowCap) * 100)
-                const completionUsage = Math.round((approxCompletionTokens / contextWindowCap) * 100)
-
-                return {
-                    usagePercentage,
-                    prevMessageUsage: prevMessageUsage,
-                    vectorStoreUsage: vectorStoreUsage,
-                    completionUsage: completionUsage,
                 }
             })
+
+            // Fetch the key's # of previous messages, but consider the the plan's usage cap
+            const prevMessages = await db.message.findMany({
+                where: { [`${type}Id`]: key },
+                orderBy: { createdAt: 'asc' },
+                take: subscription.prevMessagesCap
+            });
+
+            // Formatting is needed b/c it happens during prompt submission and adds tokens, so we do it here too
+            const formattedPrevMessages = prevMessages.map(msg => ({
+                role: msg.isUserMessage ? 'user' : 'assistant',
+                content: msg.text,
+            }))
+
+            // Calculate tokens used for previous messages
+            const prevMessageTokens = countMessageTokens(formattedPrevMessages, subscriptionDetails.gptModel.extraTokenCosts);
+
+            const approxVectorStoreTokens = fileCount * 500     // Assuming 500 tokens per page/file
+            const approxCompletionTokens = 4000;                // Another assumption that will change over time
+
+            // Total tokens used
+            const totalTokensUsed = prevMessageTokens + approxVectorStoreTokens + approxCompletionTokens
+
+            // Compute the usage percentage relative to the context window
+            const contextWindowCap = subscriptionDetails.gptModel.contextWindow
+            const usagePercentage = Math.round((totalTokensUsed / contextWindowCap) * 100);
+
+            const prevMessageUsage = Math.round((prevMessageTokens / contextWindowCap) * 100)
+            const vectorStoreUsage = Math.round((approxVectorStoreTokens / contextWindowCap) * 100)
+            const completionUsage = Math.round((approxCompletionTokens / contextWindowCap) * 100)
+
+            return {
+                usagePercentage,
+                prevMessageUsage: prevMessageUsage,
+                vectorStoreUsage: vectorStoreUsage,
+                completionUsage: completionUsage,
+            }
+        })
 })
 
 export type AppRouter = typeof appRouter

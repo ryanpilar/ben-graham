@@ -24,7 +24,13 @@ const defaultTickers: SearchTicker[] = [{
     exchangeShortName: '',
 }];
 
-export default function SearchTickers({ setProjectName }: { setProjectName: (name: string) => void }) {
+interface SearchTickersProps {
+    setProjectName: (name: string) => void,
+    setProjectSymbol: (symbol: string) => void
+    setProjectExchange: (exchange: string) => void
+}
+
+export default function SearchTickers({ setProjectName, setProjectSymbol, setProjectExchange }: SearchTickersProps) {
     const fetchLimit = 25;
     const apiKey = process.env.NEXT_PUBLIC_FMP_API_KEY;
 
@@ -52,9 +58,10 @@ export default function SearchTickers({ setProjectName }: { setProjectName: (nam
                     items: json,
                 };
             } catch (error) {
+
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     console.warn('Request aborted:', error);
-                    return { items: [] }; // Avoid showing toast for aborted requests
+                    return { items: [] };
                 } else if (error instanceof Error) {
                     console.error('Failed to load items:', error);
                     toast({
@@ -78,15 +85,17 @@ export default function SearchTickers({ setProjectName }: { setProjectName: (nam
     }, [list.items]);
 
     useEffect(() => {
-        console.log('Current items:', items.map(item => item.symbol));
+        console.log('Current items:', items.map(item => item));
     }, [items]);
 
     const onSelectionChange = (key: Key | null) => {
         const selectedItem = items.find((option) => option.symbol === key);
         if (selectedItem) {
             setSelectedKey(key);
-            setInputValue(selectedItem.symbol);
-            setProjectName(selectedItem.symbol);
+            setInputValue(selectedItem.symbol)
+            setProjectName(`${selectedItem.name}`)
+            setProjectSymbol(`${selectedItem.symbol}`)
+            setProjectExchange(`${selectedItem.exchangeShortName}`)
         }
     };
 
@@ -97,30 +106,48 @@ export default function SearchTickers({ setProjectName }: { setProjectName: (nam
 
     return (
         <Autocomplete
-            className="max-w-xs"
-            inputValue={inputValue}
+            autoFocus
             items={items}
-            label="Search a company"
-            placeholder="Type to search..."
+            inputValue={inputValue}
             selectedKey={selectedKey}
-            variant="bordered"
             onInputChange={onInputChange}
             onSelectionChange={onSelectionChange}
-            isLoading={list.isLoading}
-            showScrollIndicators // Show scroll indicators
-            scrollShadowProps={{ style: { maxHeight: '200px' } }} // Set a fixed height for the scroll area
-            listboxProps={{ style: { maxHeight: '200px', overflowY: 'auto' } }} // Ensure the listbox can scroll
+            showScrollIndicators
             allowsCustomValue={true}
+            isLoading={list.isLoading}
+
+            label="Search a company"
+            placeholder="Type to search..."
+            aria-label="Select a company ticker"
+
+            size='md'
+            variant="bordered"
+            radius="none"
+            className="max-w-xs"
+            classNames={{
+                base: "data-[focus-visible=true]:ring-primary",
+                listboxWrapper: "max-h-[320px]",
+                selectorButton: "text-default-500"
+            }}
+            inputProps={{
+                classNames: {
+                    input: "ml-1",
+                },
+            }}
+            scrollShadowProps={{ style: { maxHeight: '200px' } }}
+            listboxProps={{ style: { maxHeight: '200px', overflowY: 'auto' } }}
+
         >
             {(item) => (
                 <AutocompleteItem
                     key={item.symbol}
                     textValue={item.symbol}
-                    className="capitalize"
+
                 >
                     {item.name} {item.symbol}
                 </AutocompleteItem>
             )}
+
         </Autocomplete>
     );
 }

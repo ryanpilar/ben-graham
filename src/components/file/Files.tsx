@@ -1,19 +1,19 @@
 "use client"
 
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 // Project Imports
-import { Button } from '../ui/button';
-import { trpc } from '@/app/_trpc/client';
+import { Button } from '../ui/button'
+import { trpc } from '@/app/_trpc/client'
+import { useToast } from '../ui/use-toast'
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 
 // 3rd Party Imports
 import Link from 'next/link';
 import { format } from 'date-fns'
+import { useParams } from 'next/navigation'
 import Skeleton from "react-loading-skeleton"
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
-
-import { useParams } from 'next/navigation';
+import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react'
 
 /** =================================|| Files ||==================================== **/
 
@@ -24,6 +24,10 @@ interface FilesProps {
 const Files = ({ type }: FilesProps) => {
 
     const params = useParams()
+    const { toast } = useToast()
+    const utils = trpc.useUtils()    
+    
+    const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
 
     const getKey = () => {
         if (type === 'project' && params.projectid) {
@@ -34,21 +38,28 @@ const Files = ({ type }: FilesProps) => {
         return '#'; 
     };
 
-    // We need to know exactly what file is currently being deleted
-    const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(null)
-
-    // If we invalidate the data, we force an automatic refresh
-    const utils = trpc.useUtils()          
-
-    const { data: files, isLoading } = trpc.getFiles.useQuery({type: type, key:getKey()})
+    const { data: files, isLoading } = trpc.getFiles.useQuery({type: type, key: getKey()})
 
     const { mutate: deleteFile } = trpc.deleteFile.useMutation({
         onSuccess() {
             utils.getFileCount.invalidate()
-            utils.getUserFiles.invalidate()
+            utils.getFiles.invalidate()
+
+            toast({
+                title: "File Deleted successfully",
+                description: "You have added a new project.",
+                variant: "default",
+            });                        
         },
-        onMutate({ id }) {    // Callback right away when the button is clicked
+        onMutate({ id }) {    
             setCurrentlyDeletingFile(id)
+        },
+        onError() {
+            toast({
+                title: "File Deletion unsuccessful",
+                description: "Something went wrong when trying to delete this file, please try again.",
+                variant: "destructive",
+            })
         },
         onSettled() {
             // Whether there is an error or not, the loading state should stop
@@ -58,8 +69,6 @@ const Files = ({ type }: FilesProps) => {
 
     return (
         <>
-
-            {/* DISPLAY ALL USER FILES */}
             {files && files?.length !== 0 ? (
                 <ul className='mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3'>
                     {files

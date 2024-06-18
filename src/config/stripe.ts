@@ -1,6 +1,6 @@
 import { GPT_MODELS } from "./open-ai";
 
-// Types taken from uploadthing node modules
+// ** Types taken from uploadthing node modules
 type PowOf2 = 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024;
 type SizeUnit = "B" | "KB" | "MB" | "GB";
 type FileSize = `${PowOf2}${SizeUnit}`;

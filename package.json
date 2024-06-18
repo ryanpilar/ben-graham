@@ -111,6 +111,7 @@
     "react-resize-detector": "^10.0.1",
     "react-syntax-highlighter": "^15.5.0",
     "react-textarea-autosize": "^8.5.3",
+    "react-ts-tradingview-widgets": "^1.2.4",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "simplebar-react": "^3.2.4",

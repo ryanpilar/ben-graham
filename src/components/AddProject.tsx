@@ -32,17 +32,17 @@ const AddProjectButton = ({ isSubscribed, }: { isSubscribed: boolean }) => {
                 isOpen={isOpen}
                 onClose={onClose}
                 classNames={{
-                    body: "p-4",
+                    body: "pb-4",
                     backdrop: "bg-black bg-opacity-65",
-                    closeButton: "absolute top-4 right-4",
-                    base: "max-w-xl p-4 rounded-lg bg-white dark:bg-gray-800",
-                    header: "border-b border-gray-200 dark:border-gray-700 p-4",
-                    footer: "border-t border-gray-200 dark:border-gray-700 p-4",
+                    // closeButton: "absolute top-4 right-4 m-0",
+                    base: "max-w-xl rounded-lg bg-white dark:bg-gray-800",
+                    header: "p-2",
+                    footer: "bg-transparent py-6",
                 }}
             >
                 <ModalContent>
                     <>
-                        <ModalHeader className="flex flex-col gap-1">Add New Research Project</ModalHeader>
+                        <ModalHeader className="flex flex-col"></ModalHeader>
                         <ModalBody>
                             <AddProject isSubscribed={isSubscribed} onClose={onClose} />
                         </ModalBody>
@@ -57,7 +57,11 @@ const AddProjectButton = ({ isSubscribed, }: { isSubscribed: boolean }) => {
 
 const AddProject = ({ isSubscribed, onClose }: { isSubscribed: boolean; onClose: () => void }) => {
 
-    const projectSchema = z.object({ name: z.string().min(1, "Project name is required") });
+    const projectSchema = z.object({
+        name: z.string().min(1, "Project name is required"),
+        symbol: z.string().min(1, "Project symbol is required"),
+        exchange: z.string().min(1, "Project exchange is required")
+    });
     type ProjectFormData = z.infer<typeof projectSchema>;
 
     const router = useRouter()
@@ -84,6 +88,12 @@ const AddProject = ({ isSubscribed, onClose }: { isSubscribed: boolean; onClose:
 
     const setProjectName = (name: string) => {
         setValue("name", name);
+    }
+    const setProjectSymbol = (symbol: string) => {
+        setValue("symbol", symbol);
+    }
+    const setProjectExchange = (exchange: string) => {
+        setValue("exchange", exchange);
     }
 
     // TRPC client side endpoints
@@ -122,17 +132,18 @@ const AddProject = ({ isSubscribed, onClose }: { isSubscribed: boolean; onClose:
                         <p className="text-xs text-zinc-500">Limit: {renderPlanLimit()}</p>
                     </div>
 
-                    <SearchTickers setProjectName={setProjectName} />
+                    <SearchTickers setProjectName={setProjectName} setProjectSymbol={setProjectSymbol} setProjectExchange={setProjectExchange} />
 
                     {errors.name && <p className="text-red-500 text-xs pl-3.5 py-1">{errors.name.message}</p>}
+
+                    <ModalFooter className='bg-transparent'>
+                        <Button type='button' onClick={onClose}>Close</Button>
+                        <Button type="submit">Add Project</Button>
+                    </ModalFooter>
+
                 </div>
             </div>
-            <ModalFooter>
-                <Button onClick={onClose}>Close</Button>
-                <Button type="submit">Add Project</Button>
-            </ModalFooter>
         </form>
-
     );
 };
 

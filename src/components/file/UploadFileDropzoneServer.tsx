@@ -14,12 +14,6 @@ export interface UploadFileUploadServer {
 const UploadFileDropzoneServer = async ({ isSubscribed }: UploadFileUploadServer) => {
 
     const userProjects = await trpcServer.getUserProjects()
-    // const userQuestions = await trpcServer.getUserQuestions()
-
-    const userData = {
-        userProjects,
-        userQuestions: '',
-    }
 
     return (
         <Suspense fallback={<Skeleton count={2} />}>
