@@ -18,6 +18,7 @@ import { getUserSubscriptionPlan } from '@/lib/stripe';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import { SheetMenu } from '@/components/sheet-menu';
 
 /** ================================|| Research Project - Page ||=================================== **/
 
@@ -48,7 +49,11 @@ const Project = async ({ params }: PageProps) => {
 
     const ProjectContents = () => {
         return (<>
-            <div className='lg:mt-4 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
+            <div className='
+                flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 
+                sm:flex-row sm:items-center sm:gap-0
+                border-b border-gray-200 pt-2 pb-5 lg:mt-1 
+                '>
                 <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
                     Project: <span className='text-xl'>{project.name}</span>
                 </h1>
@@ -58,6 +63,7 @@ const Project = async ({ params }: PageProps) => {
                         <FileDrawer type={'project'} isSubscribed={subscriptionPlan.isSubscribed} />
                     </BadgeFileCounter>
                     <AddQuestion type='project' researchKey={projectid} isSubscribed={subscriptionPlan.isSubscribed} />
+                    <SheetMenu chatComponents={<ChatWrapper type='project' researchKey={project.id} />} />
                 </div>
             </div>
             <AdvancedRealTimeWidgetTW  symbol={project.symbol} exchange={project.exchange} />

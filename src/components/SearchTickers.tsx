@@ -31,6 +31,7 @@ interface SearchTickersProps {
 }
 
 export default function SearchTickers({ setProjectName, setProjectSymbol, setProjectExchange }: SearchTickersProps) {
+
     const fetchLimit = 25;
     const apiKey = process.env.NEXT_PUBLIC_FMP_API_KEY;
 
@@ -80,14 +81,6 @@ export default function SearchTickers({ setProjectName, setProjectSymbol, setPro
         getKey: (item: SearchTicker) => item.symbol,
     });
 
-    useEffect(() => {
-        setItems(list.items);
-    }, [list.items]);
-
-    useEffect(() => {
-        console.log('Current items:', items.map(item => item));
-    }, [items]);
-
     const onSelectionChange = (key: Key | null) => {
         const selectedItem = items.find((option) => option.symbol === key);
         if (selectedItem) {
@@ -100,9 +93,22 @@ export default function SearchTickers({ setProjectName, setProjectSymbol, setPro
     };
 
     const onInputChange = (inputValue: string) => {
+
+        console.log('inputValue', inputValue);
+        
         list.setFilterText(inputValue);
         setInputValue(inputValue);
     };
+
+
+    useEffect(() => {
+        setItems(list.items);
+    }, [list.items]);
+
+    useEffect(() => {
+        console.log('Current items:', items.map(item => item));
+    }, [items]);
+
 
     return (
         <Autocomplete
@@ -115,7 +121,6 @@ export default function SearchTickers({ setProjectName, setProjectSymbol, setPro
             showScrollIndicators
             allowsCustomValue={true}
             isLoading={list.isLoading}
-
             label="Search a company"
             placeholder="Type to search..."
             aria-label="Select a company ticker"
@@ -136,17 +141,17 @@ export default function SearchTickers({ setProjectName, setProjectSymbol, setPro
             }}
             scrollShadowProps={{ style: { maxHeight: '200px' } }}
             listboxProps={{ style: { maxHeight: '200px', overflowY: 'auto' } }}
-
+            // onClick={(e) => (e.target as HTMLInputElement).focus()}
         >
-            {(item) => (
+
+            {items.map( (item) => (
                 <AutocompleteItem
                     key={item.symbol}
                     textValue={item.symbol}
-
                 >
                     {item.name} {item.symbol}
                 </AutocompleteItem>
-            )}
+            ))}
 
         </Autocomplete>
     );

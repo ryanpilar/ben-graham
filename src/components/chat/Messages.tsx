@@ -43,13 +43,15 @@ const Messages = ({ type, researchKey }: MessagesProps) => {
       key: researchKey,
       limit: INFINITE_QUERY_LIMIT,
     },
+
     // By using getNextPageParam we get access to the 'lastPage'. And trpc knows where to start fetching
     {
       getNextPageParam: (lastPage) => lastPage?.nextCursor,
       keepPreviousData: true,
     }
   )
-  // We could use a regular 'map' for this, our returned type would be array array, or [][]. So we flatten the map to get one array
+
+  // We could use a regular 'map' for this, but our returned type would be array array, or [][]. So we flatten the map to get one array
   const messages = data?.pages.flatMap((page) => page.messages)
 
   // Regarding format, this needs to match our other messages too
@@ -133,7 +135,7 @@ const Messages = ({ type, researchKey }: MessagesProps) => {
 
   return (
     <div className='
-      flex max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 flex-col-reverse gap-4 p-3 
+      flex justify max-h-full xs:max-h-[calc(100vh-8.2rem)] md:max-h-[calc(100vh-9.7rem)] lg:max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200  flex-col-reverse gap-4 p-3 
       overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter 
       scrollbar-w-2 scrolling-touch'
     >

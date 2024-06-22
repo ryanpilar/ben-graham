@@ -27,7 +27,7 @@ const AdvancedRealTimeWidgetTW = ({ symbol, exchange }: AdvancedRealTimeWidgetTW
                     hide_legend={true}
                     hide_top_toolbar={false}
                     hide_side_toolbar={false}
-                    allow_symbol_change={false}
+                    allow_symbol_change={true}
                     details={true}
                     hotlist={false}
                 />
