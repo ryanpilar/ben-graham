@@ -2,16 +2,12 @@ import React from 'react'
 
 // Project Imports
 import { db } from '@/db';
-import Notes from '@/components/Notes';
-import Questions from '@/components/Questions';
 import AddQuestion from '@/components/AddQuestion';
 import SplitLayout from '@/components/SplitLayout';
 import ContextUsage from '@/components/ContextUsage';
 import FileDrawer from '@/components/file/FileDrawer';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter'
-import AdvancedRealTimeWidgetTV from '@/components/trading-view/AdvancedRealTimeWidgetTV'
 import ChatWrapper from '@/components/chat/ChatWrapper';
-import PinnedMessages from '@/components/chat/PinnedMessages';
 
 import { getUserSubscriptionPlan } from '@/lib/stripe';
 
@@ -55,7 +51,8 @@ const Project = async ({ params }: PageProps) => {
             <div className='
                 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 
                 sm:flex-row sm:items-center sm:gap-0 sm:pt-3
-                '>
+                '
+            >
                 <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
                     Project: <span className='text-xl'>{project.name}</span>
                 </h1>
@@ -72,10 +69,6 @@ const Project = async ({ params }: PageProps) => {
             <CompanyDetails researchKey={projectid} subscriptionPlan={subscriptionPlan} symbol={project.symbol} exchange={project.exchange} type={'project'} />
             <CompanyDetails2 researchKey={projectid} subscriptionPlan={subscriptionPlan} symbol={project.symbol} exchange={project.exchange} type={'project'} />
 
-            {/* <AdvancedRealTimeWidgetTW  symbol={project.symbol} exchange={project.exchange} /> */}
-            {/* <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
-            <PinnedMessages type={'project'} researchKey={projectid} />
-            <Notes type='project' researchKey={projectid} /> */}
         </>)
     }
 

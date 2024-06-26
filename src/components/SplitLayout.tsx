@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { Footer } from "@/components/Footer";
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/components/Sidebar";
 import { useStore } from "@/hooks/useStore";
 import { useSidebarToggle } from "@/hooks/useSidebarToggle";
 import { SheetMenu } from "@/components/SheetMenu";
