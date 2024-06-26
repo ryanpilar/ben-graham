@@ -9,7 +9,7 @@ interface AdvancedRealTimeWidgetTWProps {
     symbol: string
     exchange: string
 }
-const AdvancedRealTimeWidgetTW = ({ symbol, exchange }: AdvancedRealTimeWidgetTWProps) => {
+const AdvancedRealTimeWidgetTV = ({ symbol, exchange }: AdvancedRealTimeWidgetTWProps) => {
 
     return (
         <div className="flex flex-col justify-start w-full h-full min-h-[600px]">
@@ -23,17 +23,19 @@ const AdvancedRealTimeWidgetTW = ({ symbol, exchange }: AdvancedRealTimeWidgetTW
                     timezone="exchange"
                     container_id="tradingview_widget"
                     symbol={`${exchange}:${symbol}`}
-                    save_image={false}
                     hide_legend={true}
                     hide_top_toolbar={false}
                     hide_side_toolbar={false}
                     allow_symbol_change={true}
-                    details={true}
+                    // details={true}
                     hotlist={false}
+                    show_popup_button={false}
+                    enable_publishing={true}
+                    save_image={true}
                 />
             </div>
         </div>
     );
 };
 
-export default AdvancedRealTimeWidgetTW;
+export default AdvancedRealTimeWidgetTV;

@@ -18,31 +18,33 @@ import { Ghost, Loader2, MessageSquare, Plus, Trash } from 'lucide-react';
 interface QuestionProps {
     subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>
     researchKey: string
-    type: 'project' | 'question'     
-  }
-  
-const Questions = ({subscriptionPlan, researchKey, type}: QuestionProps) => {
+    type: 'project' | 'question'
+}
+
+const Questions = ({ subscriptionPlan, researchKey, type }: QuestionProps) => {
 
     // We need to know exactly what file is currently being deleted
     const [currentlyDeletingQuestion, setCurrentlyDeletingQuestion] = useState<string | null>(null)
 
-    const utils = trpc.useUtils()          
+    const utils = trpc.useUtils()
 
     // Automatically gets queried on page load
-    const { data: questions, isLoading } = trpc.getQuestions.useQuery({ type: type, key: researchKey })     
+    const { data: questions, isLoading } = trpc.getQuestions.useQuery({ type: type, key: researchKey })
 
-    const { mutate: deleteQuestion } = trpc.deleteQuestion.useMutation({       
+    const { mutate: deleteQuestion } = trpc.deleteQuestion.useMutation({
         onSuccess() {
             // utils.getProjectQuestions.invalidate()
             utils.getQuestions.invalidate()
 
         },
-        onMutate({ questionId }) {    
-            setCurrentlyDeletingQuestion(researchKey)
+        onMutate({ questionId }) {
+            console.log('onMutate questionId', questionId)
+
+            setCurrentlyDeletingQuestion(questionId)
         },
         onSettled() {
             // Whether there is an error or not, the loading state should stop
-            setCurrentlyDeletingQuestion(null) 
+            setCurrentlyDeletingQuestion(null)
         }
     })
 
@@ -57,7 +59,7 @@ const Questions = ({subscriptionPlan, researchKey, type}: QuestionProps) => {
             {/* Display all research questions */}
             {questions && questions?.length !== 0 ? (
                 <ul className='mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3'>
-                    {questions                        
+                    {questions
                         .map((question) => (
                             <li
                                 key={question.id}
@@ -78,6 +80,7 @@ const Questions = ({subscriptionPlan, researchKey, type}: QuestionProps) => {
                                 </Link>
 
                                 <div className='px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500'>
+
                                     <div className='flex items-center gap-2'>
                                         <Plus className='h-4 w-4' />
                                         {format(
@@ -91,18 +94,21 @@ const Questions = ({subscriptionPlan, researchKey, type}: QuestionProps) => {
                                     </div>
 
                                     <Button
-                                        onClick={() =>
+                                        onClick={() => {
+                                            console.log('onClick question.id', question.id)
                                             deleteQuestion({ questionId: question.id })
-                                        }
+                                        }}
                                         size='sm'
                                         className='w-full'
-                                        variant='destructive'>
+                                        variant='destructive'
+                                    >
                                         {currentlyDeletingQuestion === question.id ? (
                                             <Loader2 className='h-4 w-4 animate-spin' />
                                         ) : (
                                             <Trash className='h-4 w-4' />
                                         )}
                                     </Button>
+
                                 </div>
 
                             </li>

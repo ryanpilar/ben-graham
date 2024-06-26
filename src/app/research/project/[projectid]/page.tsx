@@ -9,7 +9,7 @@ import SplitLayout from '@/components/SplitLayout';
 import ContextUsage from '@/components/ContextUsage';
 import FileDrawer from '@/components/file/FileDrawer';
 import BadgeFileCounter from '@/components/file/BadgeFileCounter'
-import AdvancedRealTimeWidgetTW from '@/components/chart/AdvancedRealTimeWidgetTW'
+import AdvancedRealTimeWidgetTV from '@/components/trading-view/AdvancedRealTimeWidgetTV'
 import ChatWrapper from '@/components/chat/ChatWrapper';
 import PinnedMessages from '@/components/chat/PinnedMessages';
 
@@ -18,7 +18,10 @@ import { getUserSubscriptionPlan } from '@/lib/stripe';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { SheetMenu } from '@/components/sheet-menu';
+import { SheetMenu } from '@/components/SheetMenu';
+import CompanyDetails from '@/components/CompanyDetails';
+import CompanyDetails2 from '@/components/CompanyDetails2';
+
 
 /** ================================|| Research Project - Page ||=================================== **/
 
@@ -51,8 +54,7 @@ const Project = async ({ params }: PageProps) => {
         return (<>
             <div className='
                 flex flex-col flex-wrap xs:flex-nowrap items-start justify-between gap-4 
-                sm:flex-row sm:items-center sm:gap-0
-                border-b border-gray-200 pt-2 pb-5 lg:mt-1 
+                sm:flex-row sm:items-center sm:gap-0 sm:pt-3
                 '>
                 <h1 className='mb-3 font-bold text-2xl lg:text-5xl text-gray-900'>
                     Project: <span className='text-xl'>{project.name}</span>
@@ -66,10 +68,14 @@ const Project = async ({ params }: PageProps) => {
                     <SheetMenu chatComponents={<ChatWrapper type='project' researchKey={project.id} />} />
                 </div>
             </div>
-            <AdvancedRealTimeWidgetTW  symbol={project.symbol} exchange={project.exchange} />
-            <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
+
+            <CompanyDetails researchKey={projectid} subscriptionPlan={subscriptionPlan} symbol={project.symbol} exchange={project.exchange} type={'project'} />
+            <CompanyDetails2 researchKey={projectid} subscriptionPlan={subscriptionPlan} symbol={project.symbol} exchange={project.exchange} type={'project'} />
+
+            {/* <AdvancedRealTimeWidgetTW  symbol={project.symbol} exchange={project.exchange} /> */}
+            {/* <Questions type='project' researchKey={projectid} subscriptionPlan={subscriptionPlan} />
             <PinnedMessages type={'project'} researchKey={projectid} />
-            <Notes type='project' researchKey={projectid} />
+            <Notes type='project' researchKey={projectid} /> */}
         </>)
     }
 

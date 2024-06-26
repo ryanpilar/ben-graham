@@ -2,11 +2,11 @@
 
 import React from 'react'
 
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/Footer";
 import { Sidebar } from "@/components/sidebar";
-import { useStore } from "@/hooks/use-store";
-import { useSidebarToggle } from "@/hooks/use-sidebar-toggle";
-import { SheetMenu } from "@/components/sheet-menu";
+import { useStore } from "@/hooks/useStore";
+import { useSidebarToggle } from "@/hooks/useSidebarToggle";
+import { SheetMenu } from "@/components/SheetMenu";
 import { cn } from '@/lib/utils';
 
 /** ================================|| Split Layout ||=================================== **/
@@ -63,12 +63,12 @@ const SplitLayout = ({ leftChildren, rightChildren }: SplitLayoutProps) => {
 
             <Sidebar chatComponents={rightChildren} />
 
-            <footer className={cn(
+            {/* <footer className={cn(
                 "transition-[margin-right] ease-in-out duration-300",
                 sidebar?.isOpen === false ? "lg:mr-[0px]" : "lg:w-[50%]")}
             >
                 <Footer />
-            </footer>
+            </footer> */}
 
         </>
 

@@ -1252,7 +1252,7 @@ export const appRouter = router({
             const { kindeId } = ctx
 
             // Define the billing URL for redirecting users. 
-            const billingUrl = absoluteUrl('/dashboard/billing')  // absoluteUrl() b/c we are server side, and not able to use relative urls
+            const billingUrl = absoluteUrl('/billing')  // absoluteUrl() b/c we are server side, and not able to use relative urls
 
             // Ensure the user is authenticated
             if (!kindeId) {

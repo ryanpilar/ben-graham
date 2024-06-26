@@ -17,6 +17,7 @@ import { getUserSubscriptionPlan } from '@/lib/stripe';
 // 3rd Party Imports
 import { notFound, redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { SheetMenu } from '@/components/SheetMenu';
 
 /** ================================|| Research Question - Page  ||=================================== **/
 
@@ -57,6 +58,7 @@ const Question = async ({ params }: PageProps) => {
                             <FileDrawer type={'question'} isSubscribed={subscriptionPlan.isSubscribed} />
                         </BadgeFileCounter>
                         <AddQuestion type='question' researchKey={questionid} isSubscribed={subscriptionPlan.isSubscribed} />
+                        <SheetMenu chatComponents={<ChatWrapper type='question' researchKey={question.id} />} />
                     </div>
                 </div>
 

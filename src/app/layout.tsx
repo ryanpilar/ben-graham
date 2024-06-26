@@ -29,6 +29,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
 
             <Toaster />
             <Navbar />
+            
             {children}
 
           </NUIProvider>

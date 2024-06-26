@@ -29,7 +29,7 @@ interface NotesFormProps {
 
 const NotesForm = ({ researchKey, type, notes }: NotesFormProps) => {
 
-    const { mutate: updateNotes } = trpc.updateNotes.useMutation({        
+    const { mutate: updateNotes } = trpc.updateNotes.useMutation({
         onError: () => {
             toast({
                 title: 'Error updating notes',
@@ -55,8 +55,10 @@ const NotesForm = ({ researchKey, type, notes }: NotesFormProps) => {
 
     return (
         <>
-            <Form {...form}>
-                <form key={`key-${type}-${researchKey}`} id={`id-${type}-${researchKey}`} onSubmit={form.handleSubmit(onSubmit)}>
+            <Form  {...form}>
+                <form key={`key-${type}-${researchKey}`} id={`id-${type}-${researchKey}`}
+                    onSubmit={form.handleSubmit(onSubmit)}
+                >
                     <FormField control={form.control} name='notes' render={({ field }) => (
                         <FormItem>
                             <FormLabel className="sr-only">Notes</FormLabel>

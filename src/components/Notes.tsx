@@ -29,9 +29,9 @@ const Notes =  ({ researchKey, type }: NotesProps) => {
     const mainNote = notes?.find(note => note.name === 'main note')
 
     return (
-        <div className='mx-auto max-w-7xl'>
+        <div className='mx-auto max-w-7xl h-full'>
 
-            <div className={`
+            {/* <div className={`
                 flex flex-col items-start justify-between gap-4
                 sm:flex-row sm:items-center sm:gap-0 
                 mt-2 sm:mt-8                  
@@ -40,7 +40,7 @@ const Notes =  ({ researchKey, type }: NotesProps) => {
                 <h1 className='mb-3 font-bold text-2xl lg:text-3xl text-gray-900'>
                     Notes
                 </h1>
-            </div>
+            </div> */}
 
             {notes && mainNote ? (
                 <NotesForm researchKey={researchKey} type={type} notes={mainNote} />

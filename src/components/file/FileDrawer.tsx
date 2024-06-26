@@ -74,7 +74,7 @@ const FileDrawer = ({ isSubscribed, type }: FileDrawerProps) => {
                     bottom-0 left-0 right-0 
                     h-full 
                     max-w-6xl mx-auto 
-                    z-30
+                    z-40
                     `}>
 
                     <div className="w-full mx-auto flex flex-col overflow-auto">

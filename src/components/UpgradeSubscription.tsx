@@ -17,7 +17,7 @@ const UpgradeSubscription = () => {
 
       const {mutate: createStripeSession} = trpc.createStripeSession.useMutation({
         onSuccess: ({url}) => {
-          window.location.href = url ?? "/dashboard/billing"
+          window.location.href = url ?? "/billing"
         }
       })
 

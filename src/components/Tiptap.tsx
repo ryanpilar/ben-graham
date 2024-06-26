@@ -77,7 +77,7 @@ const Tiptap = ({ notes, onChange, onFormSubmit }: TiptapProps) => {
         editorProps: {
             attributes: {
                 class:
-                    "border focus:outline-none focus:border-2 focus:ring-1 focus:border-primary rounded-none  min-h-[150px] border-input text-slate-800 text-default px-4 py-3 mt-0.5 disabled:cursor-not-allowed disabled:opacity-50",
+                    "border focus:outline-none focus:border-2 focus:ring-1 focus:border-primary rounded-none h-full min-h-[400px] border-input text-slate-800 text-default px-4 py-3 mt-0.5 disabled:cursor-not-allowed disabled:opacity-50",
             }
         },
         

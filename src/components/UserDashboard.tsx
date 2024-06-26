@@ -9,8 +9,6 @@ import Skeleton from "react-loading-skeleton"
 import Files from './file/Files';
 import GoBack from './GoBack';
 
-
-
 /** ================================|| User Dashboard ||=================================== **/
 
 interface PageProps {
@@ -35,7 +33,6 @@ const UserDashboard = ({ subscriptionPlan, params }: PageProps) => {
             </div>
 
             <GoBack />
-
 
             <Files type={'all'} />
 

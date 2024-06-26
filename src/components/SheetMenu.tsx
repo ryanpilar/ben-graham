@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -17,6 +15,7 @@ interface SheetMenuProps {
 export function SheetMenu({chatComponents}: SheetMenuProps) {
   return (
     <Sheet modal={false}>
+
       <SheetTrigger className="lg:hidden" asChild>
         <Button className="h-10" variant="outline" size="icon">
           <ChevronRight
@@ -27,13 +26,11 @@ export function SheetMenu({chatComponents}: SheetMenuProps) {
         </Button>
       </SheetTrigger>
       <SheetContent className="px-0 lg:px-3 h-screen flex flex-col" side="rightWide">
-        <SheetHeader className="flex justify-center items-center pb-1 pt-1 ">
-          
+        <SheetHeader className="flex justify-center items-center pb-1 pt-1 ">          
         </SheetHeader>
-        {/* <Menu isOpen /> */}
-
          {chatComponents}
       </SheetContent>
+
     </Sheet>
   );
 }

@@ -21,7 +21,7 @@ const Toolbar = ({ editor }: ToolbarProps) => {
     if (!editor) { return null }
 
     return (
-        <div className='border border-input bg-transparent rounded-sm'>
+        <div className='border-input bg-transparent rounded-sm'>
             <Toggle
                 size='sm'
                 pressed={editor.isActive('heading')}

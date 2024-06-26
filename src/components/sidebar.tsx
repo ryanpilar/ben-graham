@@ -1,10 +1,8 @@
 'use client'
-import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useStore } from "@/hooks/use-store";
-import { Button } from "@/components/ui/button";
-import { useSidebarToggle } from "@/hooks/use-sidebar-toggle";
-import { SidebarToggle } from "@/components/sidebar-toggle";
+import { useStore } from "@/hooks/useStore";
+import { useSidebarToggle } from "@/hooks/useSidebarToggle";
+import { SidebarToggle } from "@/components/SidebarToggle";
 
 
 interface SidebarProps {

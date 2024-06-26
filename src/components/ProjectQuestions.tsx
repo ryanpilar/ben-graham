@@ -36,6 +36,7 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
             utils.getQuestions.invalidate()
         },
         onMutate({ questionId }) {    
+            console.log('onMutate questionId', questionId)
             setCurrentlyDeletingQuestion(questionId)
         },
         onSettled() {
@@ -89,8 +90,10 @@ const ProjectQuestions = ({subscriptionPlan, projectId}: QuestionProps) => {
                                     </div>
 
                                     <Button
-                                        onClick={() =>
-                                            deleteQuestion({ questionId: question.id })
+                                        onClick={() => {
+                                            console.log('onClick question.id', question.id)
+
+                                            deleteQuestion({ questionId: question.id })}
                                         }
                                         size='sm'
                                         className='w-full'
